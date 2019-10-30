@@ -1,0 +1,57 @@
+@import "./../../variables";
+
+nav {
+  position: fixed;
+  z-index: 80;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  .logo {
+    font-size: 24px;
+    padding: 12px 30px;
+    cursor: pointer;
+    &:focus {
+      outline: none;
+    }
+  }
+  ul {
+    position: relative;
+    right: 15px;
+    list-style-type: none;
+    li {
+      display: inline-block;
+      a {
+        display: inline-block;
+        font-size: 16px;
+        text-transform: uppercase;
+        color: #fff;
+        text-decoration: none;
+        padding: 15px;
+        position: relative;
+        &::after {
+          position: absolute;
+          left: 15px;
+          right: 15px;
+          height: 2px;
+          background: #fff;
+          content: "";
+          transition: $pew;
+          transform: scaleX(0);
+          bottom: 10px;
+        }
+        &:hover {
+          &::after {
+            transform: scaleX(0.6);
+          }
+        }
+        &.active {
+          &::after {
+            transform: scaleX(1);
+          }
+        }
+      }
+    }
+  }
+}
