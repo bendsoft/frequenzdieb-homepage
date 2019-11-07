@@ -6,15 +6,14 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.router
 
 @Configuration
-class ConcertRoutes(
-    private val concertHandler: ConcertHandler
+class SignUpRoutes(
+    private val signUpHandler: SignUpHandler
 ) {
     @Bean
-    fun concertRouter() = router {
-        "/api/concert".nest {
+    fun signUpRouter() = router {
+        "/api/concert/{concertId}".nest {
             accept(MediaType.APPLICATION_JSON).nest {
-                GET("/", concertHandler::findAll)
-                GET("/{id}", concertHandler::findById)
+                POST("/signup", signUpHandler::create)
             }
         }
     }
