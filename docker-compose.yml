@@ -1,0 +1,34 @@
+version: "3.7"
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=frequenzDB
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    ports:
+      - "27017:27017"
+#    volumes:
+#      - mongodb:/data/db
+    networks:
+      - frequenz_net
+
+  frequenzdieb-api:
+    build: frequenzdieb-server/Dockerfile
+    image: ch.frequenzdieb/frequenzdieb-rest-api:latest
+    container_name: frequenzdieb-api
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    logging:
+      driver: json-file
+    networks:
+      - frequenz_net
+    depends_on:
+      - mongodb
+
+networks:
+  frequenz_net: {}

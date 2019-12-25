@@ -14,6 +14,7 @@ class SubscriptionRoutes(
         "/api/subscription".nest {
             accept(APPLICATION_JSON).nest {
                 GET("/{id}", subscriptionHandler::findById)
+                PUT("/confirm/{id}", subscriptionHandler::confirm)
                 GET("/query", subscriptionHandler::findAllByQuery)
                 POST("/", subscriptionHandler::create)
                 DELETE("/query", subscriptionHandler::deleteByQuery)

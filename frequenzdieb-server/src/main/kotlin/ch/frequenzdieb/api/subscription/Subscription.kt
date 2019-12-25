@@ -10,10 +10,16 @@ import javax.validation.constraints.Size
 @Document(collection = "subscriptions")
 @TypeAlias("model.subscription")
 data class Subscription(
-    @Id val id: String? = null,
+    @Id
+    val id: String,
+
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     val name: String = "",
+
     @Email(message = "Email should be valid")
     val email: String = "",
-    val registrationDate: LocalDate
+
+    val registrationDate: LocalDate,
+
+    var isConfirmed: Boolean = false
 )

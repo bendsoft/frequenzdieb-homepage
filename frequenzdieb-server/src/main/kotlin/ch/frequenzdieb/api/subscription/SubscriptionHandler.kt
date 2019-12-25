@@ -20,6 +20,16 @@ class SubscriptionHandler {
         ok().body(repository.findById(req.pathVariable("id")))
             .switchIfEmpty(notFound().build())
 
+    fun confirm(req: ServerRequest) =
+        repository.findById(req.pathVariable("id"))
+            .doOnNext {
+                if (!it.isConfirmed) {
+                    it.isConfirmed = true
+                    repository.save(it)
+                }
+            }
+            .flatMap { ok().body(it, Subscription::class.java) }
+
     fun create(req: ServerRequest) =
         req.bodyToMono(Subscription::class.java)
             .doOnNext { repository.save(it) }

@@ -12,7 +12,7 @@ import javax.validation.constraints.Size
 @Document(collection = "signups")
 @TypeAlias("model.signup")
 data class SignUp(
-    @Id val id: String? = null,
+    @Id val id: String,
     val concertId: String,
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     val name: String = "",
