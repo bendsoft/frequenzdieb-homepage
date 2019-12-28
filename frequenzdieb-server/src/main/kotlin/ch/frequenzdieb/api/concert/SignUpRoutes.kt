@@ -11,9 +11,12 @@ class SignUpRoutes(
 ) {
     @Bean
     fun signUpRouter() = router {
-        "/api/concert/{concertId}".nest {
+        "/api/concert/{concertId}/signup".nest {
             accept(MediaType.APPLICATION_JSON).nest {
-                POST("/signup", signUpHandler::create)
+                GET("/{id}", signUpHandler::findById)
+                GET("/query", signUpHandler::findAll)
+                POST("/", signUpHandler::create)
+                DELETE("/", signUpHandler::delete)
             }
         }
     }

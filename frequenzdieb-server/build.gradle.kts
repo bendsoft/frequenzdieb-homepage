@@ -45,6 +45,8 @@ dependencies {
 	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
+	testImplementation("io.kotlintest:kotlintest-extensions-spring:3.4.2")
 }
 
 tasks {

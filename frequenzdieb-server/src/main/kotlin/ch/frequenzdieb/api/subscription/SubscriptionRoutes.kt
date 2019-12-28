@@ -13,11 +13,10 @@ class SubscriptionRoutes(
     fun newsletterRouter() = router {
         "/api/subscription".nest {
             accept(APPLICATION_JSON).nest {
-                GET("/{id}", subscriptionHandler::findById)
                 PUT("/confirm/{id}", subscriptionHandler::confirm)
-                GET("/query", subscriptionHandler::findAllByQuery)
+                GET("/query", subscriptionHandler::findAllByEmail)
                 POST("/", subscriptionHandler::create)
-                DELETE("/query", subscriptionHandler::deleteByQuery)
+                DELETE("/", subscriptionHandler::deleteAllByEmail)
             }
          }
     }

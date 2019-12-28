@@ -15,6 +15,8 @@ class ConcertRoutes(
             accept(MediaType.APPLICATION_JSON).nest {
                 GET("/", concertHandler::findAll)
                 GET("/{id}", concertHandler::findById)
+                POST("/", concertHandler::create)
+                DELETE("/{id}", concertHandler::delete)
             }
         }
     }

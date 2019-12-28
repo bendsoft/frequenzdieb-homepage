@@ -1,6 +1,5 @@
 package ch.frequenzdieb.api.ticketing
 
-import ch.frequenzdieb.api.subscription.Subscription
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest

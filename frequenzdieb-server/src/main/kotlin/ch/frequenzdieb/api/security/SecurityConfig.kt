@@ -1,41 +1,56 @@
 package ch.frequenzdieb.api.security
 
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.http.HttpMethod
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
+import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.MapReactiveUserDetailsService
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.web.server.SecurityWebFilterChain
 
-@Configuration
-@EnableWebSecurity
-class SecurityConfig : WebSecurityConfigurerAdapter() {
+@EnableWebFluxSecurity
+class SecurityConfig {
     init {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL)
     }
 
-    @Throws(Exception::class)
-    override fun configure(auth: AuthenticationManagerBuilder) {
-        auth.inMemoryAuthentication()
-            .withUser("admin").password(encoder().encode("adminPass")).roles("ADMIN")
-            .and()
-            .withUser("user").password(encoder().encode("userPass")).roles("USER")
+    @Bean
+    fun userDetailsService(): MapReactiveUserDetailsService {
+        val admin: UserDetails = User
+            .withUsername("admin")
+            .password(encoder().encode("password"))
+            .roles("ADMIN")
+            .build()
+
+        val user: UserDetails = User
+            .withUsername("user")
+            .password(encoder().encode("password"))
+            .roles("USER")
+            .build()
+
+        return MapReactiveUserDetailsService(admin, user)
     }
 
-    @Throws(Exception::class)
-    override fun configure(http: HttpSecurity) {
-        http
-            .csrf().disable()
-            .httpBasic()
+    @Bean
+    fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+        http.csrf()
+            .disable()
+            .authorizeExchange()
+            .pathMatchers("/**").permitAll()
+            .pathMatchers(HttpMethod.GET,"/api/ticketing/*").hasRole("USER")
+            .pathMatchers(HttpMethod.PUT,"/api/ticketing/*/invalidate").hasRole("ADMIN")
+            .pathMatchers(HttpMethod.DELETE,"/api/subscription").hasRole("ADMIN")
+            .pathMatchers(HttpMethod.GET, "/api/subscription/query").hasRole("ADMIN")
+            .pathMatchers(HttpMethod.POST,"/api/concert").hasRole("ADMIN")
+            .pathMatchers(HttpMethod.DELETE,"/api/concert/*").hasRole("ADMIN")
+            .pathMatchers(HttpMethod.GET, "/api/concert/*/signup/*").hasRole("ADMIN")
             .and()
-            .authorizeRequests()
-            .antMatchers("/index.html", "/", "/home", "/login").permitAll()
-            .regexMatchers("/api/ticketing/[A-Za-z0-9]+/invalidate").hasRole("ADMIN")
-            .antMatchers("/api/subscription/query").hasRole("ADMIN")
-            .antMatchers("/api/**").permitAll()
+            .httpBasic()
+        return http.build()
     }
 
     @Bean

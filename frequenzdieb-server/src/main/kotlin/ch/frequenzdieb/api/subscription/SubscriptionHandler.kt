@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse.*
-import org.springframework.web.reactive.function.server.body
+import reactor.core.publisher.Mono
 import java.net.URI
 
 @Configuration
@@ -12,13 +12,13 @@ class SubscriptionHandler {
     @Autowired
     lateinit var repository: SubscriptionRepository
 
-    fun findAllByQuery(req: ServerRequest) =
-        ok().body(repository.findAllByEmail(req.queryParam("email").orElse("")))
-            .switchIfEmpty(notFound().build())
-
-    fun findById(req: ServerRequest) =
-        ok().body(repository.findById(req.pathVariable("id")))
-            .switchIfEmpty(notFound().build())
+    fun findAllByEmail(req: ServerRequest) =
+        Mono.just(req.queryParam("email"))
+            .filter { it.isPresent }
+            .flatMap {
+                ok().body(repository.findAllByEmail(it.get()), Subscription::class.java)
+            }
+            .switchIfEmpty(badRequest().bodyValue("Please provide an email"))
 
     fun confirm(req: ServerRequest) =
         repository.findById(req.pathVariable("id"))
@@ -35,7 +35,7 @@ class SubscriptionHandler {
             .doOnNext { repository.save(it) }
             .flatMap { created(URI.create("/subscription/${it.id}")).build() }
 
-    fun deleteByQuery(req: ServerRequest) =
+    fun deleteAllByEmail(req: ServerRequest) =
         repository.deleteAllByEmail(req.queryParam("email").orElse(""))
             .flatMap { noContent().build() }
 }
