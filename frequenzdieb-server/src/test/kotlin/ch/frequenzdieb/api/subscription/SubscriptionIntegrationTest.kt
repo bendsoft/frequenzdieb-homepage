@@ -1,12 +1,10 @@
 package ch.frequenzdieb.api.subscription
 
 import ch.frequenzdieb.api.BaseIntegrationTest
-import io.kotlintest.inspectors.forOne
 import io.kotlintest.shouldBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.http.MediaType
-import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec
 
 @ComponentScan(basePackages = ["ch.frequenzdieb.api.subscription"])
 internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
@@ -23,13 +21,16 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .expectStatus().isOk
-                    .expectBodyList(Subscription::class.java)
-                    .hasSize(1)
-                    .consumeWith<ListBodySpec<Subscription>> {
-                        it.responseBody!!.forOne {
-                            subscription -> subscription.name shouldBe "Muster"
-                        }
-                    }
+                    .expectBody(Subscription::class.java)
+                    .returnResult()
+                    .apply { responseBody?.name shouldBe "Muster" }
+            }
+
+            it("should return 404 if not found") {
+                restClient.get().uri("/api/subscription/query?email=han.solo@example.com")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isNotFound
             }
 
             it("should be a bad-request if no email given") {

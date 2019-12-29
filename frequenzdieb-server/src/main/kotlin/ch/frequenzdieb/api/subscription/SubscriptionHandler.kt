@@ -15,8 +15,11 @@ class SubscriptionHandler {
     fun findAllByEmail(req: ServerRequest) =
         Mono.just(req.queryParam("email"))
             .filter { it.isPresent }
+            .map { repository.findAllByEmail(it.get()) }
             .flatMap {
-                ok().body(repository.findAllByEmail(it.get()), Subscription::class.java)
+                it.next()
+                    .flatMap { subscription -> ok().bodyValue(subscription) }
+                    .switchIfEmpty(notFound().build())
             }
             .switchIfEmpty(badRequest().bodyValue("Please provide an email"))
 
@@ -28,14 +31,27 @@ class SubscriptionHandler {
                     repository.save(it)
                 }
             }
-            .flatMap { ok().body(it, Subscription::class.java) }
+            .flatMap { ok().bodyValue(it) }
 
     fun create(req: ServerRequest) =
         req.bodyToMono(Subscription::class.java)
-            .doOnNext { repository.save(it) }
-            .flatMap { created(URI.create("/subscription/${it.id}")).build() }
+            .flatMap {
+                repository.findAllByEmail(it.email).next()
+                    .flatMap { badRequest().bodyValue("E-Mail has already subscribed") }
+                    .switchIfEmpty(
+                        repository.save(it)
+                            .flatMap { subscription -> created(URI.create("/subscription/${subscription.id}")).build() }
+                    )
+            }
 
     fun deleteAllByEmail(req: ServerRequest) =
-        repository.deleteAllByEmail(req.queryParam("email").orElse(""))
-            .flatMap { noContent().build() }
+        Mono.just(req.queryParam("email"))
+            .filter { it.isPresent }
+            .map { repository.deleteAllByEmail(it.get()) }
+            .flatMap {
+                it
+                    .flatMap { noContent().build() }
+                    .switchIfEmpty(notFound().build())
+            }
+            .switchIfEmpty(badRequest().bodyValue("Please provide an email"))
 }
