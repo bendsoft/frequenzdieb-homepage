@@ -14,8 +14,17 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
             subscriptionHelper.resetCollection()
             subscriptionHelper.insertSubscriptionForHansMuster()
 
+            it("should not allow unauthenticated requests") {
+                getRestClientUnauthenticated()
+                    .get().uri("/api/subscription/query?email=hans.muster@example.com")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isUnauthorized
+            }
+
             it("should have Muster as name") {
-                restClient.get().uri("/api/subscription/query?email=hans.muster@example.com")
+                getRestClientAuthenticatedWithAdmin()
+                    .get().uri("/api/subscription/query?email=hans.muster@example.com")
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .expectStatus().isOk
@@ -25,14 +34,16 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
             }
 
             it("should return 404 if not found") {
-                restClient.get().uri("/api/subscription/query?email=han.solo@example.com")
+                getRestClientAuthenticatedWithAdmin()
+                    .get().uri("/api/subscription/query?email=han.solo@example.com")
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .expectStatus().isNotFound
             }
 
             it("should be a bad-request if no email given") {
-                restClient.get().uri("/api/subscription/query")
+                getRestClientAuthenticatedWithAdmin()
+                    .get().uri("/api/subscription/query")
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .expectStatus().isBadRequest
