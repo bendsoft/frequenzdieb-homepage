@@ -3,10 +3,8 @@ package ch.frequenzdieb.api.subscription
 import ch.frequenzdieb.api.BaseIntegrationTest
 import io.kotlintest.shouldBe
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.ComponentScan
 import org.springframework.http.MediaType
 
-@ComponentScan(basePackages = ["ch.frequenzdieb.api.subscription"])
 internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
     @Autowired
     lateinit var subscriptionHelper: SubscriptionHelper

@@ -9,8 +9,10 @@ import org.springframework.context.annotation.FilterType
 import org.springframework.context.annotation.Import
 import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebFluxTest(
-    includeFilters = [ ComponentScan.Filter(type = FilterType.REGEX, pattern = [".*Helper"]) ]
+@WebFluxTest
+@ComponentScan(
+    basePackages = ["ch.frequenzdieb.api"],
+    includeFilters = [ComponentScan.Filter(type = FilterType.REGEX, pattern = [".*Helper"])]
 )
 @Import(value = [SecurityConfig::class])
 internal abstract class BaseIntegrationTest : DescribeSpec() {
