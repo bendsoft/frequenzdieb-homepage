@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.ticketing
+package ch.frequenzdieb.api.services.ticketing
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.TypeAlias

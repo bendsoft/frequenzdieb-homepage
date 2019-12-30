@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.subscription
+package ch.frequenzdieb.api.services.subscription
 
 import com.mongodb.BasicDBObjectBuilder
 import io.kotlintest.extensions.TestListener

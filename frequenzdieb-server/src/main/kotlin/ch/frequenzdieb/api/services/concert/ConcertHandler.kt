@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.ticketing
+package ch.frequenzdieb.api.services.concert
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
@@ -8,24 +8,24 @@ import org.springframework.web.reactive.function.server.body
 import java.net.URI
 
 @Configuration
-class TicketingHandler {
+class ConcertHandler {
     @Autowired
-    lateinit var repository: TicketingRepository
+    lateinit var repository: ConcertRepository
+
+    fun findAll(req: ServerRequest) =
+        ok().body(repository.findAll())
+            .switchIfEmpty(notFound().build())
 
     fun findById(req: ServerRequest) =
         ok().body(repository.findById(req.pathVariable("id")))
             .switchIfEmpty(notFound().build())
 
     fun create(req: ServerRequest) =
-        req.bodyToMono(Ticket::class.java)
-            .doOnNext { repository.insert(it) }
-            .flatMap { created(URI.create("/ticketing/${it.id}")).build() }
+        req.bodyToMono(Concert::class.java)
+            .doOnNext { repository.save(it) }
+            .flatMap { created(URI.create("/concert/${it.id}")).build() }
 
-    fun invalidate(req: ServerRequest) =
-        repository.findById(req.pathVariable("id"))
-            .doOnNext {
-                it.isValid = false
-                repository.save(it)
-            }
-            .flatMap { ok().body(it, Ticket::class.java) }
+    fun delete(req: ServerRequest) =
+        repository.deleteById(req.pathVariable("id"))
+            .flatMap { noContent().build() }
 }

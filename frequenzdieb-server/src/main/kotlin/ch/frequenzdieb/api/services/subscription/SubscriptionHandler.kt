@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.subscription
+package ch.frequenzdieb.api.services.subscription
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
@@ -50,6 +50,7 @@ class SubscriptionHandler {
             .map { repository.deleteAllByEmail(it.get()) }
             .flatMap {
                 it
+                    .filter { deleteCount -> deleteCount > 0 }
                     .flatMap { noContent().build() }
                     .switchIfEmpty(notFound().build())
             }

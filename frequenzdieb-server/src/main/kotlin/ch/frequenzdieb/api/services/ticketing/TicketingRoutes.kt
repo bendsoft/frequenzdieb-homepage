@@ -1,6 +1,5 @@
-package ch.frequenzdieb.api.ticketing
+package ch.frequenzdieb.api.services.ticketing
 
-import ch.frequenzdieb.api.security.SecurityConfig
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType.APPLICATION_JSON

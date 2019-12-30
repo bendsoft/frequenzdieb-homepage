@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.concert
+package ch.frequenzdieb.api.services.concert
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
@@ -8,9 +8,9 @@ import org.springframework.web.reactive.function.server.body
 import java.net.URI
 
 @Configuration
-class ConcertHandler {
+class SignUpHandler {
     @Autowired
-    lateinit var repository: ConcertRepository
+    lateinit var repository: SignUpRepository
 
     fun findAll(req: ServerRequest) =
         ok().body(repository.findAll())
@@ -21,11 +21,11 @@ class ConcertHandler {
             .switchIfEmpty(notFound().build())
 
     fun create(req: ServerRequest) =
-        req.bodyToMono(Concert::class.java)
+        req.bodyToMono(SignUp::class.java)
             .doOnNext { repository.save(it) }
-            .flatMap { created(URI.create("/concert/${it.id}")).build() }
+            .flatMap { created(URI.create("/concert/${it.concertId}/signup/${it.id}")).build() }
 
     fun delete(req: ServerRequest) =
-        repository.deleteById(req.pathVariable("id"))
+        repository.deleteAllByEmail(req.queryParam("email").orElse(""))
             .flatMap { noContent().build() }
 }

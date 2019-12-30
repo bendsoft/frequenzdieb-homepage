@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.concert
+package ch.frequenzdieb.api.services.concert
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

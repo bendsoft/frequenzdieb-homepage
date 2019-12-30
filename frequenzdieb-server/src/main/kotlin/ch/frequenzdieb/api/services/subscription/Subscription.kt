@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.subscription
+package ch.frequenzdieb.api.services.subscription
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.TypeAlias
@@ -11,18 +11,18 @@ import javax.validation.constraints.Size
 @TypeAlias("model.subscription")
 data class Subscription(
     @Id
-    val id: String,
+    val id: String? = null,
 
     @Size(min = 2, max = 100, message = "Surname must be between 2 and 100 characters")
-    val surname: String = "",
+    val surname: String,
 
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
-    val name: String = "",
+    val name: String,
 
     @Email(message = "Email should be valid")
-    val email: String = "",
+    val email: String,
 
-    val registrationDate: LocalDateTime,
+    val registrationDate: LocalDateTime = LocalDateTime.now(),
 
     var isConfirmed: Boolean = false
 )

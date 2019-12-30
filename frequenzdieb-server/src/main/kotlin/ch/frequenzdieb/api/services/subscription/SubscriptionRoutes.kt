@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.subscription
+package ch.frequenzdieb.api.services.subscription
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -14,7 +14,7 @@ class SubscriptionRoutes(
         "/api/subscription".nest {
             accept(APPLICATION_JSON).nest {
                 PUT("/confirm/{id}", subscriptionHandler::confirm)
-                GET("/query", subscriptionHandler::findAllByEmail)
+                GET("/", subscriptionHandler::findAllByEmail)
                 POST("/", subscriptionHandler::create)
                 DELETE("/", subscriptionHandler::deleteAllByEmail)
             }

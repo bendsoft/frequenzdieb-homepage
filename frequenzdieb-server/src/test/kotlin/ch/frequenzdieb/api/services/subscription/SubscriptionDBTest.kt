@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.subscription
+package ch.frequenzdieb.api.services.subscription
 
 import io.kotlintest.inspectors.forOne
 import io.kotlintest.shouldBe
