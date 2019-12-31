@@ -17,15 +17,27 @@ class ConcertHandler {
             .switchIfEmpty(notFound().build())
 
     fun findById(req: ServerRequest) =
-        ok().body(repository.findById(req.pathVariable("id")))
+        repository.findById(req.pathVariable("id"))
+            .flatMap { ok().bodyValue(it) }
             .switchIfEmpty(notFound().build())
 
     fun create(req: ServerRequest) =
         req.bodyToMono(Concert::class.java)
-            .doOnNext { repository.save(it) }
-            .flatMap { created(URI.create("/concert/${it.id}")).build() }
+            .flatMap {
+                repository.save(it)
+                    .flatMap { concert ->
+                        created(URI.create("/concert/${concert.id}"))
+                            .bodyValue(concert)
+                    }
+            }
+            .switchIfEmpty(badRequest().bodyValue("Concert entity must be provided"))
 
-    fun delete(req: ServerRequest) =
-        repository.deleteById(req.pathVariable("id"))
-            .flatMap { noContent().build() }
+    fun deleteById(req: ServerRequest) =
+        repository.findById(req.pathVariable("id"))
+            .flatMap { concert ->
+                repository.delete(concert)
+                    .thenReturn(noContent().build())
+                    .flatMap { it }
+            }
+            .switchIfEmpty(notFound().build())
 }

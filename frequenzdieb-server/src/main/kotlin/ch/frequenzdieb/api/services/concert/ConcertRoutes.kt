@@ -16,7 +16,7 @@ class ConcertRoutes(
                 GET("/", concertHandler::findAll)
                 GET("/{id}", concertHandler::findById)
                 POST("/", concertHandler::create)
-                DELETE("/{id}", concertHandler::delete)
+                DELETE("/{id}", concertHandler::deleteById)
             }
         }
     }

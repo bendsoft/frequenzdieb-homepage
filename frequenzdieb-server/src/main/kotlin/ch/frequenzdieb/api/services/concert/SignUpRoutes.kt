@@ -14,7 +14,7 @@ class SignUpRoutes(
         "/api/concert/{concertId}/signup".nest {
             accept(MediaType.APPLICATION_JSON).nest {
                 GET("/{id}", signUpHandler::findById)
-                GET("/query", signUpHandler::findAll)
+                GET("/", signUpHandler::findAll)
                 POST("/", signUpHandler::create)
                 DELETE("/", signUpHandler::delete)
             }

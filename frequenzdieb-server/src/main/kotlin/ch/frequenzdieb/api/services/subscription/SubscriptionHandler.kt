@@ -40,7 +40,9 @@ class SubscriptionHandler {
                     .flatMap { badRequest().bodyValue("E-Mail has already subscribed") }
                     .switchIfEmpty(
                         repository.save(it)
-                            .flatMap { subscription -> created(URI.create("/subscription/${subscription.id}")).build() }
+                            .flatMap { subscription ->
+                                created(URI.create("/subscription/${subscription.id}"))
+                                    .bodyValue(subscription) }
                     )
             }
 

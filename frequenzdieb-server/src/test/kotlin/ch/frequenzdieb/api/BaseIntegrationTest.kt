@@ -1,6 +1,5 @@
 package ch.frequenzdieb.api
 
-import ch.frequenzdieb.api.services.security.SecurityConfig
 import io.kotlintest.specs.DescribeSpec
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest

@@ -10,9 +10,9 @@ import javax.validation.constraints.Size
 @Document(collection = "concerts")
 @TypeAlias("model.concert")
 data class Concert(
-    @Id val id: String,
+    @Id val id: String? = null,
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
-    val name: String = "",
+    val name: String,
     @Future val date: LocalDate,
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     val location: String

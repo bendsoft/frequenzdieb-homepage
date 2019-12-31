@@ -10,7 +10,7 @@ class SubscriptionRoutes(
     private val subscriptionHandler: SubscriptionHandler
 ) {
     @Bean
-    fun newsletterRouter() = router {
+    fun subscriptionRouter() = router {
         "/api/subscription".nest {
             accept(APPLICATION_JSON).nest {
                 PUT("/confirm/{id}", subscriptionHandler::confirm)

@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.services.security
+package ch.frequenzdieb.api
 
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
@@ -45,6 +45,7 @@ class SecurityConfig {
             .pathMatchers(HttpMethod.GET, "/api/subscription").hasRole("ADMIN")
             .pathMatchers(HttpMethod.POST,"/api/concert").hasRole("ADMIN")
             .pathMatchers(HttpMethod.DELETE,"/api/concert/*").hasRole("ADMIN")
+            .pathMatchers(HttpMethod.GET, "/api/concert/*/signup").hasRole("ADMIN")
             .pathMatchers(HttpMethod.GET, "/api/concert/*/signup/*").hasRole("ADMIN")
             .pathMatchers("/**").permitAll()
             .and()
