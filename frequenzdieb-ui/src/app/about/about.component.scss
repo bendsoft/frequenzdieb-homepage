@@ -1,0 +1,112 @@
+@import "./../../variables";
+
+main {
+  header {
+    height: 90vh;
+    .text {
+      position: absolute;
+      top: 30vh;
+      left: calc(100vw / 6);
+      h2 {
+        font-size: 24px;
+        text-transform: uppercase;
+      }
+      h3 {
+        font-size: 96px;
+        font-weight: normal;
+        line-height: 1;
+      }
+    }
+  }
+  article {
+    section {
+      position: relative;
+      &#band-shot {
+        background: $white;
+        .image {
+          width: calc(100vw / 12 * 10);
+          margin: 0 auto;
+          position: relative;
+          top: -10vh;
+          z-index: 5;
+        }
+        .band-member {
+          position: absolute;
+          z-index: 10;
+          h3 {
+            font-size: 32px;
+            text-transform: uppercase;
+            font-weight: normal;
+            line-height: 1;
+          }
+          h4 {
+            font-size: 16px;
+            text-transform: uppercase;
+            font-weight: normal;
+          }
+          &#silvan {
+            top: 3vw;
+            left: 15vw;
+          }
+          &#ben {
+            top: 6vw;
+            left: 30vw;
+          }
+          &#robin {
+            top: 3vw;
+            left: 45vw;
+          }
+          &#raphael {
+            top: 6vw;
+            left: 60vw;
+          }
+          &#luc {
+            top: 3vw;
+            left: 75vw;
+          }
+        }
+      }
+      &#about {
+        background: $white;
+        color: $black;
+        padding-top: 80px;
+        margin-bottom: 240px;
+        display: flex;
+        flex-wrap: wrap;
+        .text {
+          margin-left: calc(100% / 12 * 2);
+          width: calc(100% / 12 * 5);
+          margin-bottom: 240px;
+          h3 {
+            font-size: 48px;
+            line-height: 1.2;
+            margin-bottom: 48px;
+          }
+          p {
+            font-family: "Open Sans", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+          }
+        }
+        .image {
+          position: relative;
+          &.one {
+            width: calc(100%  / 12 * 4);
+            margin-left: calc(100% / 12);
+            margin-bottom: -120px;
+          }
+          &.two {
+            width: calc(100% / 12 * 7);
+            bottom: 0;
+            transform: translate(0, calc(100% - 120px));
+            position: absolute;
+          }
+        }
+      }
+      &#spacer {
+        height: 30vh;
+      }
+    }
+  }
+}

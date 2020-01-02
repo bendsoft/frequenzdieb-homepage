@@ -1,0 +1,12 @@
+@import "./../../variables";
+
+.blog-post-container {
+  background: $white;
+  padding: 120px calc(200vw / 12);
+  display: flex;
+  align-content: space-between;
+  .blog-post {
+    width: calc(100% / 3 - 30px);
+    background: $white;
+  }
+}

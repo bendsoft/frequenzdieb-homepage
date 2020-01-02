@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { HttpClientModule } from "@angular/common/http";
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -12,6 +13,7 @@ import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
 import { TicketsComponent } from './tickets/tickets.component';
 import { NewsletterSubComponent } from './newsletter-sub/newsletter-sub.component';
+import { BlogPostComponent } from './blog-post/blog-post.component';
 
 @NgModule({
   declarations: [
@@ -24,11 +26,13 @@ import { NewsletterSubComponent } from './newsletter-sub/newsletter-sub.componen
     HeaderComponent,
     FooterComponent,
     TicketsComponent,
-    NewsletterSubComponent
+    NewsletterSubComponent,
+    BlogPostComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
