@@ -10,7 +10,7 @@ import java.net.URI
 @Configuration
 class SubscriptionHandler {
     @Autowired
-    lateinit var repository: SubscriptionRepository
+    lateinit var repository: BlogRepository
 
     fun findAllByEmail(req: ServerRequest) =
         Mono.just(req.queryParam("email"))
@@ -34,7 +34,7 @@ class SubscriptionHandler {
             .flatMap { ok().bodyValue(it) }
 
     fun create(req: ServerRequest) =
-        req.bodyToMono(Subscription::class.java)
+        req.bodyToMono(Blog::class.java)
             .flatMap {
                 repository.findAllByEmail(it.email).next()
                     .flatMap { badRequest().bodyValue("E-Mail has already subscribed") }

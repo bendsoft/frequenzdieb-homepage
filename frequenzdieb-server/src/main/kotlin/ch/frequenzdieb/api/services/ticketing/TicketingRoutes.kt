@@ -13,7 +13,7 @@ class TicketingRoutes(
     fun ticketingRouter() = router {
         "/api/ticketing".nest {
             accept(APPLICATION_JSON).nest {
-                GET("/{id}", ticketingHandler::findById)
+                GET("/", ticketingHandler::findAllBySubscriptionId)
                 POST("/", ticketingHandler::create)
                 PUT("/{id}/invalidate", ticketingHandler::invalidate)
             }

@@ -29,7 +29,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .expectStatus().isOk
-                    .expectBody(Subscription::class.java)
+                    .expectBody(Blog::class.java)
                     .returnResult()
                     .apply { responseBody?.name shouldBe "Muster" }
             }
@@ -78,7 +78,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
                                 .accept(MediaType.APPLICATION_JSON)
                                 .exchange()
                                 .expectStatus().isOk
-                                .expectBody(Subscription::class.java)
+                                .expectBody(Blog::class.java)
                                 .returnResult()
                                 .apply { responseBody?.name shouldBe "Imal" }
                         }
@@ -98,7 +98,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
     private fun createMaxImal(): WebTestClient.ResponseSpec {
         return getRestClientUnauthenticated()
             .post().uri("/api/subscription")
-            .bodyValue(Subscription(
+            .bodyValue(Blog(
                 name = "Imal",
                 surname = "Max",
                 email = "max.imal@example.com"

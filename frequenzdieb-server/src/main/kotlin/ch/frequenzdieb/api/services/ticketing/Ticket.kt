@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.core.mapping.Document
 @TypeAlias("model.ticket")
 data class Ticket(
     @Id val id: String,
-    val subscriptionId: String,
+    val subscriptionId: String?,
     val concertId: String,
-    val qrCode: String,
+    var qrCode: String,
     var isValid: Boolean
 )

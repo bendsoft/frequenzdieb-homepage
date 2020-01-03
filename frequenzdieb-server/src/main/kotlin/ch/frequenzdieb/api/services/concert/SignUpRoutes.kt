@@ -16,7 +16,7 @@ class SignUpRoutes(
                 GET("/{id}", signUpHandler::findById)
                 GET("/", signUpHandler::findAll)
                 POST("/", signUpHandler::create)
-                DELETE("/", signUpHandler::delete)
+                DELETE("/", signUpHandler::deleteAllByEmail)
             }
         }
     }

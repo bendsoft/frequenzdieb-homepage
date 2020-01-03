@@ -25,9 +25,11 @@ idea {
 
 repositories {
 	mavenCentral()
+	maven(url = "https://jitpack.io")
 }
 
 dependencies {
+	compile("com.github.kenglxn.QRGen:javase:2.6.0")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")

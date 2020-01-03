@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.services.subscription
+package ch.frequenzdieb.api.services.blog
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -6,17 +6,16 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.web.reactive.function.server.router
 
 @Configuration
-class SubscriptionRoutes(
+class BlogRoutes(
     private val subscriptionHandler: BlogHandler
 ) {
     @Bean
-    fun subscriptionRouter() = router {
-        "/api/subscription".nest {
+    fun blogRouter() = router {
+        "/api/blog".nest {
             accept(APPLICATION_JSON).nest {
-                PUT("/confirm/{id}", subscriptionHandler::confirm)
-                GET("/", subscriptionHandler::findAllByEmail)
+                GET("/", subscriptionHandler::findAll)
                 POST("/", subscriptionHandler::create)
-                DELETE("/", subscriptionHandler::deleteAllByEmail)
+                DELETE("/{id}", subscriptionHandler::deleteById)
             }
          }
     }

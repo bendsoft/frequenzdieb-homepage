@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 internal class SubscriptionHelper(
     private val mongoTemplate: MongoTemplate
 ) : TestListener {
-    private val subscriptionCollectionName: String = mongoTemplate.getCollectionName(Subscription::class.java)
+    private val subscriptionCollectionName: String = mongoTemplate.getCollectionName(Blog::class.java)
 
     fun insertSubscriptionForHansMuster() {
         val objectToSave = BasicDBObjectBuilder.start()
@@ -26,9 +26,9 @@ internal class SubscriptionHelper(
     }
 
     fun resetCollection() {
-        mongoTemplate.dropCollection(Subscription::class.java)
+        mongoTemplate.dropCollection(Blog::class.java)
     }
 
-    fun getAllSubscriptions(): MutableList<Subscription> =
-        mongoTemplate.findAll(Subscription::class.java, subscriptionCollectionName)
+    fun getAllSubscriptions(): MutableList<Blog> =
+        mongoTemplate.findAll(Blog::class.java, subscriptionCollectionName)
 }
