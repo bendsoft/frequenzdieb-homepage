@@ -7,13 +7,13 @@ import org.springframework.web.reactive.function.server.router
 
 @Configuration
 class SubscriptionRoutes(
-    private val subscriptionHandler: BlogHandler
+    private val subscriptionHandler: SubscriptionHandler
 ) {
     @Bean
     fun subscriptionRouter() = router {
         "/api/subscription".nest {
             accept(APPLICATION_JSON).nest {
-                PUT("/confirm/{id}", subscriptionHandler::confirm)
+                PUT("/{id}/confirm", subscriptionHandler::confirm)
                 GET("/", subscriptionHandler::findAllByEmail)
                 POST("/", subscriptionHandler::create)
                 DELETE("/", subscriptionHandler::deleteAllByEmail)

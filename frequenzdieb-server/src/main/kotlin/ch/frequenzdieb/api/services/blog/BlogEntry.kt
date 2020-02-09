@@ -7,9 +7,9 @@ import java.time.LocalDateTime
 import javax.validation.constraints.Email
 import javax.validation.constraints.Size
 
-@Document(collection = "blogs")
-@TypeAlias("model.blog")
-data class Blog(
+@Document(collection = "blogentries")
+@TypeAlias("model.blogentry")
+data class BlogEntry(
     @Id
     val id: String? = null,
 

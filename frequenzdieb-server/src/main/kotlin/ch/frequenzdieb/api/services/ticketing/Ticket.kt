@@ -7,9 +7,10 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "ticketing")
 @TypeAlias("model.ticket")
 data class Ticket(
-    @Id val id: String,
-    val subscriptionId: String?,
+    @Id val id: String? = null,
+    val subscriptionId: String,
     val concertId: String,
-    var qrCode: String,
-    var isValid: Boolean
+    var qrCode: String? = null,
+    var isValid: Boolean = false,
+    var paymentTransactionId: String
 )

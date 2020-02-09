@@ -10,8 +10,8 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=admin
     ports:
       - "27017:27017"
-#    volumes:
-#      - mongodb:/data/db
+    volumes:
+      - mongodb-data:/data/db
     networks:
       - frequenz_net
 
@@ -32,3 +32,6 @@ services:
 
 networks:
   frequenz_net: {}
+
+volumes:
+  mongodb-data:

@@ -1,14 +1,11 @@
 package ch.frequenzdieb.api.services.ticketing
 
-import ch.frequenzdieb.api.services.subscription.BlogRepository
-import net.glxn.qrgen.javase.QRCode
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse.*
 import reactor.core.publisher.Mono
 import java.net.URI
-import java.util.*
 
 @Configuration
 class TicketingHandler {
@@ -16,7 +13,10 @@ class TicketingHandler {
     lateinit var repository: TicketingRepository
 
     @Autowired
-    lateinit var subscriptionRepository: BlogRepository
+    lateinit var ticketCreator: TicketCreator
+
+    @Autowired
+    lateinit var subscriptionRepository: TicketingRepository
 
     fun findAllBySubscriptionId(req: ServerRequest) =
         Mono.just(req.queryParam("subscriptionid"))
@@ -31,13 +31,9 @@ class TicketingHandler {
 
     fun create(req: ServerRequest) =
         req.bodyToMono(Ticket::class.java)
+            .doOnNext { ticketCreator.create(it) }
             .flatMap {
                 repository.save(it)
-                    .doOnNext { ticket ->
-                        ticket.qrCode = encoder(
-                            QRCode.from(ticket.id).stream().toByteArray() //TODO: add property to config and load it with spring to have the base url
-                        )
-                    }
                     .flatMap { ticket ->
                         created(URI.create("/ticketing/${ticket.id}"))
                             .bodyValue(ticket)
@@ -52,8 +48,4 @@ class TicketingHandler {
                 repository.save(it)
             }
             .flatMap { ok().body(it, Ticket::class.java) }
-
-    private fun encoder(imageBytes: ByteArray): String{
-        return Base64.getEncoder().encodeToString(imageBytes)
-    }
 }

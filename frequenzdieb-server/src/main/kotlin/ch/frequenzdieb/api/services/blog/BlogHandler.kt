@@ -17,20 +17,20 @@ class BlogHandler {
             .switchIfEmpty(notFound().build())
 
     fun create(req: ServerRequest) =
-        req.bodyToMono(Blog::class.java)
+        req.bodyToMono(BlogEntry::class.java)
             .flatMap {
                 repository.save(it)
-                    .flatMap { blog ->
-                        created(URI.create("/blog/${blog.id}"))
-                            .bodyValue(blog)
+                    .flatMap { blogEntry ->
+                        created(URI.create("/blogEntry/${blogEntry.id}"))
+                            .bodyValue(blogEntry)
                     }
             }
-            .switchIfEmpty(badRequest().bodyValue("Blog entity must be provided"))
+            .switchIfEmpty(badRequest().bodyValue("BlogEntry must be provided"))
 
     fun deleteById(req: ServerRequest) =
         repository.findById(req.pathVariable("id"))
-            .flatMap { blog ->
-                repository.delete(blog)
+            .flatMap { blogEntry ->
+                repository.delete(blogEntry)
                     .thenReturn(noContent().build())
                     .flatMap { it }
             }
