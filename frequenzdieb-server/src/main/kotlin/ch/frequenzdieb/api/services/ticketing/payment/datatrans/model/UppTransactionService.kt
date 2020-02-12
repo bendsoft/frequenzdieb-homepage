@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.services.ticketing.payment.datatrans
+package ch.frequenzdieb.api.services.ticketing.payment.datatrans.model
 
 import java.util.*
 import javax.xml.bind.annotation.*

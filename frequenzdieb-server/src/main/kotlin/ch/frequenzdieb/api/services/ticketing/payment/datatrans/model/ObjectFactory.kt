@@ -1,7 +1,7 @@
-package ch.frequenzdieb.api.services.ticketing.payment.datatrans
+package ch.frequenzdieb.api.services.ticketing.payment.datatrans.model
 
-import ch.frequenzdieb.api.services.ticketing.payment.datatrans.UppTransactionService.Body.Transaction
-import ch.frequenzdieb.api.services.ticketing.payment.datatrans.UppTransactionService.Body.Transaction.UserParameters
+import ch.frequenzdieb.api.services.ticketing.payment.datatrans.model.UppTransactionService.Body.Transaction
+import ch.frequenzdieb.api.services.ticketing.payment.datatrans.model.UppTransactionService.Body.Transaction.UserParameters
 import javax.xml.bind.annotation.XmlRegistry
 
 /**

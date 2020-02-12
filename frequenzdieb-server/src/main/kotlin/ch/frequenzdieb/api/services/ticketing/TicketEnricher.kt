@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate
 import org.springframework.http.MediaType.APPLICATION_PDF
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 import java.io.ByteArrayOutputStream
 import java.util.*
-
 
 @Service
 class TicketEnricher {
@@ -23,7 +23,7 @@ class TicketEnricher {
         private val ticket: Ticket,
         private val gridFs: ReactiveGridFsTemplate
     ) {
-        private val qrCode = QRCode.from(ticket.id).stream().toByteArray() //TODO: add property to config and load it with spring to have the base url
+        private val qrCode = QRCode.from(ticket.id).stream().toByteArray()
 
         fun createQRCode(): TicketHelpers {
             val qrCodeEncoded = encoder(qrCode)
@@ -57,8 +57,8 @@ class TicketEnricher {
             return this
         }
 
-        fun enrich(): Ticket {
-            return ticket
+        fun enrich(): Mono<Ticket> {
+            return Mono.just(ticket)
         }
 
         private fun encoder(imageBytes: ByteArray): String{

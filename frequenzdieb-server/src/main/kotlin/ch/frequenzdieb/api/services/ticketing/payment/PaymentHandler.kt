@@ -1,11 +1,12 @@
 package ch.frequenzdieb.api.services.ticketing.payment
 
 import ch.frequenzdieb.api.services.ticketing.TicketingRepository
-import ch.frequenzdieb.api.services.ticketing.payment.datatrans.UppTransactionService
+import ch.frequenzdieb.api.services.ticketing.payment.datatrans.model.UppTransactionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse.*
+import org.springframework.web.reactive.function.server.ServerResponse.badRequest
+import org.springframework.web.reactive.function.server.ServerResponse.ok
 
 @Configuration
 class PaymentHandler {
