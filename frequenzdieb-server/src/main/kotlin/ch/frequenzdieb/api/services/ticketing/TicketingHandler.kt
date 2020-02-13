@@ -52,10 +52,15 @@ class TicketingHandler {
 
     fun create(req: ServerRequest) =
         req.bodyToMono(Ticket::class.java)
-            .flatMap {
-                repository.insert(it)
-                    .flatMap { ticket -> createPDFAndSaveTicket(ticket) }
+            .flatMap { repository.insert(it)
+                .doOnNext { ticket ->
+                    ticketEnricher.with(ticket)
+                        .createQRCode()
+                        .createPDF()
+                        .enrich()
+                }
             }
+            .flatMap { repository.save(it) }
             .flatMap {
                 created(URI.create("/ticketing/${it.id}"))
                     .bodyValue(it)
@@ -68,7 +73,7 @@ class TicketingHandler {
             .filterWhen {
                 transactionRepository.findTopByUppTransactionIdAndSuccess_ResponseCode(it.paymentTransactionId)
                     .switchIfEmpty(
-                        datatransHelper.getTransactionsByReference(it.id)
+                        datatransHelper.getTransactionsByReference(it.id!!)
                             .next()
                     )
                     .filter { transaction -> datatransHelper.isTransactionSuccessful(transaction) }
@@ -93,16 +98,6 @@ class TicketingHandler {
                     .body(BodyInserters.fromResource(operations.getResource(it)))
             }
             .switchIfEmpty(notFound().build())
-
-    private fun createPDFAndSaveTicket(ticket: Ticket): Mono<Ticket> {
-        requireNotNull(ticket.id)
-
-        return ticketEnricher.with(ticket)
-            .createQRCode()
-            .createPDF()
-            .enrich()
-            .flatMap { enrichedTicket -> repository.save(enrichedTicket) }
-    }
 
     private fun loadTicketFromDatabase(ticket: Ticket): Mono<GridFSFile> {
         return gridFs.findOne(

@@ -5,12 +5,13 @@ import net.glxn.qrgen.javase.QRCode
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
+import org.apache.pdfbox.pdmodel.common.PDRectangle
+import org.apache.pdfbox.pdmodel.font.PDFontFactory
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate
 import org.springframework.http.MediaType.APPLICATION_PDF
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
 import java.io.ByteArrayOutputStream
 import java.util.*
 
@@ -34,12 +35,45 @@ class TicketEnricher {
 
         fun createPDF(): TicketHelpers {
             val ticketDocument = PDDocument()
-            val page = PDPage()
+
+            val HEIGHT = 418f
+            val LENGTH = 596f
+            val OFFSET = 20f
+
+            val LEFT = OFFSET
+            val TOP = HEIGHT-OFFSET
+
+            val LEFT_TOP_CORNER = Pair(OFFSET, HEIGHT-OFFSET)
+
+            val page = PDPage(
+                PDRectangle( // 418*596
+                    PDRectangle.A6.height,
+                    PDRectangle.A6.width
+                )
+            )
             ticketDocument.addPage(page)
+
             val contentStream = PDPageContentStream(ticketDocument, page)
+
             val image: PDImageXObject = PDImageXObject.createFromByteArray(ticketDocument, qrCode, "qr-code-ticket")
-            contentStream.drawImage(image, 0f, 0f)
-            contentStream.close()
+
+            contentStream.apply {
+                drawImage(image, 0f, 0f)
+
+                beginText()
+                newLineAtOffset(100f, 50f)
+                setFont(PDFontFactory.createDefaultFont(), 30f)
+                showText("Das ist ein Test!")
+                endText()
+
+                beginText()
+                newLineAtOffset(100f, 90f)
+                setFont(PDFontFactory.createDefaultFont(), 20f)
+                showText("Irgendein Text darunter")
+                endText()
+
+                close()
+            }
 
             val baos = ByteArrayOutputStream()
             ticketDocument.save(baos)
@@ -57,8 +91,8 @@ class TicketEnricher {
             return this
         }
 
-        fun enrich(): Mono<Ticket> {
-            return Mono.just(ticket)
+        fun enrich(): Ticket {
+            return ticket
         }
 
         private fun encoder(imageBytes: ByteArray): String{
