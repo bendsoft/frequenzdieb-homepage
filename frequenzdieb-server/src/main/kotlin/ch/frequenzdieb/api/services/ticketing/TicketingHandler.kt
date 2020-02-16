@@ -57,6 +57,7 @@ class TicketingHandler {
                     ticketEnricher.with(ticket)
                         .createQRCode()
                         .createPDF()
+                        .store()
                         .enrich()
                 }
             }
@@ -100,11 +101,22 @@ class TicketingHandler {
             .switchIfEmpty(notFound().build())
 
     private fun loadTicketFromDatabase(ticket: Ticket): Mono<GridFSFile> {
-        return gridFs.findOne(
-            query(
-                Criteria.where("_id")
-                    .`is`(ticket.ticketFileId)
-            )
-        )
+        gridFs.delete(query(
+            Criteria.where("_id")
+                .`is`(ticket.ticketFileId)
+        ))
+
+        return ticketEnricher
+            .with(ticket)
+            .createQRCode()
+            .createPDF()
+            .store()
+            .enrich()
+            .let {
+                gridFs.findOne(query(
+                    Criteria.where("_id")
+                        .`is`(it.ticketFileId)
+                ))
+            }
     }
 }

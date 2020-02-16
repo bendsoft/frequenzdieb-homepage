@@ -1,92 +1,97 @@
 package ch.frequenzdieb.api.services.ticketing
 
 import com.mongodb.reactivestreams.client.gridfs.helpers.AsyncStreamHelper
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
+import net.glxn.qrgen.core.image.ImageType
 import net.glxn.qrgen.javase.QRCode
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.PDPage
-import org.apache.pdfbox.pdmodel.PDPageContentStream
-import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.font.PDFontFactory
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ResourceLoader
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate
 import org.springframework.http.MediaType.APPLICATION_PDF
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
-import java.util.*
+import java.util.Base64
+import javax.xml.parsers.DocumentBuilderFactory
 
 @Service
 class TicketEnricher {
     @Autowired
     lateinit var gridFs: ReactiveGridFsTemplate
 
-    class TicketHelpers(
-        private val ticket: Ticket,
-        private val gridFs: ReactiveGridFsTemplate
+    @Autowired
+    lateinit var resourceLoader: ResourceLoader
+
+    inner class TicketHelpers(
+        private val ticket: Ticket
     ) {
-        private val qrCode = QRCode.from(ticket.id).stream().toByteArray()
+        private var pdfTicketOutputStream: ByteArrayOutputStream? = null
+        private val qrCode = encoder(
+            QRCode.from(ticket.id)
+                .withSize(200,200)
+                .to(ImageType.PNG)
+                .stream()
+                .toByteArray()
+        )
+
+        init {
+            requireNotNull(ticket.id)
+        }
 
         fun createQRCode(): TicketHelpers {
-            val qrCodeEncoded = encoder(qrCode)
-            ticket.qrCode = qrCodeEncoded
+            ticket.qrCode = qrCode
 
             return this
         }
 
         fun createPDF(): TicketHelpers {
-            val ticketDocument = PDDocument()
+            val htmlTemplate = DocumentBuilderFactory
+                .newInstance()
+                .newDocumentBuilder()
+                .parse(resourceLoader.getResource("classpath:ticket_template.html").inputStream)
+                .apply {
+                    normalize()
+                    getElementsByTagName("img")
+                        .apply {
+                            (0..this.length)
+                                .map { this.item(it) }
+                                .first { it.attributes.getNamedItem("id")?.nodeValue == "ticket-qr-code" }
+                                .let { it.attributes.getNamedItem("src").nodeValue = "data:image/png;base64,${qrCode}" }
+                        }
+                }
 
-            val HEIGHT = 418f
-            val LENGTH = 596f
-            val OFFSET = 20f
-
-            val LEFT = OFFSET
-            val TOP = HEIGHT-OFFSET
-
-            val LEFT_TOP_CORNER = Pair(OFFSET, HEIGHT-OFFSET)
-
-            val page = PDPage(
-                PDRectangle( // 418*596
-                    PDRectangle.A6.height,
-                    PDRectangle.A6.width
-                )
-            )
-            ticketDocument.addPage(page)
-
-            val contentStream = PDPageContentStream(ticketDocument, page)
-
-            val image: PDImageXObject = PDImageXObject.createFromByteArray(ticketDocument, qrCode, "qr-code-ticket")
-
-            contentStream.apply {
-                drawImage(image, 0f, 0f)
-
-                beginText()
-                newLineAtOffset(100f, 50f)
-                setFont(PDFontFactory.createDefaultFont(), 30f)
-                showText("Das ist ein Test!")
-                endText()
-
-                beginText()
-                newLineAtOffset(100f, 90f)
-                setFont(PDFontFactory.createDefaultFont(), 20f)
-                showText("Irgendein Text darunter")
-                endText()
-
-                close()
+            pdfTicketOutputStream = ByteArrayOutputStream().apply {
+                use {
+                    PdfRendererBuilder().apply {
+                        useFastMode()
+                        withW3cDocument(htmlTemplate, "")
+                        toStream(it)
+                        run()
+                    }
+                }
             }
 
-            val baos = ByteArrayOutputStream()
-            ticketDocument.save(baos)
+            return this
+        }
 
-            val fileId = gridFs.store(
-                AsyncStreamHelper.toAsyncInputStream(baos.toByteArray()),
-                "ticket_${ticket.id}.pdf",
-                APPLICATION_PDF.subtype,
-                null
-            ).block()
+        fun store(
+            objectIdHandler: (fileId: ObjectId) -> Unit = { ticket.ticketFileId = it.toHexString() }
+        ): TicketHelpers {
+            requireNotNull(pdfTicketOutputStream)
 
-            ticket.ticketFileId = fileId?.toHexString().orEmpty()
-            ticketDocument.close()
+            gridFs
+                .store(
+                    AsyncStreamHelper.toAsyncInputStream(pdfTicketOutputStream?.toByteArray()),
+                    "ticket_${ticket.id}.pdf",
+                    APPLICATION_PDF.subtype,
+                    null
+                )
+                .block()
+                .let {
+                    if (it != null) {
+                        objectIdHandler(it)
+                    }
+                }
 
             return this
         }
@@ -95,12 +100,12 @@ class TicketEnricher {
             return ticket
         }
 
-        private fun encoder(imageBytes: ByteArray): String{
-            return Base64.getEncoder().encodeToString(imageBytes)
+        private fun encoder(image: ByteArray): String {
+            return Base64.getEncoder().encodeToString(image)
         }
     }
 
     fun with(ticket: Ticket): TicketHelpers {
-        return TicketHelpers(ticket, gridFs)
+        return TicketHelpers(ticket)
     }
 }

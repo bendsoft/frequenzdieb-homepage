@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Ticket</title>
+    <style>
+        @page {
+            size: A5 landscape;
+            margin: 30px;
+        }
+        .handwriting {
+            font-family: 'handwriting', serif;
+        }
+        body {
+            font-family: 'handwriting', sans-serif, serif;
+        }
+        .clearfix:after {
+            content: "";
+            display: table;
+            clear: both;
+            margin-bottom: 2em;
+        }
+        .qr-code-box {
+            padding: 10px;
+            float: left;
+            margin: 10px;
+        }
+        .text-box {
+            padding: 4px;
+        }
+        .header {
+            text-align:center;
+            font-size: 50px;
+            color:orange;
+        }
+        .floating-text {
+            font-size: 30px;
+            color:black;
+        }
+        .footer {
+            font-size: 15px;
+            color:black;
+        }
+    </style>
+</head>
+<body>
+    <div class="clearfix">
+        <div class="text-box header">
+            Smmer Come Back 2020
+        </div>
+        <div class="qr-code-box">
+            <img id="ticket-qr-code"
+                 src=""
+                 alt="Ticket QR-Code"
+            />
+        </div>
+        <div class="text-box floating-text">
+            Live Acts:<br />
+            Frequenzdieb<br />
+            CarLift
+        </div>
+        <div class="text-box footer">
+            <p>Aliquam tempus ipsum eget urna egestas sagittis. In nulla ligula, congue et, mollis nec, venenatis ut, est.</p>
+        </div>
+    </div>
+</body>
+</html>

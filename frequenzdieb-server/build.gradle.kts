@@ -29,7 +29,8 @@ repositories {
 }
 
 dependencies {
-	implementation("org.apache.pdfbox:pdfbox:2.0.8")
+	implementation("com.openhtmltopdf:openhtmltopdf-core:1.0.1")
+	implementation("com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.1")
 	implementation("com.github.kenglxn.QRGen:javase:2.6.0")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 	implementation("org.springframework.boot:spring-boot-starter-security")
