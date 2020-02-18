@@ -10,6 +10,7 @@ import org.springframework.core.io.ResourceLoader
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate
 import org.springframework.http.MediaType.APPLICATION_PDF
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 import java.io.ByteArrayOutputStream
 import java.util.Base64
 import javax.xml.parsers.DocumentBuilderFactory
@@ -76,28 +77,18 @@ class TicketEnricher {
 
         fun store(
             objectIdHandler: (fileId: ObjectId) -> Unit = { ticket.ticketFileId = it.toHexString() }
-        ): TicketHelpers {
+        ): Mono<Ticket> {
             requireNotNull(pdfTicketOutputStream)
 
-            gridFs
+            return gridFs
                 .store(
                     AsyncStreamHelper.toAsyncInputStream(pdfTicketOutputStream?.toByteArray()),
                     "ticket_${ticket.id}.pdf",
                     APPLICATION_PDF.subtype,
                     null
                 )
-                .block()
-                .let {
-                    if (it != null) {
-                        objectIdHandler(it)
-                    }
-                }
-
-            return this
-        }
-
-        fun enrich(): Ticket {
-            return ticket
+                .doOnNext { objectIdHandler(it) }
+                .flatMap { Mono.just(ticket) }
         }
 
         private fun encoder(image: ByteArray): String {
@@ -106,6 +97,6 @@ class TicketEnricher {
     }
 
     fun with(ticket: Ticket): TicketHelpers {
-        return TicketHelpers(ticket)
+        return TicketHelpers(ticket.copy())
     }
 }
