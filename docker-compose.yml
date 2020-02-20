@@ -3,24 +3,25 @@ version: "3.7"
 services:
   mongodb:
     image: mongo
-    container_name: mongodb
     environment:
-      - MONGO_INITDB_DATABASE=frequenzDB
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
     ports:
-      - "27017:27017"
+      - 27017:27017
     volumes:
       - mongodb-data:/data/db
     networks:
       - frequenz_net
 
   frequenzdieb-api:
-    build: frequenzdieb-server/Dockerfile
     image: ch.frequenzdieb/frequenzdieb-rest-api:latest
-    container_name: frequenzdieb-api
+    environment:
+      - FREQUENZDIEB_MAIL_PSW=${FREQUENZDIEB_MAIL_PSW}
+      - FREQUENZDIEB_MAIL_USER=${FREQUENZDIEB_MAIL_USER}
+      - FREQUENZDIEB_MAIL_SENDER=${FREQUENZDIEB_MAIL_SENDER}
+      - FREQUENZDIEB_MAIL_HOST=${FREQUENZDIEB_MAIL_HOST}
     ports:
-      - "8080:8080"
+      - 8080:8080
     expose:
       - 8080
     logging:

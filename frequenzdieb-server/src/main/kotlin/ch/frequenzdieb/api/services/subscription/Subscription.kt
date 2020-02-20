@@ -5,6 +5,7 @@ import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 import javax.validation.constraints.Email
+import javax.validation.constraints.PastOrPresent
 import javax.validation.constraints.Size
 
 @Document(collection = "subscriptions")
@@ -22,7 +23,10 @@ data class Subscription(
     @Email(message = "Email should be valid")
     val email: String,
 
+    @PastOrPresent
     val registrationDate: LocalDateTime = LocalDateTime.now(),
+
+    var isNewsletterAccepted: Boolean = false,
 
     var isConfirmed: Boolean = false
 )

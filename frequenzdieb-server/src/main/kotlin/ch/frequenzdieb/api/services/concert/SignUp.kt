@@ -5,20 +5,17 @@ import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDate
 import javax.validation.constraints.AssertTrue
-import javax.validation.constraints.Email
-import javax.validation.constraints.Future
-import javax.validation.constraints.Size
+import javax.validation.constraints.PastOrPresent
 
 @Document(collection = "signups")
 @TypeAlias("model.signup")
 data class SignUp(
     @Id val id: String,
     val concertId: String,
-    @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
-    val name: String = "",
-    @Email(message = "Email should be valid")
-    val email: String = "",
-    @Future val date: LocalDate,
+    val subscriptionId: String,
+    @PastOrPresent
+    val date: LocalDate,
     val message: String,
-    @AssertTrue val acceptedConditions: Boolean = false
+    @AssertTrue
+    val acceptedConditions: Boolean = false
 )
