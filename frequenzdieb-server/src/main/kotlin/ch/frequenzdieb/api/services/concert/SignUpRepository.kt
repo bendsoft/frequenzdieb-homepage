@@ -6,5 +6,5 @@ import reactor.core.publisher.Mono
 
 @Repository
 interface SignUpRepository : ReactiveMongoRepository<SignUp, String> {
-    fun deleteAllByEmail(email: String): Mono<Long>
+    fun deleteAllBySubscriptionId(subscriptionId: String): Mono<Long>
 }

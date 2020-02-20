@@ -3,7 +3,11 @@ package ch.frequenzdieb.api.services.subscription
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse.*
+import org.springframework.web.reactive.function.server.ServerResponse.badRequest
+import org.springframework.web.reactive.function.server.ServerResponse.created
+import org.springframework.web.reactive.function.server.ServerResponse.noContent
+import org.springframework.web.reactive.function.server.ServerResponse.notFound
+import org.springframework.web.reactive.function.server.ServerResponse.ok
 import reactor.core.publisher.Mono
 import java.net.URI
 
@@ -13,11 +17,9 @@ class SubscriptionHandler {
     lateinit var repository: SubscriptionRepository
 
     fun findAllByEmail(req: ServerRequest) =
-        Mono.just(req.queryParam("email"))
-            .filter { it.isPresent }
-            .map { repository.findAllByEmail(it.get()) }
+        Mono.justOrEmpty(req.queryParam("email"))
             .flatMap {
-                it.next()
+                repository.findFirstByEmail(it)
                     .flatMap { subscription -> ok().bodyValue(subscription) }
                     .switchIfEmpty(notFound().build())
             }
@@ -36,7 +38,7 @@ class SubscriptionHandler {
     fun create(req: ServerRequest) =
         req.bodyToMono(Subscription::class.java)
             .flatMap {
-                repository.findAllByEmail(it.email).next()
+                repository.findFirstByEmail(it.email)
                     .flatMap { badRequest().bodyValue("E-Mail has already subscribed") }
                     .switchIfEmpty(
                         repository.save(it)
@@ -48,9 +50,8 @@ class SubscriptionHandler {
             }
 
     fun deleteAllByEmail(req: ServerRequest) =
-        Mono.just(req.queryParam("email"))
-            .filter { it.isPresent }
-            .map { repository.deleteAllByEmail(it.get()) }
+        Mono.justOrEmpty(req.queryParam("email"))
+            .map { repository.deleteAllByEmail(it) }
             .flatMap {
                 it
                     .filter { deleteCount -> deleteCount > 0 }
