@@ -1,12 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
 	java
 	idea
-	id("com.palantir.docker") version "0.25.0"
 	id("org.springframework.boot") version "2.2.2.RELEASE"
 	id("io.spring.dependency-management") version "1.0.8.RELEASE"
+	id("com.google.cloud.tools.jib") version "1.8.0"
 	kotlin("jvm") version "1.3.61"
 	kotlin("plugin.spring") version "1.3.61"
 	kotlin("kapt") version "1.3.61"
@@ -73,12 +72,4 @@ tasks {
 			jvmTarget = "1.8"
 		}
 	}
-}
-
-docker {
-	val archiveBaseName = tasks.getByName<BootJar>("bootJar").archiveBaseName.get()
-	name = "${project.group}/$archiveBaseName"
-	setDockerfile(file("Dockerfile"))
-	copySpec.from(tasks.getByName<Copy>("unpack").outputs).into("dependency")
-	buildArgs(mapOf("DEPENDENCY" to "dependency"))
 }
