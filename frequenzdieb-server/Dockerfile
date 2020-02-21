@@ -4,7 +4,7 @@ USER frequenz:dieb
 VOLUME /tmp
 COPY . /frequenzdieb-server
 RUN ls -al && cd frequenzdieb-server && ls -al
-RUN frequenzdieb-server/gradlew jibDockerBuild --image=ch.frequenzdieb/frequenzdieb-rest-api
+RUN frequenzdieb-server/gradlew --no-daemon jibDockerBuild --image=ch.frequenzdieb/frequenzdieb-rest-api
 ARG DEPENDENCY=build/dependency
 COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY ${DEPENDENCY}/META-INF /app/META-INF
