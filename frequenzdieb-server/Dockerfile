@@ -3,13 +3,12 @@ RUN addgroup -S dieb && adduser -S frequenz -G dieb
 USER frequenz:dieb
 WORKDIR /home/frequenz
 COPY . ./frequenzdieb-server
-RUN ls -al && ls -al ./frequenzdieb-server
 USER root
 RUN chown -R frequenz:dieb ./
 USER frequenz:dieb
 WORKDIR frequenzdieb-server
-RUN ls -al
 RUN ./gradlew clean bootJar --no-daemon --stacktrace
+RUN ls -al && ls -al build && ls -al build/libs
 WORKDIR ..
 COPY frequenzdieb-server/build/libs /app
 RUN rm -rf frequenzdieb-server
