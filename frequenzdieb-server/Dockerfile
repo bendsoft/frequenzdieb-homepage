@@ -2,9 +2,10 @@ FROM openjdk:8-jdk-alpine
 RUN addgroup -S dieb && adduser -S frequenz -G dieb
 USER frequenz:dieb
 WORKDIR /home/frequenz
-COPY . /server
-RUN ls -al && ls -al /home && ls -al /home/frequenz
+COPY . ./
+RUN ls -al && ls -al /home
 WORKDIR server
+RUN ls -al
 RUN ./gradlew --no-daemon --stacktrace --debug jibDockerBuild --image=ch.frequenzdieb/frequenzdieb-rest-api
 ARG DEPENDENCY=/build/dependency
 COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
