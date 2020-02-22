@@ -8,9 +8,6 @@ RUN chown -R frequenz:dieb ./
 USER frequenz:dieb
 WORKDIR frequenzdieb-server
 RUN ./gradlew clean bootJar --no-daemon --stacktrace
-RUN ls -al && ls -al build && ls -al build/libs
-WORKDIR ..
-RUN ls -al
-COPY frequenzdieb-server/build/libs /app
-RUN rm -rf frequenzdieb-server
+COPY ./build/libs ../app
+RUN rm -rf ../frequenzdieb-server
 ENTRYPOINT ["java","-cp","app:app/libs/*","ch.frequenzdieb.api.FrequenzdiebRestApiApplicationKt"]
