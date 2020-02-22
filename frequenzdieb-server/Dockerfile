@@ -3,7 +3,7 @@ RUN addgroup -S dieb && adduser -S frequenz -G dieb
 USER frequenz:dieb
 WORKDIR /home/frequenz
 COPY . ./frequenzdieb-server
-RUN ls -al && ls -al /frequenzdieb-server
+RUN ls -al && ls -al ./frequenzdieb-server
 USER root
 RUN chown -R frequenz:dieb ./
 USER frequenz:dieb
