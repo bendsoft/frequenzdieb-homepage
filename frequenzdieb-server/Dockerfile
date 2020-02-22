@@ -3,7 +3,7 @@ RUN addgroup -S dieb && adduser -S frequenz -G dieb
 USER frequenz:dieb
 VOLUME /tmp
 COPY . /tmp/frequenzdieb-server
-RUN /tmp/frequenzdieb-server/gradlew --no-daemon --stacktrace --debug jibDockerBuild --image=ch.frequenzdieb/frequenzdieb-rest-api
+RUN /tmp/frequenzdieb-server/gradlew --no-daemon --gradle-user-home=/tmp/frequenzdieb-server --stacktrace --debug jibDockerBuild --image=ch.frequenzdieb/frequenzdieb-rest-api
 ARG DEPENDENCY=/tmp/frequenzdieb-server/build/dependency
 COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY ${DEPENDENCY}/META-INF /app/META-INF
