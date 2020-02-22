@@ -20,3 +20,4 @@ out/
 
 ### Docker ###
 */.env
+/.env
