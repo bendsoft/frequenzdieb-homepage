@@ -3,7 +3,9 @@ RUN addgroup -S dieb && adduser -S frequenz -G dieb
 USER frequenz:dieb
 WORKDIR /home/frequenz
 COPY . ./
+USER root
 RUN sudo chown -R frequenz:dieb ./
+USER frequenz:dieb
 RUN ./gradlew --no-daemon --stacktrace --debug jibDockerBuild --image=ch.frequenzdieb/frequenzdieb-rest-api
 ARG DEPENDENCY=/build/dependency
 COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
