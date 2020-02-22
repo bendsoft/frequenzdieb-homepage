@@ -3,6 +3,7 @@ version: "3.7"
 services:
   mongodb:
     image: mongo
+    container_name: mongodb
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
@@ -14,7 +15,8 @@ services:
       - frequenz_net
 
   frequenzdieb-api:
-    image: ch.frequenzdieb/frequenzdieb-rest-api:latest
+    build: https://github.com/bendsoft/frequenzdieb-homepage.git#:frequenzdieb-server
+    image: ch.frequenzdieb/frequenzdieb-rest-api
     environment:
       - FREQUENZDIEB_MAIL_PSW=${FREQUENZDIEB_MAIL_PSW}
       - FREQUENZDIEB_MAIL_USER=${FREQUENZDIEB_MAIL_USER}

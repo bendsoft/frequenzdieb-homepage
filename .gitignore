@@ -19,4 +19,4 @@ out/
 .vscode/
 
 ### Docker ###
-/.env
+*/.env
