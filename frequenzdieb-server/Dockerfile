@@ -4,7 +4,7 @@ USER frequenz:dieb
 WORKDIR /home/frequenz
 COPY . ./
 USER root
-RUN sudo chown -R frequenz:dieb ./
+RUN chown -R frequenz:dieb ./
 USER frequenz:dieb
 RUN ./gradlew --no-daemon --stacktrace --debug jibDockerBuild --image=ch.frequenzdieb/frequenzdieb-rest-api
 ARG DEPENDENCY=/build/dependency
