@@ -17,8 +17,8 @@ internal class SubscriptionHelper(
     fun insertSubscriptionForHansMuster() {
         val objectToSave = BasicDBObjectBuilder.start()
             .add("email", "hans.muster@example.com")
-            .add("name", "Muster")
-            .add("surname", "Hans")
+            .add("lastname", "Muster")
+            .add("firstname", "Hans")
             .add("registrationDate", LocalDateTime.now())
             .get()
 

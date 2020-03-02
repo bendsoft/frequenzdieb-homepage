@@ -5,8 +5,8 @@ plugins {
 	java
 	idea
 	id("com.palantir.docker") version "0.25.0"
-	id("org.springframework.boot") version "2.2.4.RELEASE"
-	id("io.spring.dependency-management") version "1.0.8.RELEASE"
+	id("org.springframework.boot") version "2.2.5.RELEASE"
+	id("io.spring.dependency-management") version "1.0.9.RELEASE"
 	kotlin("jvm") version "1.3.61"
 	kotlin("plugin.spring") version "1.3.61"
 	kotlin("kapt") version "1.3.61"
@@ -34,6 +34,7 @@ dependencies {
 	implementation("com.github.kenglxn.QRGen:javase:2.6.0")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("io.jsonwebtoken:jjwt:0.9.1")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

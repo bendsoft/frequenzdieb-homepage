@@ -1,7 +1,7 @@
 version: "3.7"
 
 services:
-  mongodb:
+  frequenz-db:
     image: mongo:4.2.3
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
@@ -20,6 +20,7 @@ services:
       - FREQUENZDIEB_MAIL_USER=${FREQUENZDIEB_MAIL_USER}
       - FREQUENZDIEB_MAIL_SENDER=${FREQUENZDIEB_MAIL_SENDER}
       - FREQUENZDIEB_MAIL_HOST=${FREQUENZDIEB_MAIL_HOST}
+      - FREQUENZDIEB_JWT_SECRET=${FREQUENZDIEB_JWT_SECRET}
       - SPRING_PROFILE=prod
     ports:
       - 8080:8080
@@ -28,7 +29,7 @@ services:
     logging:
       driver: json-file
     depends_on:
-      - mongodb
+      - frequenz-db
 
 volumes:
   mongodb-data:

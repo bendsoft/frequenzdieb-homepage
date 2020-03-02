@@ -1,13 +1,14 @@
 package ch.frequenzdieb.api.configuration
 
+import ch.frequenzdieb.api.services.security.AccountRepository
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.MapReactiveUserDetailsService
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
@@ -18,22 +19,21 @@ class SecurityConfig {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL)
     }
 
+    @Autowired
+    lateinit var accountRepository: AccountRepository
+
     @Bean
-    fun userDetailsService(): MapReactiveUserDetailsService {
-        val admin: UserDetails = User
-            .withUsername("admin")
-            .password(encoder().encode("password"))
-            .roles("ADMIN")
-            .build()
-
-        val user: UserDetails = User
-            .withUsername("user")
-            .password(encoder().encode("password"))
-            .roles("USER")
-            .build()
-
-        return MapReactiveUserDetailsService(admin, user)
-    }
+    fun userDetailsService() =
+        ReactiveUserDetailsService {
+            accountRepository.findOneByUsername(it)
+                .map { account ->
+                    User
+                        .withUsername(account.username)
+                        .password(account.password)
+                        .roles(account.role.toString())
+                        .build()
+                }
+        }
 
     @Bean
     fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
