@@ -1,5 +1,6 @@
-FROM openjdk:8-jdk-alpine
-RUN addgroup -S dieb && adduser -S frequenz -G dieb
+FROM openjdk:11-jre-slim
+RUN addgroup --system dieb
+RUN adduser --system --ingroup dieb frequenz
 USER frequenz:dieb
 VOLUME /tmp
 ARG DEPENDENCY=build/dependency
