@@ -25,5 +25,9 @@ export class ApiService {
     return this.http.get(this.api_url + "/blog/" + id);
   }
 
+  public getSubscriptions() {
+    return this.http.get(this.api_url);
+  }
+
 
 }

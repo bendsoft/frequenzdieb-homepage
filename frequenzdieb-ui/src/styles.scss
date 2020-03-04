@@ -21,12 +21,13 @@ img {
 }
 
 body {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   width: 100%;
   margin: 0;
   padding: 0;
-  background: $black;
-  color: $white;
+  background: $white;
+  color: $black;
+  perspective: 500px;
   &::-webkit-scrollbar {
     width: 12px;
   }
@@ -37,55 +38,5 @@ body {
     background-color: $black;
     border: 2px solid $white;
     border-radius: 200px;
-  }
-}
-
-// global stuff, move into modules if becoming too long
-
-.button {
-  display: inline-block;
-  padding: 15px 30px;
-  border: 2px solid $black;
-  cursor: pointer;
-  position: relative;
-  transition: $t;
-  &::after {
-    content: "";
-    position: absolute;
-    right: 15px;
-    width: 0;
-    height: 0;
-    border-top: 10px solid transparent;
-    border-left: 15px solid $black;
-    border-bottom: 10px solid transparent;
-    top: 50%;
-    transform: translate(0, -50%);
-    opacity: 0;
-    transition: $t;
-  }
-  .text {
-    color: $black;
-    font-size: 24px;
-    transition: $t;
-    text-transform: uppercase;
-  }
-  &.light {
-    border-color: $white;
-    &::after {
-      border-left: 15px solid $white;
-    }
-    .text {
-      color: $white;
-    }
-  }
-  &:hover {
-    padding: 15px 60px 15px 40px;
-    &::after {
-      opacity: 1;
-      right: 25px;
-    }
-    .text {
-      letter-spacing: 2px;
-    }
   }
 }

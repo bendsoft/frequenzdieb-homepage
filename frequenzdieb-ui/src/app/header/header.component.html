@@ -1,10 +1,10 @@
 <header>
   <nav>
     <div routerLink="/home" class="logo">
-      <img src="./../../assets/frequenzdieb_logo.svg" alt="">
+      <img src="./../../assets/frequenzdieb_logo_guitar_black.svg" alt="">
     </div>
     <ul>
-      <li>
+      <!-- <li>
         <a routerLink="/band" routerLinkActive="active">Die Band</a>
       </li>
       <li>
@@ -15,9 +15,13 @@
       </li>
       <li>
         <a routerLink="/tickets" routerLinkActive="active">Tickets</a>
-      </li>
+      </li> -->
       <li>
-        <a routerLink="/kontakt" routerLinkActive="active">Kontakt</a>
+        <a class="button" (click)="openNewsletterWindow()">
+          <div class="text">
+            Newsletter Abo
+          </div>
+        </a>
       </li>
     </ul>
   </nav>

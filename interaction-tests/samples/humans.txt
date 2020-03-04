@@ -1,0 +1,14 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+
+    Samuel Bader - UI, UX, Frontend - badsam.ch
+
+# THANKS
+
+    -
+
+# TECHNOLOGY COLOPHON
+
+    CSS3, HTML5
