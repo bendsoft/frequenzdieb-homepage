@@ -42,6 +42,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
+	implementation("commons-codec:commons-codec:1.14")
 	kapt("org.springframework.boot:spring-boot-configuration-processor")
 	runtimeOnly("org.springframework.boot:spring-boot-devtools")
 	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

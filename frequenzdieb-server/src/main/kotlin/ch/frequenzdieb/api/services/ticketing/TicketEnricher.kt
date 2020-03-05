@@ -4,19 +4,27 @@ import com.mongodb.reactivestreams.client.gridfs.helpers.AsyncStreamHelper
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import net.glxn.qrgen.core.image.ImageType
 import net.glxn.qrgen.javase.QRCode
+import org.apache.commons.codec.digest.DigestUtils
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.ResourceLoader
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate
 import org.springframework.http.MediaType.APPLICATION_PDF
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.io.ByteArrayOutputStream
-import java.util.Base64
+import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
 
 @Service
 class TicketEnricher {
+    @Value("\${FREQUENZDIEB_TICKET_SECRET}")
+    lateinit var ticketSecret: String
+
+    @Value("\${FREQUENZDIEB_PAYMENT_SECRET}")
+    lateinit var paymentSecret: String
+
     @Autowired
     lateinit var gridFs: ReactiveGridFsTemplate
 
@@ -28,8 +36,8 @@ class TicketEnricher {
     ) {
         private var pdfTicketOutputStream: ByteArrayOutputStream? = null
         private val qrCode = encoder(
-            QRCode.from(ticket.id)
-                .withSize(200,200)
+            QRCode.from(DigestUtils.sha512Hex(ticket.id + ticketSecret))
+                .withSize(250,250)
                 .to(ImageType.PNG)
                 .stream()
                 .toByteArray()
@@ -41,6 +49,7 @@ class TicketEnricher {
 
         fun createQRCode(): TicketHelpers {
             ticket.qrCode = qrCode
+            ticket.paymentTransactionRefHash = DigestUtils.sha512Hex(ticket.id + paymentSecret)
 
             return this
         }

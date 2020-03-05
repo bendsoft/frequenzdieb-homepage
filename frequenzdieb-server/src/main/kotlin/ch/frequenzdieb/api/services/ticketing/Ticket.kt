@@ -12,6 +12,6 @@ data class Ticket(
     val concertId: String,
     var qrCode: String?,
     var isValid: Boolean = false,
-    var paymentTransactionId: String,
-    var ticketFileId: String = ""
+    var ticketFileId: String = "",
+    var paymentTransactionRefHash: String = ""
 )

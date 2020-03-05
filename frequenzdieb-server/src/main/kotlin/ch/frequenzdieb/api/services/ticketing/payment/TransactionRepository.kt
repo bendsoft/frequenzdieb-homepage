@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono
 
 @Repository
 interface TransactionRepository : ReactiveMongoRepository<UppTransactionService.Body.Transaction, String> {
-    fun findTopByUppTransactionIdAndSuccess_ResponseCode(subscriptionId: String, responseCode: String = "01"): Mono<UppTransactionService.Body.Transaction>
+    fun findTopByRefnoAndSuccess_ResponseCode(paymentRef: String, responseCode: String = "01"): Mono<UppTransactionService.Body.Transaction>
 }
