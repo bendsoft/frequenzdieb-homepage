@@ -7,6 +7,6 @@ import reactor.core.publisher.Mono
 
 @Repository
 interface TicketingRepository : ReactiveMongoRepository<Ticket, String> {
-    fun findAllBySubscriptionId(subscriptionId: String): Flux<Ticket>
-    fun findOneByQrCode(qrCode: String): Mono<Ticket>
+	fun findAllBySubscriptionId(subscriptionId: String): Flux<Ticket>
+	fun findOneByQrCodeHash(qrCodeHash: String): Mono<Ticket>
 }

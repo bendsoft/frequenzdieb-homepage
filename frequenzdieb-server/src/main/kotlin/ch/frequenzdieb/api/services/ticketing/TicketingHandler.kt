@@ -2,136 +2,128 @@ package ch.frequenzdieb.api.services.ticketing
 
 import ch.frequenzdieb.api.services.subscription.SubscriptionRepository
 import ch.frequenzdieb.api.services.ticketing.payment.TransactionRepository
-import ch.frequenzdieb.api.services.ticketing.payment.datatrans.DatatransHelper
+import ch.frequenzdieb.api.services.ticketing.payment.datatrans.DatatransUtils
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.apache.commons.codec.digest.DigestUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query.query
-import org.springframework.data.mongodb.gridfs.GridFsOperations
-import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate
 import org.springframework.http.MediaType
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse.badRequest
-import org.springframework.web.reactive.function.server.ServerResponse.created
-import org.springframework.web.reactive.function.server.ServerResponse.notFound
-import org.springframework.web.reactive.function.server.ServerResponse.ok
+import org.springframework.web.reactive.function.server.ServerResponse.*
 import reactor.core.publisher.Mono
 import java.net.URI
 
 @Configuration
 class TicketingHandler {
-    @Autowired
-    lateinit var ticketingRepository: TicketingRepository
-    @Autowired
-    lateinit var ticketEnricher: TicketEnricher
-    @Autowired
-    lateinit var transactionRepository: TransactionRepository
-    @Autowired
-    lateinit var datatransHelper: DatatransHelper
-    @Autowired
-    lateinit var subscriptionRepository: SubscriptionRepository
-    @Autowired
-    lateinit var javaMailSender: JavaMailSender
-    @Autowired
-    lateinit var gridFs: ReactiveGridFsTemplate
-    @Autowired
-    lateinit var gridFsOperations: GridFsOperations
+	@Autowired
+	lateinit var ticketingRepository: TicketingRepository
 
-    @Value("\${frequenzdieb.mail.sender}")
-    lateinit var senderEMailAddress: String
+	@Autowired
+	lateinit var ticketUtils: TicketUtils
 
-    fun findAllBySubscriptionId(req: ServerRequest) =
-            Mono.justOrEmpty(req.queryParam("subscriptionid"))
-                    .filterWhen { subscriptionRepository.findById(it).hasElement() }
-                    .flatMap {
-                        ticketingRepository.findAllBySubscriptionId(it).collectList()
-                                .flatMap { tickets -> ok().bodyValue(tickets) }
-                                .switchIfEmpty(notFound().build())
-                    }
-                    .switchIfEmpty(badRequest().bodyValue("Please provide a valid subscriptionId"))
+	@Autowired
+	lateinit var transactionRepository: TransactionRepository
 
-    fun create(req: ServerRequest) =
-            req.bodyToMono(Ticket::class.java)
-                    .flatMap { ticketingRepository.insert(it) }
-                    .flatMap { enrichAndSafePDFTicket(it) }
-                    .doOnNext { sendTicketByEmail(it) }
-                    .flatMap {
-                        created(URI.create("/ticketing/${it.id}"))
-                                .bodyValue(it)
-                    }
-                    .switchIfEmpty(badRequest().bodyValue("Ticket entity must be provided"))
+	@Autowired
+	lateinit var datatransUtils: DatatransUtils
 
-    fun invalidate(req: ServerRequest) =
-            ticketingRepository.findOneByQrCode(req.pathVariable("qrCode"))
-                    .filter { it.isValid }
-                    .filterWhen { hasValidPaymentTransaction(it) }
-                    .doOnNext {
-                        it.isValid = false
-                        ticketingRepository.save(it)
-                    }
-                    .flatMap { ok().body(it, Ticket::class.java) }
-                    .switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
+	@Autowired
+	lateinit var subscriptionRepository: SubscriptionRepository
 
-    fun downloadTicket(req: ServerRequest) =
-            loadTicketFromDatabase(req.pathVariable("fileId"))
-                    .flatMap {
-                        ok()
-                                .contentType(MediaType.APPLICATION_PDF)
-                                .headers { httpHeaders ->
-                                    httpHeaders.setContentDispositionFormData(it.filename, it.filename)
-                                }
-                                .body(BodyInserters.fromResource(gridFsOperations.getResource(it)))
-                    }
-                    .switchIfEmpty(notFound().build())
+	@Autowired
+	lateinit var javaMailSender: JavaMailSender
 
-    fun sendTicket(req: ServerRequest) =
-            ticketingRepository.findById(req.pathVariable("id"))
-                    .doOnNext { sendTicketByEmail(it) }
-                    .flatMap { ok().build() }
-                    .switchIfEmpty(notFound().build())
+	@Value("\${frequenzdieb.mail.sender}")
+	lateinit var senderEMailAddress: String
 
-    private fun sendTicketByEmail(ticket: Ticket) = GlobalScope.launch {
-        loadTicketFromDatabase(ticket.ticketFileId)
-                .zipWhen { subscriptionRepository.findById(ticket.subscriptionId) }
-                .doOnSuccess {
-                    val mailMessage = javaMailSender.createMimeMessage()
-                    MimeMessageHelper(mailMessage, true).apply {
-                        setFrom(senderEMailAddress)
-                        setTo(it.t2.email)
-                        setSubject("Test")
-                        setText("Nur ein Test")
-                        addAttachment(
-                                it.t1.filename,
-                                ByteArrayResource(gridFsOperations.getResource(it.t1).inputStream.readBytes())
-                        )
-                    }
+	fun findAllBySubscriptionId(req: ServerRequest) =
+		Mono.justOrEmpty(req.queryParam("subscriptionid"))
+			.filterWhen { subscriptionRepository.findById(it).hasElement() }
+			.flatMap {
+				ticketingRepository.findAllBySubscriptionId(it).collectList()
+					.flatMap { tickets -> ok().bodyValue(tickets) }
+					.switchIfEmpty(notFound().build())
+			}
+			.switchIfEmpty(badRequest().bodyValue("Please provide a valid subscriptionId"))
 
-                    javaMailSender.send(mailMessage)
-                }.subscribe()
-    }
+	fun create(req: ServerRequest) =
+		req.bodyToMono(Ticket::class.java)
+			.flatMap { ticketingRepository.insert(it) }
+			.flatMap {
+				created(URI.create("/ticketing/${it.id}"))
+					.bodyValue(hashMapOf(
+						"ticket" to it,
+						"qrcode" to ticketUtils.createQRCode(it)
+					))
+			}
+			.switchIfEmpty(badRequest().bodyValue("Ticket entity must be provided"))
 
-    private fun hasValidPaymentTransaction(ticket: Ticket) =
-            Mono.justOrEmpty(ticket)
-                    .filter { datatransHelper.isValidPaymentTransactionRefHash(it) }
-                    .flatMap { transactionRepository.findTopByRefnoAndSuccess_ResponseCode(it.paymentTransactionRefHash) }
-                    .filter { datatransHelper.isTransactionSuccessful(it) }
-                    .hasElement()
+	fun createPaymentTransactionReference(req: ServerRequest) =
+		ticketingRepository.findById(req.pathVariable("id"))
+			.map { datatransUtils.createPaymentTransactionRefHash(it) }
+			.flatMap { ok().bodyValue(it) }
+			.switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
 
-    private fun enrichAndSafePDFTicket(ticket: Ticket) =
-            ticketEnricher
-                    .with(ticket)
-                    .createQRCode()
-                    .createPDF()
-                    .store()
+	fun invalidate(req: ServerRequest) =
+		ticketingRepository.findOneByQrCodeHash(req.pathVariable("qrCodeHash"))
+			.filter { it.isValid && checkTicketIntegrity(it) }
+			.filterWhen { hasValidPaymentTransaction(it) }
+			.doOnNext {
+				it.isValid = false
+				ticketingRepository.save(it)
+			}
+			.flatMap { ok().body(it, Ticket::class.java) }
+			.switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
 
-    private fun loadTicketFromDatabase(fileId: String) =
-            gridFs.findOne(query(Criteria.where("_id").`is`(fileId)))
+	private fun checkTicketIntegrity(ticket: Ticket) =
+		ticketUtils.createQRCodeHash(ticket) == ticket.qrCodeHash
+
+	fun downloadTicket(req: ServerRequest) =
+		ticketingRepository.findById(req.pathVariable("id"))
+			.flatMap {
+				ok()
+					.contentType(MediaType.APPLICATION_PDF)
+					.headers { httpHeaders ->
+						httpHeaders.setContentDispositionFormData(createTicketName(it), createTicketName(it))
+					}
+					.body(BodyInserters.fromResource(ticketUtils.createPDF(it)))
+			}
+			.switchIfEmpty(notFound().build())
+
+	fun sendTicket(req: ServerRequest) =
+		ticketingRepository.findById(req.pathVariable("id"))
+			.doOnNext { sendTicketByEmail(it) }
+			.flatMap { ok().build() }
+			.switchIfEmpty(notFound().build())
+
+	private fun sendTicketByEmail(ticket: Ticket) = GlobalScope.launch {
+		subscriptionRepository.findById(ticket.subscriptionId)
+			.doOnSuccess {
+				val mailMessage = javaMailSender.createMimeMessage()
+				MimeMessageHelper(mailMessage, true).apply {
+					setFrom(senderEMailAddress)
+					setTo(it.email)
+					setSubject("Dein Ticket zum Frequenzdieb-Konzert")
+					setText("Anbei dein Ticket. Wir freuen uns auf einen tollen Abend mit dir!")
+					addAttachment(
+						createTicketName(ticket),
+						ticketUtils.createPDF(ticket)
+					)
+				}
+
+				javaMailSender.send(mailMessage)
+			}.subscribe()
+	}
+
+	private fun createTicketName(ticket: Ticket) = "ticket_${ticket.id}.pdf"
+
+	private fun hasValidPaymentTransaction(ticket: Ticket) =
+		Mono.justOrEmpty(datatransUtils.createPaymentTransactionRefHash(ticket))
+			.flatMap { transactionRepository.findTopByRefnoAndSuccess_ResponseCode(it) }
+			.filter { datatransUtils.isTransactionSuccessful(it) }
+			.hasElement()
 }
