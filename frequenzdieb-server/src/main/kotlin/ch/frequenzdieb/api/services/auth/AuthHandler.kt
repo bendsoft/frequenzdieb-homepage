@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.services.security
+package ch.frequenzdieb.api.services.auth
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 
 @Configuration
-class SecurityHandler {
+class AuthHandler {
     @Autowired
     lateinit var accountRepository: AccountRepository
 

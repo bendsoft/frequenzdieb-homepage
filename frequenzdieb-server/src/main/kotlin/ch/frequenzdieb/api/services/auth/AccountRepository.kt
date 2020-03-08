@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.services.security
+package ch.frequenzdieb.api.services.auth
 
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.stereotype.Repository

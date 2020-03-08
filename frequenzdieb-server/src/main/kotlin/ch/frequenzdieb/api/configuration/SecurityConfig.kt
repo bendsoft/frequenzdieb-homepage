@@ -1,6 +1,6 @@
 package ch.frequenzdieb.api.configuration
 
-import ch.frequenzdieb.api.services.security.AccountRepository
+import ch.frequenzdieb.api.services.auth.AccountRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod

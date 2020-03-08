@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class DatatransUtils {
-	@Value("\${FREQUENZDIEB_PAYMENT_SECRET}")
+	@Value("\${frequenzdieb.security.payment.secret}")
 	lateinit var paymentSecret: String
 
 	fun isTransactionSuccessful(transaction: UppTransactionService.Body.Transaction) =

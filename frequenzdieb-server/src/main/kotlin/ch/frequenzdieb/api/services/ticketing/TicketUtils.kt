@@ -10,23 +10,23 @@ import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.ResourceLoader
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
-import java.util.*
+import java.util.Base64
 import javax.xml.parsers.DocumentBuilderFactory
 
 @Service
 class TicketUtils {
-	@Value("\${FREQUENZDIEB_TICKET_SECRET}")
+	@Value("\${frequenzdieb.security.ticket.secret}")
 	lateinit var ticketSecret: String
 
 	@Autowired
 	lateinit var resourceLoader: ResourceLoader
 
-	fun createQRCodeHash(ticket: Ticket) =
+	fun createUniqueTicketHash(ticket: Ticket): String =
 		DigestUtils.sha512Hex(ticket.subscriptionId + ticket.concertId + ticket.created + ticketSecret)
 
 	fun createQRCode(ticket: Ticket) =
 		encoder(
-			QRCode.from(createQRCodeHash(ticket))
+			QRCode.from(createUniqueTicketHash(ticket))
 				.withSize(250, 250)
 				.to(ImageType.PNG)
 				.stream()

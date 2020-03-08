@@ -13,7 +13,10 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse.*
+import org.springframework.web.reactive.function.server.ServerResponse.badRequest
+import org.springframework.web.reactive.function.server.ServerResponse.created
+import org.springframework.web.reactive.function.server.ServerResponse.notFound
+import org.springframework.web.reactive.function.server.ServerResponse.ok
 import reactor.core.publisher.Mono
 import java.net.URI
 
@@ -80,7 +83,7 @@ class TicketingHandler {
 			.switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
 
 	private fun checkTicketIntegrity(ticket: Ticket) =
-		ticketUtils.createQRCodeHash(ticket) == ticket.qrCodeHash
+		ticketUtils.createUniqueTicketHash(ticket) == ticket.qrCodeHash
 
 	fun downloadTicket(req: ServerRequest) =
 		ticketingRepository.findById(req.pathVariable("id"))

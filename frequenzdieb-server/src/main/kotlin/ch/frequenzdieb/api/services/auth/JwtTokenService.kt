@@ -1,4 +1,4 @@
-package ch.frequenzdieb.api.services.security
+package ch.frequenzdieb.api.services.auth
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
