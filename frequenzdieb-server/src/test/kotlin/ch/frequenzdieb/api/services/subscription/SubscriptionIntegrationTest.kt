@@ -31,7 +31,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
                     .expectStatus().isOk
                     .expectBody(Subscription::class.java)
                     .returnResult()
-                    .apply { responseBody?.lastname shouldBe "Muster" }
+                    .apply { responseBody?.surname shouldBe "Muster" }
             }
 
             it("should return 404 if not found") {
@@ -80,7 +80,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
                                 .expectStatus().isOk
                                 .expectBody(Subscription::class.java)
                                 .returnResult()
-                                .apply { responseBody?.lastname shouldBe "Imal" }
+                                .apply { responseBody?.surname shouldBe "Imal" }
                         }
                 }
 
@@ -99,8 +99,8 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
         return getRestClientUnauthenticated()
             .post().uri("/api/subscription")
             .bodyValue(Subscription(
-                lastname = "Imal",
-                firstname = "Max",
+                surname = "Imal",
+                name = "Max",
                 email = "max.imal@example.com"
             ))
             .accept(MediaType.APPLICATION_JSON)

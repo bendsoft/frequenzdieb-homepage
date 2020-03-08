@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.server.ServerResponse.notFound
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import reactor.core.publisher.Mono
 import java.net.URI
+import java.time.LocalDateTime
 
 @Configuration
 class TicketingHandler {
@@ -55,11 +56,13 @@ class TicketingHandler {
 
 	fun create(req: ServerRequest) =
 		req.bodyToMono(Ticket::class.java)
-			.flatMap { ticketingRepository.insert(it) }
+			.flatMap {
+				it.created = LocalDateTime.now()
+				ticketingRepository.insert(it)
+			}
 			.flatMap {
 				created(URI.create("/ticketing/${it.id}"))
 					.bodyValue(hashMapOf(
-						"ticket" to it,
 						"qrcode" to ticketUtils.createQRCode(it)
 					))
 			}
@@ -72,15 +75,22 @@ class TicketingHandler {
 			.switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
 
 	fun invalidate(req: ServerRequest) =
-		ticketingRepository.findOneByQrCodeHash(req.pathVariable("qrCodeHash"))
-			.filter { it.isValid && checkTicketIntegrity(it) }
-			.filterWhen { hasValidPaymentTransaction(it) }
-			.doOnNext {
-				it.isValid = false
-				ticketingRepository.save(it)
+		req.bodyToMono(TicketInvalidationRequest::class.java)
+			.flatMap { invalidationRequestTicket ->
+				ticketingRepository.findOneByQrCodeHash(invalidationRequestTicket.qrCodeHash)
+					.filter { it.isValid && checkTicketIntegrity(it) }
+					.filterWhen { hasValidPaymentTransaction(it) }
+					.doOnNext {
+						it.isValid = false
+						ticketingRepository.save(it)
+					}
+					.flatMap { ok().body(it, Ticket::class.java) }
+					.switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
 			}
-			.flatMap { ok().body(it, Ticket::class.java) }
-			.switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
+
+	private data class TicketInvalidationRequest(
+		var qrCodeHash: String
+	)
 
 	private fun checkTicketIntegrity(ticket: Ticket) =
 		ticketUtils.createUniqueTicketHash(ticket) == ticket.qrCodeHash

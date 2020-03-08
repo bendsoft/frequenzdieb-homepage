@@ -8,10 +8,10 @@ import java.time.LocalDateTime
 @Document(collection = "ticketing")
 @TypeAlias("model.ticket")
 data class Ticket(
-	@Id val id: String?,
+	@Id val id: String? = null,
 	val subscriptionId: String,
 	val concertId: String,
-	var qrCodeHash: String,
+	var qrCodeHash: String?,
 	var created: LocalDateTime?,
-	var isValid: Boolean = false
+	var isValid: Boolean = true
 )
