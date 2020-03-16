@@ -31,6 +31,10 @@ class JwtTokenService {
             .compact()
     }
 
+    fun getUsernameFromToken(token: String): String {
+        return getAllClaimsFromToken(token).subject
+    }
+
     private fun calculateExpirationDate(createdDate: Date) =
         Date(createdDate.time + expiration.toLong() * 10000)
 
