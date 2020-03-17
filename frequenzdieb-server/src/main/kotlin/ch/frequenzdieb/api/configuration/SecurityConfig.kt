@@ -1,6 +1,7 @@
 package ch.frequenzdieb.api.configuration
 
 import ch.frequenzdieb.api.services.auth.AccountRepository
+import ch.frequenzdieb.api.services.auth.Role
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
@@ -55,16 +56,14 @@ class SecurityConfig {
             .authenticationManager(authenticationManager)
             .securityContextRepository(securityContextRepository)
             .authorizeExchange()
-            .pathMatchers(HttpMethod.OPTIONS).permitAll()
-            .pathMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-            .pathMatchers(HttpMethod.GET, "/api/ticketing/*").hasRole("USER")
-            .pathMatchers(HttpMethod.PUT, "/api/ticketing/*/invalidate").hasRole("ADMIN")
-            .pathMatchers(HttpMethod.GET, "/api/subscription").hasRole("ADMIN")
-            .pathMatchers(HttpMethod.POST, "/api/concert").hasRole("ADMIN")
-            .pathMatchers(HttpMethod.DELETE, "/api/concert/*").hasRole("ADMIN")
-            .pathMatchers(HttpMethod.GET, "/api/concert/*/signup").hasRole("ADMIN")
-            .pathMatchers(HttpMethod.GET, "/api/concert/*/signup/*").hasRole("ADMIN")
-            .pathMatchers("/**").permitAll()
+            .pathMatchers(HttpMethod.GET, "/api/ticketing/*").hasRole(Role.ADMIN.toString())
+            .pathMatchers(HttpMethod.PUT, "/api/ticketing/*/invalidate").hasRole(Role.ADMIN.toString())
+            .pathMatchers(HttpMethod.GET, "/api/subscription").hasRole(Role.ADMIN.toString())
+            .pathMatchers(HttpMethod.POST, "/api/concert").hasRole(Role.ADMIN.toString())
+            .pathMatchers(HttpMethod.DELETE, "/api/concert/*").hasRole(Role.ADMIN.toString())
+            .pathMatchers(HttpMethod.GET, "/api/concert/*/signup").hasRole(Role.ADMIN.toString())
+            .pathMatchers(HttpMethod.GET, "/api/concert/*/signup/*").hasRole(Role.ADMIN.toString())
+            .pathMatchers("/api/**").permitAll()
             .anyExchange().authenticated()
             .and().build()
 

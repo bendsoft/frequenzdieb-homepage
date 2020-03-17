@@ -18,7 +18,7 @@ class JwtTokenService {
 
     fun generateToken(account: Account): String {
         val claims: MutableMap<String, Any> = HashMap()
-        claims["role"] = account.role
+        claims["role"] = listOf(account.role)
 
         val createdDate = Date()
 
@@ -31,9 +31,11 @@ class JwtTokenService {
             .compact()
     }
 
-    fun getUsernameFromToken(token: String): String {
-        return getAllClaimsFromToken(token).subject
-    }
+    fun getUsernameFromClaim(claims: Claims): String =
+        claims.subject
+
+    fun isClaimExpired(claims: Claims) =
+        claims.expiration.before(Date())
 
     private fun calculateExpirationDate(createdDate: Date) =
         Date(createdDate.time + expiration.toLong() * 10000)
@@ -43,6 +45,4 @@ class JwtTokenService {
             .setSigningKey(secret.toByteArray())
             .parseClaimsJws(token)
             .body
-
-    fun isTokenValid(token: String) = getAllClaimsFromToken(token).expiration.before(Date())
 }
