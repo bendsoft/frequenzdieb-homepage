@@ -47,8 +47,8 @@ class SecurityConfig {
     fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
         http
             .exceptionHandling()
-            .authenticationEntryPoint { exchange, _ -> Mono.from { exchange.response.statusCode = HttpStatus.UNAUTHORIZED } }
-            .accessDeniedHandler { exchange, _ -> Mono.from { exchange.response.statusCode = HttpStatus.FORBIDDEN } }
+            .authenticationEntryPoint { exchange, _ -> Mono.fromRunnable { exchange.response.statusCode = HttpStatus.UNAUTHORIZED } }
+            .accessDeniedHandler { exchange, _ -> Mono.fromRunnable { exchange.response.statusCode = HttpStatus.FORBIDDEN } }
             .and()
             .csrf().disable()
             .formLogin().disable()
@@ -56,6 +56,8 @@ class SecurityConfig {
             .authenticationManager(authenticationManager)
             .securityContextRepository(securityContextRepository)
             .authorizeExchange()
+            .pathMatchers(HttpMethod.OPTIONS).permitAll()
+            .pathMatchers("/api/auth/login").permitAll()
             .pathMatchers(HttpMethod.GET, "/api/ticketing/*").hasRole(Role.ADMIN.toString())
             .pathMatchers(HttpMethod.PUT, "/api/ticketing/*/invalidate").hasRole(Role.ADMIN.toString())
             .pathMatchers(HttpMethod.GET, "/api/subscription").hasRole(Role.ADMIN.toString())

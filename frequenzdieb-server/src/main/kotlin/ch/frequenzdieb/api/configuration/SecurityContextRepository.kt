@@ -3,6 +3,7 @@ package ch.frequenzdieb.api.configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.security.web.server.context.ServerSecurityContextRepository
@@ -26,8 +27,10 @@ class SecurityContextRepository(
 
         return if (!authToken.isNullOrEmpty()) {
             val auth = UsernamePasswordAuthenticationToken(authToken, authToken)
-            authenticationManager.authenticate(auth).map {
-                SecurityContextImpl(it)
+            authenticationManager.authenticate(auth)
+                .flatMap { authentication ->
+                    ReactiveSecurityContextHolder.getContext()
+                        .doOnNext { it.authentication = authentication }
             }
         } else Mono.empty()
     }
