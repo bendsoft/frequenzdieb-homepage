@@ -5,30 +5,23 @@ import ch.frequenzdieb.api.services.auth.Role
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
-import reactor.core.publisher.Mono
 
 @EnableWebFluxSecurity
 class SecurityConfig {
-    init {
-        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL)
-    }
+    private val ADMIN = Role.ADMIN.toString()
 
     @Autowired
     lateinit var accountRepository: AccountRepository
 
     @Autowired
-    lateinit var authenticationManager: AuthenticationManager
-
-    @Autowired
-    lateinit var securityContextRepository: SecurityContextRepository
+    lateinit var bearerAuthenticationFilter: BearerAuthenticationFilter
 
     @Bean
     fun userDetailsService() =
@@ -46,28 +39,25 @@ class SecurityConfig {
     @Bean
     fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
         http
-            .exceptionHandling()
-            .authenticationEntryPoint { exchange, _ -> Mono.fromRunnable { exchange.response.statusCode = HttpStatus.UNAUTHORIZED } }
-            .accessDeniedHandler { exchange, _ -> Mono.fromRunnable { exchange.response.statusCode = HttpStatus.FORBIDDEN } }
+            .authorizeExchange()
+            .pathMatchers(HttpMethod.OPTIONS).permitAll()
+            .pathMatchers("/api/auth/login").permitAll()
+            .and().addFilterAt(bearerAuthenticationFilter, SecurityWebFiltersOrder.FIRST)
+            .authorizeExchange()
+            .pathMatchers(HttpMethod.GET, "/api/ticketing/*").hasRole(ADMIN)
+            .pathMatchers(HttpMethod.PUT, "/api/ticketing/*/invalidate").hasRole(ADMIN)
+            .pathMatchers(HttpMethod.GET, "/api/subscription").hasRole(ADMIN)
+            .pathMatchers(HttpMethod.POST, "/api/concert").hasRole(ADMIN)
+            .pathMatchers(HttpMethod.DELETE, "/api/concert/*").hasRole(ADMIN)
+            .pathMatchers(HttpMethod.GET, "/api/concert/*/signup").hasRole(ADMIN)
+            .pathMatchers(HttpMethod.GET, "/api/concert/*/signup/*").hasRole(ADMIN)
+            .pathMatchers("/api/**").permitAll()
+            .anyExchange().authenticated()
             .and()
             .csrf().disable()
             .formLogin().disable()
             .httpBasic().disable()
-            .authenticationManager(authenticationManager)
-            .securityContextRepository(securityContextRepository)
-            .authorizeExchange()
-            .pathMatchers(HttpMethod.OPTIONS).permitAll()
-            .pathMatchers("/api/auth/login").permitAll()
-            .pathMatchers(HttpMethod.GET, "/api/ticketing/*").hasRole(Role.ADMIN.toString())
-            .pathMatchers(HttpMethod.PUT, "/api/ticketing/*/invalidate").hasRole(Role.ADMIN.toString())
-            .pathMatchers(HttpMethod.GET, "/api/subscription").hasRole(Role.ADMIN.toString())
-            .pathMatchers(HttpMethod.POST, "/api/concert").hasRole(Role.ADMIN.toString())
-            .pathMatchers(HttpMethod.DELETE, "/api/concert/*").hasRole(Role.ADMIN.toString())
-            .pathMatchers(HttpMethod.GET, "/api/concert/*/signup").hasRole(Role.ADMIN.toString())
-            .pathMatchers(HttpMethod.GET, "/api/concert/*/signup/*").hasRole(Role.ADMIN.toString())
-            .pathMatchers("/api/**").permitAll()
-            .anyExchange().authenticated()
-            .and().build()
+            .build()
 
     @Bean
     fun encoder() = BCryptPasswordEncoder()
