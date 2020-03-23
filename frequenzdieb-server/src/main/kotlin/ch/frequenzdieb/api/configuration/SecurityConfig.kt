@@ -76,6 +76,7 @@ class SecurityConfig {
             .anyExchange().authenticated()
             .and()
             .csrf().disable()
+            .cors().disable()
             .formLogin().disable()
             .httpBasic().disable()
             .build()
