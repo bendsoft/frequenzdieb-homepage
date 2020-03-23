@@ -70,7 +70,6 @@ class SecurityConfig {
             .authorizeExchange()
             .pathMatchers(HttpMethod.GET, "/api/ticketing/*").hasRole(ADMIN)
             .pathMatchers(HttpMethod.PUT, "/api/ticketing/*/invalidate").hasRole(ADMIN)
-            .pathMatchers(HttpMethod.GET, "/api/subscription").hasRole(ADMIN)
             .pathMatchers(HttpMethod.POST, "/api/concert").hasRole(ADMIN)
             .pathMatchers(HttpMethod.DELETE, "/api/concert/*").hasRole(ADMIN)
             .pathMatchers(HttpMethod.GET, "/api/concert/*/signup").hasRole(ADMIN)
