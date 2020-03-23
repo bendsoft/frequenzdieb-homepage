@@ -1,0 +1,111 @@
+@import "./../../variables";
+
+nav {
+  position: fixed;
+  z-index: 80;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+
+  .logo {
+    width: 240px;
+    position: relative;
+    left: 20px;
+    top: 20px;
+    cursor: pointer;
+
+    &:hover {
+      animation: wiggle 1s linear infinite;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  ul {
+    position: relative;
+    right: 30px;
+    top: 10px;
+    list-style-type: none;
+
+    li {
+      display: inline-block;
+
+      a {
+        display: inline-block;
+        font-size: 16px;
+        text-transform: uppercase;
+        color: #fff;
+        text-decoration: none;
+        // padding: 15px;
+        position: relative;
+        cursor: pointer;
+
+        &.button {
+          background: transparent;
+          border-color: $black;
+          color: $black;
+          padding: 12px 24px;
+          top: 15px;
+          border-radius: 50px;
+          font-weight: bold;
+          transition: $t;
+          border: 2px solid $black;
+          cursor: pointer;
+
+          .text {
+            transition: $t;
+            font-size: 16px;
+            letter-spacing: 1px;
+            position: relative;
+          }
+        }
+
+        &:hover {
+          transform: scale(0.9);
+          background: $black;
+
+          .text {
+            color: $white;
+            transform: scale(1.1);
+            letter-spacing: 1px;
+          }
+
+          &::after {
+            display: none;
+          }
+        }
+
+        // &::after {
+        //   position: absolute;
+        //   left: 15px;
+        //   right: 15px;
+        //   height: 2px;
+        //   background: #fff;
+        //   content: "";
+        //   transition: $pew;
+        //   transform: scaleX(0);
+        //   bottom: 10px;
+        // }
+        // &:hover {
+        //   &::after {
+        //     transform: scaleX(0.6);
+        //   }
+        // }
+        &.active {
+          &::after {
+            transform: scaleX(1);
+          }
+        }
+      }
+    }
+  }
+}

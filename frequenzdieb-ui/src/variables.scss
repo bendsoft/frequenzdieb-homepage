@@ -1,0 +1,21 @@
+// colors
+
+$black: #211A1E;
+$white: #FCFCFC;
+$gray: #AAA694;
+$yellow: #F4E04D;
+
+
+// transitions
+
+$t: 0.3s ease-in-out;
+$pew: 0.6s cubic-bezier(0.6, 0, 0.4, 1);
+
+// utility
+
+@mixin center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
