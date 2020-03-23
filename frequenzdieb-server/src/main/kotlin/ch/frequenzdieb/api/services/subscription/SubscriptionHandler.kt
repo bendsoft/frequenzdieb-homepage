@@ -3,6 +3,7 @@ package ch.frequenzdieb.api.services.subscription
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.badRequest
 import org.springframework.web.reactive.function.server.ServerResponse.created
 import org.springframework.web.reactive.function.server.ServerResponse.noContent
@@ -16,7 +17,7 @@ class SubscriptionHandler {
     @Autowired
     lateinit var repository: SubscriptionRepository
 
-    fun findAllByEmail(req: ServerRequest) =
+    fun findFirstByEmail(req: ServerRequest) =
         Mono.justOrEmpty(req.queryParam("email"))
             .flatMap {
                 repository.findFirstByEmail(it)
@@ -35,6 +36,7 @@ class SubscriptionHandler {
             }
             .flatMap { ok().bodyValue(it) }
 
+    // TODO: Send email to subscriber
     fun create(req: ServerRequest) =
         req.bodyToMono(Subscription::class.java)
             .flatMap {
@@ -48,6 +50,24 @@ class SubscriptionHandler {
                             }
                     )
             }
+
+    fun unsubscribe(req: ServerRequest) =
+        changeSubscriptionToNewsletter(req, accepted = false)
+
+    fun subscribe(req: ServerRequest) =
+        changeSubscriptionToNewsletter(req, accepted = true)
+
+    private fun changeSubscriptionToNewsletter(req: ServerRequest, accepted: Boolean): Mono<ServerResponse> {
+        return repository.findById(req.pathVariable("id"))
+            .flatMap {
+                it.isNewsletterAccepted = accepted
+                repository.save(it)
+                    .flatMap { updatedSubscription ->
+                        ok().bodyValue(updatedSubscription)
+                    }
+            }
+            .switchIfEmpty(badRequest().build())
+    }
 
     fun deleteAllByEmail(req: ServerRequest) =
         Mono.justOrEmpty(req.queryParam("email"))

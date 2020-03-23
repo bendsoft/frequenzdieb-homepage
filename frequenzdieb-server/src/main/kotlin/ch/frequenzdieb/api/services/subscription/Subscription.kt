@@ -1,5 +1,6 @@
 package ch.frequenzdieb.api.services.subscription
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
@@ -11,6 +12,7 @@ import javax.validation.constraints.Size
 @Document(collection = "subscriptions")
 @TypeAlias("model.subscription")
 data class Subscription(
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Id
     val id: String? = null,
 
@@ -23,10 +25,12 @@ data class Subscription(
     @Email(message = "Email should be valid")
     val email: String,
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @PastOrPresent
     val registrationDate: LocalDateTime = LocalDateTime.now(),
 
     var isNewsletterAccepted: Boolean = false,
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     var isConfirmed: Boolean = false
 )
