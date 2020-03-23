@@ -1,14 +1,18 @@
 
 <main>
-  <header>
+  <header *ngIf="concert">
     <div class="background">
       <!-- <img src="./../../assets/img/frequenzdieb_concert_2.jpg" alt=""> -->
     </div>
     <h2 class="date">
-      31.05<br>
-      2020
+      {{ concert.date  | date:'dd.MM'}}<br>
+      {{ concert.date  | date:'yyyy'}}
+      <div class="location">
+        {{ concert.location }}
+      </div>
       <div class="shadow"></div>
     </h2>
+
     <h3 class="next-concert">
       Nächstes<br>
       Konzert

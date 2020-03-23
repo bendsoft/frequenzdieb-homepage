@@ -12,7 +12,7 @@
   <p>
     Gib einfach hier deine e-mail Adresse ein und du bist dabei.
   </p>
-  <input type="text" placeholder="max.muster@gmail.com">
+  <input type="text" placeholder="max.muster@gmail.com" (keydown.enter)="submitNewsletterSub()" (keydown.escape)="closeNewsletterSub()">
   <div class="button" (click)="submitNewsletterSub()">
     <div class="text">
       Anmeldung absenden

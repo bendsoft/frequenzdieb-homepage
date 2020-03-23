@@ -7,7 +7,8 @@ import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 export class ApiService {
 
   api_key = "";
-  api_url = "https://virtserver.swaggerhub.com/bendsoft/frequenzdieb-rest/1.0.0";
+  // api_url = "https://virtserver.swaggerhub.com/bendsoft/frequenzdieb-rest/1.0.0a";
+  api_url = "https://de0a780b-590b-47b3-82fa-33e56804d435.mock.pstmn.io";
 
   headers = new HttpHeaders();
 
@@ -25,9 +26,16 @@ export class ApiService {
     return this.http.get(this.api_url + "/blog/" + id);
   }
 
-  public getSubscriptions() {
-    return this.http.get(this.api_url);
+  public getSubscription(email) {
+    return this.http.get(this.api_url + "/subscription?email=" + email);
   }
 
+  public getConcert() {
+    return this.http.get(this.api_url + "/concert")
+  }
+
+  public postSubscription() {
+
+  }
 
 }

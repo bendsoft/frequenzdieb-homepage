@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
+import { ApiService } from './../api.service';
+
 declare var $:any;
 
 @Component({
@@ -14,12 +16,19 @@ export class NewsletterSubComponent implements OnInit {
   }
 
   submitNewsletterSub () {
-
+    var mail = $(".newsletter-sub-window input").val();
+    console.log(mail);
+    this.api.getSubscription(mail).subscribe(data => {
+      console.log(data);
+    });
   }
 
-  constructor() { }
+  constructor(
+    private api:ApiService
+  ) { }
 
   ngOnInit() {
+
   }
 
 }
