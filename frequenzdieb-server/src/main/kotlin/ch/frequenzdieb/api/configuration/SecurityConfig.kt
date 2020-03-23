@@ -80,7 +80,12 @@ class SecurityConfig {
             .and()
             .csrf().disable()
             .cors().configurationSource {
-                CorsConfiguration().apply { allowedHeaders = listOf(CorsConfiguration.ALL) }
+                CorsConfiguration().apply {
+                    allowCredentials = true
+                    allowedHeaders = listOf(CorsConfiguration.ALL)
+                    allowedMethods = listOf(CorsConfiguration.ALL)
+                    allowedOrigins = listOf(CorsConfiguration.ALL)
+                }
             }.and()
             .formLogin().disable()
             .httpBasic().disable()
