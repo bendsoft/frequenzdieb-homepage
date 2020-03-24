@@ -4,14 +4,12 @@ import ch.frequenzdieb.api.services.common.EmailService
 import kotlinx.html.a
 import kotlinx.html.body
 import kotlinx.html.html
-import kotlinx.html.link
 import kotlinx.html.p
 import kotlinx.html.stream.createHTML
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.badRequest
 import org.springframework.web.reactive.function.server.ServerResponse.created
 import org.springframework.web.reactive.function.server.ServerResponse.noContent
