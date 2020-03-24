@@ -1,16 +1,15 @@
 package ch.frequenzdieb.api.services.ticketing
 
+import ch.frequenzdieb.api.services.common.EMailAttachment
+import ch.frequenzdieb.api.services.common.EmailService
 import ch.frequenzdieb.api.services.subscription.SubscriptionRepository
 import ch.frequenzdieb.api.services.ticketing.payment.TransactionRepository
 import ch.frequenzdieb.api.services.ticketing.payment.datatrans.DatatransUtils
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
-import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse.badRequest
@@ -39,10 +38,7 @@ class TicketingHandler {
 	lateinit var subscriptionRepository: SubscriptionRepository
 
 	@Autowired
-	lateinit var javaMailSender: JavaMailSender
-
-	@Value("\${frequenzdieb.mail.sender}")
-	lateinit var senderEMailAddress: String
+	lateinit var emailService: EmailService
 
 	fun findAllBySubscriptionId(req: ServerRequest) =
 		Mono.justOrEmpty(req.queryParam("subscriptionid"))
@@ -116,19 +112,15 @@ class TicketingHandler {
 	private fun sendTicketByEmail(ticket: Ticket) = GlobalScope.launch {
 		subscriptionRepository.findById(ticket.subscriptionId)
 			.doOnSuccess {
-				val mailMessage = javaMailSender.createMimeMessage()
-				MimeMessageHelper(mailMessage, true).apply {
-					setFrom(senderEMailAddress)
-					setTo(it.email)
-					setSubject("Dein Ticket zum Frequenzdieb-Konzert")
-					setText("Anbei dein Ticket. Wir freuen uns auf einen tollen Abend mit dir!")
-					addAttachment(
-						createTicketName(ticket),
-						ticketUtils.createPDF(ticket)
+				emailService.sendEmail(
+					emailAddress = it.email,
+					subject = "Dein Ticket zum Frequenzdieb-Konzert",
+					message = "Anbei dein Ticket. Wir freuen uns auf einen tollen Abend mit dir!",
+					attachment = EMailAttachment(
+						attachmentFilename = createTicketName(ticket),
+						file = ticketUtils.createPDF(ticket)
 					)
-				}
-
-				javaMailSender.send(mailMessage)
+				)
 			}.subscribe()
 	}
 

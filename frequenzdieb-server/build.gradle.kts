@@ -25,6 +25,7 @@ idea {
 
 repositories {
 	mavenCentral()
+	jcenter()
 	maven(url = "https://jitpack.io")
 }
 
@@ -43,6 +44,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
 	implementation("commons-codec:commons-codec:1.14")
+	implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.1")
 	kapt("org.springframework.boot:spring-boot-configuration-processor")
 	runtimeOnly("org.springframework.boot:spring-boot-devtools")
 	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
