@@ -4,7 +4,6 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
-import javax.validation.constraints.Email
 import javax.validation.constraints.Size
 
 @Document(collection = "blogentries")
