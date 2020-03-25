@@ -24,6 +24,9 @@ class SecurityConfig {
     @Value("\${frequenzdieb.security.admin.password}")
     lateinit var adminPassword: String
 
+    @Value("\${spring.profiles.active:}")
+    lateinit var activeProfile: String
+
     @Autowired
     lateinit var accountRepository: AccountRepository
 
@@ -59,7 +62,7 @@ class SecurityConfig {
     }
 
     @Bean
-    fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
+    fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         http
             .authorizeExchange()
             .pathMatchers(HttpMethod.OPTIONS).permitAll()
@@ -77,17 +80,26 @@ class SecurityConfig {
             .anyExchange().authenticated()
             .and()
             .csrf().disable()
-            .cors().configurationSource {
+            .formLogin().disable()
+            .httpBasic().disable()
+
+        disableCorsWhenDevProfileActive(http)
+
+        return http.build()
+    }
+
+    private fun disableCorsWhenDevProfileActive(http: ServerHttpSecurity) {
+        if (activeProfile == "dev") {
+            http.cors().configurationSource {
                 CorsConfiguration().apply {
                     allowCredentials = true
                     allowedHeaders = listOf(CorsConfiguration.ALL)
                     allowedMethods = listOf(CorsConfiguration.ALL)
                     allowedOrigins = listOf(CorsConfiguration.ALL)
                 }
-            }.and()
-            .formLogin().disable()
-            .httpBasic().disable()
-            .build()
+            }
+        }
+    }
 
     @Bean
     fun encoder() = BCryptPasswordEncoder()

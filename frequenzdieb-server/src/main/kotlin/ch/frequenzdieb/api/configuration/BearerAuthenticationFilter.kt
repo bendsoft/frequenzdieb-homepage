@@ -4,10 +4,12 @@ import ch.frequenzdieb.api.services.auth.JwtTokenService
 import ch.frequenzdieb.api.services.auth.Role
 import io.jsonwebtoken.Claims
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
 import org.springframework.stereotype.Component
+import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Mono
 
 @Component
@@ -21,6 +23,9 @@ class BearerAuthenticationFilter(
                 .filter { hasBearerTokenInHeader(it) }
                 .map { jwtTokenService.getAllClaimsFromToken(extractTokenFromHeader(it)) }
                 .filter { isClaimValid(it) }
+                .doOnError {
+                    throw ResponseStatusException(HttpStatus.UNAUTHORIZED, it.localizedMessage)
+                }
                 .map { claims ->
                     UsernamePasswordAuthenticationToken(
                         jwtTokenService.getUsernameFromClaim(claims),

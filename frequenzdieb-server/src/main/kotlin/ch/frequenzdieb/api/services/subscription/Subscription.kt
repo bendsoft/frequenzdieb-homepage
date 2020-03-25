@@ -1,5 +1,6 @@
 package ch.frequenzdieb.api.services.subscription
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.TypeAlias
@@ -27,6 +28,7 @@ data class Subscription(
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @PastOrPresent
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     val registrationDate: LocalDateTime = LocalDateTime.now(),
 
     var isNewsletterAccepted: Boolean = false,
