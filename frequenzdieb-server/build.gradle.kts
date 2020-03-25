@@ -7,6 +7,7 @@ plugins {
 	id("com.palantir.docker") version "0.25.0"
 	id("org.springframework.boot") version "2.2.5.RELEASE"
 	id("io.spring.dependency-management") version "1.0.9.RELEASE"
+	id("org.unbroken-dome.xjc") version "1.4.3"
 	kotlin("jvm") version "1.3.70"
 	kotlin("plugin.spring") version "1.3.70"
 	kotlin("kapt") version "1.3.70"
@@ -21,6 +22,20 @@ idea {
 		inheritOutputDirs = false
 		outputDir = file("$buildDir/classes/kotlin/main")
 	}
+}
+
+xjc {
+	includeInMainCompilation = false
+}
+
+val xjcGenerate: org.unbrokendome.gradle.plugins.xjc.XjcGenerate by tasks
+xjcGenerate.source = fileTree("src/main/resources") { include("*.xsd") }
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.dependsOn(xjcGenerate)
+
+sourceSets {
+	main { java { srcDir(xjcGenerate.outputDirectory) } }
 }
 
 repositories {
@@ -45,6 +60,9 @@ dependencies {
 	implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
 	implementation("commons-codec:commons-codec:1.14")
 	implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.1")
+	implementation("javax.xml.bind:jaxb-api:2.3.1")
+	implementation("com.sun.xml.bind:jaxb-core:2.3.0.1")
+	implementation("com.sun.xml.bind:jaxb-impl:2.3.2")
 	kapt("org.springframework.boot:spring-boot-configuration-processor")
 	runtimeOnly("org.springframework.boot:spring-boot-devtools")
 	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

@@ -77,7 +77,7 @@
 											<xs:documentation>Merchant reference number; note: unique value for PayPal;
 												can be defined as unique value for all other payment methods, too.
 												Please refer to
-												support@ch.frequenzdieb.api.services.ticketing.payment.datatrans.ch for
+												support@ch.frequenzdieb.api.services.payment.datatrans.ch for
 												details.
 											</xs:documentation>
 										</xs:annotation>

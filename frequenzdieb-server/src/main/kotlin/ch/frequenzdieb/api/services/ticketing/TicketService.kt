@@ -14,7 +14,7 @@ import java.util.Base64
 import javax.xml.parsers.DocumentBuilderFactory
 
 @Service
-class TicketUtils {
+class TicketService {
 	@Value("\${frequenzdieb.security.ticket.secret}")
 	lateinit var ticketSecret: String
 

@@ -2,9 +2,8 @@ package ch.frequenzdieb.api.services.ticketing
 
 import ch.frequenzdieb.api.services.common.EMailAttachment
 import ch.frequenzdieb.api.services.common.EmailService
+import ch.frequenzdieb.api.services.payment.PaymentService
 import ch.frequenzdieb.api.services.subscription.SubscriptionRepository
-import ch.frequenzdieb.api.services.ticketing.payment.TransactionRepository
-import ch.frequenzdieb.api.services.ticketing.payment.datatrans.DatatransUtils
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,13 +25,10 @@ class TicketingHandler {
 	lateinit var ticketingRepository: TicketingRepository
 
 	@Autowired
-	lateinit var ticketUtils: TicketUtils
+	lateinit var ticketService: TicketService
 
 	@Autowired
-	lateinit var transactionRepository: TransactionRepository
-
-	@Autowired
-	lateinit var datatransUtils: DatatransUtils
+	lateinit var paymentService: PaymentService
 
 	@Autowired
 	lateinit var subscriptionRepository: SubscriptionRepository
@@ -59,14 +55,14 @@ class TicketingHandler {
 			.flatMap {
 				created(URI.create("/ticketing/${it.id}"))
 					.bodyValue(hashMapOf(
-						"qrcode" to ticketUtils.createQRCode(it)
+						"qrcode" to ticketService.createQRCode(it)
 					))
 			}
 			.switchIfEmpty(badRequest().bodyValue("Ticket entity must be provided"))
 
 	fun createPaymentTransactionReference(req: ServerRequest) =
 		ticketingRepository.findById(req.pathVariable("id"))
-			.map { datatransUtils.createPaymentTransactionRefHash(it) }
+			.map { paymentService.createPaymentTransactionRefHash(it.id!!) }
 			.flatMap { ok().bodyValue(it) }
 			.switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
 
@@ -75,7 +71,7 @@ class TicketingHandler {
 			.flatMap { invalidationRequestTicket ->
 				ticketingRepository.findOneByQrCodeHash(invalidationRequestTicket.qrCodeHash)
 					.filter { it.isValid && checkTicketIntegrity(it) }
-					.filterWhen { hasValidPaymentTransaction(it) }
+					.filterWhen { paymentService.hasValidPaymentTransaction(it.id!!) }
 					.doOnNext {
 						it.isValid = false
 						ticketingRepository.save(it)
@@ -89,7 +85,7 @@ class TicketingHandler {
 	)
 
 	private fun checkTicketIntegrity(ticket: Ticket) =
-		ticketUtils.createUniqueTicketHash(ticket) == ticket.qrCodeHash
+		ticketService.createUniqueTicketHash(ticket) == ticket.qrCodeHash
 
 	fun downloadTicket(req: ServerRequest) =
 		ticketingRepository.findById(req.pathVariable("id"))
@@ -99,7 +95,7 @@ class TicketingHandler {
 					.headers { httpHeaders ->
 						httpHeaders.setContentDispositionFormData(createTicketName(it), createTicketName(it))
 					}
-					.body(BodyInserters.fromResource(ticketUtils.createPDF(it)))
+					.body(BodyInserters.fromResource(ticketService.createPDF(it)))
 			}
 			.switchIfEmpty(notFound().build())
 
@@ -118,17 +114,11 @@ class TicketingHandler {
 					message = "Anbei dein Ticket. Wir freuen uns auf einen tollen Abend mit dir!",
 					attachment = EMailAttachment(
 						attachmentFilename = createTicketName(ticket),
-						file = ticketUtils.createPDF(ticket)
+						file = ticketService.createPDF(ticket)
 					)
 				)
 			}.subscribe()
 	}
 
 	private fun createTicketName(ticket: Ticket) = "ticket_${ticket.id}.pdf"
-
-	private fun hasValidPaymentTransaction(ticket: Ticket) =
-		Mono.justOrEmpty(datatransUtils.createPaymentTransactionRefHash(ticket))
-			.flatMap { transactionRepository.findTopByRefnoAndSuccess_ResponseCode(it) }
-			.filter { datatransUtils.isTransactionSuccessful(it) }
-			.hasElement()
 }
