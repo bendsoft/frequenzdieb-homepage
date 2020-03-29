@@ -18,6 +18,7 @@ import org.springframework.web.reactive.function.server.ServerResponse.ok
 import reactor.core.publisher.Mono
 import java.net.URI
 import java.time.LocalDateTime
+import java.util.Base64
 
 @Configuration
 class TicketingHandler {
@@ -68,7 +69,10 @@ class TicketingHandler {
 
 	fun invalidate(req: ServerRequest) =
 		req.bodyToMono(object { val qrCodeHash: String = "" }.javaClass)
-			.zipWhen { Mono.justOrEmpty(it.qrCodeHash.split('.').first()) }
+			.zipWhen {
+				Mono.justOrEmpty(it.qrCodeHash.split('.').first())
+					.map { encodedTicketId -> Base64.getDecoder().decode(encodedTicketId).toString() }
+			}
 			.filter { checkQrCodeIntegrity(it.t2, it.t1.qrCodeHash) }
 			.map { it.t2 }
 			.flatMap { ticketId ->

@@ -3,7 +3,6 @@ package ch.frequenzdieb.api.services.ticketing
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import net.glxn.qrgen.core.image.ImageType
 import net.glxn.qrgen.javase.QRCode
-import org.apache.commons.codec.digest.DigestUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.ByteArrayResource
@@ -11,6 +10,8 @@ import org.springframework.core.io.ResourceLoader
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
 import java.util.Base64
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 import javax.xml.parsers.DocumentBuilderFactory
 
 @Service
@@ -21,8 +22,12 @@ class TicketService {
 	@Autowired
 	lateinit var resourceLoader: ResourceLoader
 
+	private val mac = Mac.getInstance("HmacSHA256").apply {
+		init(SecretKeySpec(ticketSecret.toByteArray(), "RawBytes"))
+	}
+
 	fun signTicketId(ticketId: String): String =
-		encoder("${ticketId}.${DigestUtils.sha512Hex(ticketId + ticketSecret)}".toByteArray())
+		"${encoder(ticketId.toByteArray())}.${mac.doFinal(ticketId.toByteArray())}"
 
 	fun createQRCode(ticket: Ticket) =
 		encoder(
