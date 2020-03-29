@@ -67,25 +67,25 @@ class TicketingHandler {
 			.switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
 
 	fun invalidate(req: ServerRequest) =
-		req.bodyToMono(TicketInvalidationRequest::class.java)
-			.flatMap { invalidationRequestTicket ->
-				ticketingRepository.findOneByQrCodeHash(invalidationRequestTicket.qrCodeHash)
-					.filter { it.isValid && checkTicketIntegrity(it) }
-					.filterWhen { paymentService.hasValidPaymentTransaction(it.id!!) }
+		req.bodyToMono(object { val qrCodeHash: String = "" }.javaClass)
+			.zipWhen { Mono.justOrEmpty(it.qrCodeHash.split('.').first()) }
+			.filter { checkQrCodeIntegrity(it.t2, it.t1.qrCodeHash) }
+			.map { it.t2 }
+			.flatMap { ticketId ->
+				ticketingRepository.findById(ticketId)
+					.filter { it.isValid }
+					.filterWhen { paymentService.hasValidPaymentTransaction(ticketId) }
 					.doOnNext {
 						it.isValid = false
 						ticketingRepository.save(it)
 					}
 					.flatMap { ok().body(it, Ticket::class.java) }
-					.switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
+
 			}
+			.switchIfEmpty(badRequest().bodyValue("Ticket is invalid"))
 
-	private data class TicketInvalidationRequest(
-		var qrCodeHash: String
-	)
-
-	private fun checkTicketIntegrity(ticket: Ticket) =
-		ticketService.createUniqueTicketHash(ticket) == ticket.qrCodeHash
+	private fun checkQrCodeIntegrity(ticketId: String, qrCodeHash: String) =
+		ticketService.signTicketId(ticketId) == qrCodeHash
 
 	fun downloadTicket(req: ServerRequest) =
 		ticketingRepository.findById(req.pathVariable("id"))

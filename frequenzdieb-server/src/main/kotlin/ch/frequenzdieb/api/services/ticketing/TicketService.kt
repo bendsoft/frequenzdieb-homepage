@@ -21,12 +21,12 @@ class TicketService {
 	@Autowired
 	lateinit var resourceLoader: ResourceLoader
 
-	fun createUniqueTicketHash(ticket: Ticket): String =
-		DigestUtils.sha512Hex(ticket.subscriptionId + ticket.concertId + ticket.created + ticketSecret)
+	fun signTicketId(ticketId: String): String =
+		encoder("${ticketId}.${DigestUtils.sha512Hex(ticketId + ticketSecret)}".toByteArray())
 
 	fun createQRCode(ticket: Ticket) =
 		encoder(
-			QRCode.from(createUniqueTicketHash(ticket))
+			QRCode.from(signTicketId(ticket.id!!))
 				.withSize(250, 250)
 				.to(ImageType.PNG)
 				.stream()
@@ -61,7 +61,7 @@ class TicketService {
 		}.toByteArray())
 	}
 
-	private fun encoder(image: ByteArray): String {
-		return Base64.getEncoder().encodeToString(image)
+	private fun encoder(data: ByteArray): String {
+		return Base64.getEncoder().encodeToString(data)
 	}
 }

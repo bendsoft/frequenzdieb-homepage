@@ -19,9 +19,6 @@ data class Ticket(
 	val concertId: String,
 
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
-	var qrCodeHash: String?,
-
-	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	var created: LocalDateTime?,
 
