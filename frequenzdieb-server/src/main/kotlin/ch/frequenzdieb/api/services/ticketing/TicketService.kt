@@ -9,20 +9,19 @@ import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.ResourceLoader
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
-import java.util.Base64
+import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import javax.xml.parsers.DocumentBuilderFactory
 
 @Service
-class TicketService {
-	@Value("\${frequenzdieb.security.ticket.secret}")
-	lateinit var ticketSecret: String
-
+class TicketService(
+	@Value("\${frequenzdieb.security.ticket.secret}") private val ticketSecret: String
+) {
 	@Autowired
 	lateinit var resourceLoader: ResourceLoader
 
-	private val mac = Mac.getInstance("HmacSHA256").apply {
+	private var mac: Mac = Mac.getInstance("HmacSHA256").apply {
 		init(SecretKeySpec(ticketSecret.toByteArray(), "RawBytes"))
 	}
 
