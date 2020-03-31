@@ -1,34 +1,27 @@
 package ch.frequenzdieb.api.services.subscription
 
+import ch.frequenzdieb.api.BaseHelper
 import com.mongodb.BasicDBObjectBuilder
-import io.kotlintest.extensions.TestListener
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 
 @Component
 @AutoConfigureDataMongo
 internal class SubscriptionHelper(
-    private val mongoTemplate: MongoTemplate
-) : TestListener {
-    private val subscriptionCollectionName: String = mongoTemplate.getCollectionName(Subscription::class.java)
-
-    fun insertSubscriptionForHansMuster() {
+    mongoTemplate: MongoTemplate
+) : BaseHelper(mongoTemplate, Subscription::class.java) {
+    fun insertSubscriptionForHans(subscriberName: String): String {
         val objectToSave = BasicDBObjectBuilder.start()
-            .add("email", "hans.muster@example.com")
-            .add("lastname", "Muster")
-            .add("firstname", "Hans")
-            .add("registrationDate", LocalDateTime.now())
+            .add("email", "hans.${subscriberName}@example.com")
+            .add("name", subscriberName)
+            .add("surname", "Hans")
             .get()
 
-        mongoTemplate.insert(objectToSave, subscriptionCollectionName)
-    }
-
-    fun resetCollection() {
-        mongoTemplate.dropCollection(Subscription::class.java)
+        val insertedObject = mongoTemplate.insert(objectToSave, collectionName)
+        return insertedObject.toMap()["_id"].toString()
     }
 
     fun getAllSubscriptions(): MutableList<Subscription> =
-        mongoTemplate.findAll(Subscription::class.java, subscriptionCollectionName)
+        mongoTemplate.findAll(Subscription::class.java, collectionName)
 }

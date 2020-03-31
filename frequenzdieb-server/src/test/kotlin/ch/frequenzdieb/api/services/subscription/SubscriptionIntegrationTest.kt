@@ -12,8 +12,10 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
 
     init {
         describe("get subscription by email of hans muster") {
+            val subscriberName = subscriptionHelper.createRandomString(5)
+
             subscriptionHelper.resetCollection()
-            subscriptionHelper.insertSubscriptionForHansMuster()
+            subscriptionHelper.insertSubscriptionForHans(subscriberName)
 
             it("should not allow unauthenticated requests") {
                 getRestClientUnauthenticated()
@@ -23,7 +25,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
                     .expectStatus().isUnauthorized
             }
 
-            it("should have Muster as name") {
+            it("should have Hans as surname") {
                 getRestClientAuthenticatedWithAdmin()
                     .get().uri("/api/subscription?email=hans.muster@example.com")
                     .accept(MediaType.APPLICATION_JSON)
@@ -31,7 +33,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
                     .expectStatus().isOk
                     .expectBody(Subscription::class.java)
                     .returnResult()
-                    .apply { responseBody?.surname shouldBe "Muster" }
+                    .apply { responseBody?.surname shouldBe "Hans" }
             }
 
             it("should return 404 if not found") {
@@ -61,7 +63,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
                     .expectStatus().isNoContent
                     .apply {
                         getRestClientAuthenticatedWithAdmin()
-                            .get().uri("/api/subscription?email=han.solo@example.com")
+                            .get().uri("/api/subscription?email=hans.muster@example.com")
                             .accept(MediaType.APPLICATION_JSON)
                             .exchange()
                             .expectStatus().isNotFound

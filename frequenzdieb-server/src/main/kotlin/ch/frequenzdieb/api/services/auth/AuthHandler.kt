@@ -24,7 +24,7 @@ class AuthHandler {
             .flatMap { authRequest ->
                 accountRepository.findOneByUsername(authRequest.username)
                     .filter { passwordEncoder.matches(authRequest.password, it.password) }
-                    .map { hashMapOf("token" to jwtTokenService.generateToken(it)) }
+                    .map { AuthenticationResult(jwtTokenService.generateToken(it)) }
                     .flatMap { ok().bodyValue(it) }
             }
             .switchIfEmpty(ServerResponse.status(HttpStatus.UNAUTHORIZED).build())

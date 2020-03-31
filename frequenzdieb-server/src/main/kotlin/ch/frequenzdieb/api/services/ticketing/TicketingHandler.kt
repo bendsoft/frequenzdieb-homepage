@@ -55,9 +55,7 @@ class TicketingHandler {
 			}
 			.flatMap {
 				created(URI.create("/ticketing/${it.id}"))
-					.bodyValue(hashMapOf(
-						"qrcode" to ticketService.createQRCode(it)
-					))
+					.bodyValue(TicketCreateResponse(ticketService.createQRCode(it)))
 			}
 			.switchIfEmpty(badRequest().bodyValue("Ticket entity must be provided"))
 

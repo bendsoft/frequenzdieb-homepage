@@ -16,7 +16,7 @@ internal class SubscriptionDBTest : DescribeSpec() {
     init {
         describe("get subscription by email of hans muster") {
             subscriptionHelper.resetCollection()
-            subscriptionHelper.insertSubscriptionForHansMuster()
+            subscriptionHelper.insertSubscriptionForHans()
 
             it("should have inserted the email") {
                 subscriptionHelper.getAllSubscriptions().forOne { it.email shouldBe "hans.muster@example.com" }

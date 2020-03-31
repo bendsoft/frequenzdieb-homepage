@@ -4,8 +4,6 @@ import ch.frequenzdieb.api.BaseIntegrationTest
 import io.kotlintest.shouldBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
-import org.springframework.test.web.reactive.server.WebTestClient
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class ConcertIntegrationTest : BaseIntegrationTest() {
@@ -13,11 +11,16 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
     lateinit var concertHelper: ConcertHelper
 
     init {
+        val randomConcertName = concertHelper.createRandomString(10)
+        val randomLocation = concertHelper.createRandomString(10)
+
         describe("existing concert") {
             concertHelper.resetCollection()
-            val insertedId = concertHelper.insertConcert()
+            val insertedId = concertHelper.insertConcert(
+                concertName = randomConcertName
+            )
 
-            it("should have SmmerComeBackXX as name") {
+            it("should have $randomConcertName as name") {
                 getRestClientAuthenticatedWithAdmin()
                     .get().uri("/api/concert/$insertedId")
                     .accept(MediaType.APPLICATION_JSON)
@@ -25,7 +28,7 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
                     .expectStatus().isOk
                     .expectBody(Concert::class.java)
                     .returnResult()
-                    .apply { responseBody?.name shouldBe "SmmerComeBackXX" }
+                    .apply { responseBody?.name shouldBe randomConcertName }
             }
 
             it("should return 404 if not found") {
@@ -67,9 +70,9 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
                 getRestClientUnauthenticated()
                     .post().uri("/api/concert")
                     .bodyValue(Concert(
-                        name = "SmmerComeBack2099",
-                        location = "Tatooine",
-                        date = LocalDate.of(2099, 5, 2)
+                        name = randomConcertName,
+                        location = randomLocation,
+                        date = LocalDateTime.of(2099, 5, 2, 0 , 0)
                     ))
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
@@ -80,9 +83,9 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
                 getRestClientAuthenticatedWithAdmin()
                     .post().uri("/api/concert")
                     .bodyValue(Concert(
-                        name = "SmmerComeBack2099",
-                        location = "Tatooine",
-                        date = LocalDate.of(2099, 5, 2)
+                        name = randomConcertName,
+                        location = randomLocation,
+                        date = LocalDateTime.of(2099, 5, 2, 0 , 0)
                     ))
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
@@ -97,7 +100,7 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
                             .expectStatus().isOk
                             .expectBody(Concert::class.java)
                             .returnResult()
-                            .apply { responseBody?.name shouldBe "SmmerComeBack2099" }
+                            .apply { responseBody?.name shouldBe randomConcertName }
                     }
             }
         }
