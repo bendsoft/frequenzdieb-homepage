@@ -75,7 +75,7 @@ class SubscriptionHandler {
                 p {
                     +"Bitte klicke den untenstehenden Link an, damit wir deine Registrierung bestätigen können."
                 }
-                a("${hostAddress}/api/subscription/${subscriptionId}/confirm") {
+                a("${hostAddress}/subscription/${subscriptionId}/confirm") {
                     +"e-Mail bestätigen"
                 }
             }
