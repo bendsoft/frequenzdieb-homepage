@@ -18,10 +18,10 @@ data class Subscription(
     val id: String? = null,
 
     @Size(min = 2, max = 100, message = "Firstname must be between 2 and 100 characters")
-    val name: String,
+    val name: String = "",
 
     @Size(min = 2, max = 100, message = "Lastname must be between 2 and 100 characters")
-    val surname: String,
+    val surname: String = "",
 
     @Email(message = "Email should be valid")
     val email: String,
