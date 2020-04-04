@@ -16,6 +16,7 @@ class SubscriptionRoutes(
                 GET("/{id}/confirm", subscriptionHandler::confirm)
                 GET("/", subscriptionHandler::findFirstByEmail)
                 POST("/", subscriptionHandler::create)
+                PUT("/", subscriptionHandler::update)
                 GET("/{id}/newsletter/unsubscribe", subscriptionHandler::unsubscribe)
                 GET("/{id}/newsletter/subscribe", subscriptionHandler::subscribe)
                 DELETE("/", subscriptionHandler::deleteAllByEmail)

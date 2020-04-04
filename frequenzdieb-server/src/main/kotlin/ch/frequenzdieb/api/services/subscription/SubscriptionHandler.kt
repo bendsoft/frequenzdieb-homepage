@@ -69,6 +69,17 @@ class SubscriptionHandler {
                     )
             }
 
+    fun update(req: ServerRequest) =
+        req.bodyToMono(Subscription::class.java)
+            .flatMap { changedSubscription ->
+                repository.findFirstByEmail(changedSubscription.email)
+                    .flatMap {
+                        repository.save(changedSubscription)
+                            .flatMap { ok().bodyValue(it) }
+                    }
+            }
+            .switchIfEmpty(badRequest().build())
+
     private fun createSubscriptionConfirmationMessage(subscriptionId: String) = createHTML().
         html {
             body {
