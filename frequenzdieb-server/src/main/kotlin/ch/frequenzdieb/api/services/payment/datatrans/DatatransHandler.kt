@@ -12,11 +12,13 @@ class DatatransHandler {
 	@Autowired
 	lateinit var transactionRepository: DatatransTransactionRepository
 
-	//TODO: Check for valid reference before saving to db
+	@Autowired
+	lateinit var datatransService: DatatransService
+
 	fun datatransWebhook(req: ServerRequest) =
 		req.bodyToMono(UppTransactionService::class.java)
-			.map { it.body.transaction }
-			.flatMap { transactionRepository.save(it) }
+			.filter { datatransService.checkTransactionSignature(it.body) }
+			.flatMap { transactionRepository.save(it.body.transaction) }
 			.log()
 			.flatMap { ok().build() }
 			.switchIfEmpty(badRequest().bodyValue("Invalid Operation"))

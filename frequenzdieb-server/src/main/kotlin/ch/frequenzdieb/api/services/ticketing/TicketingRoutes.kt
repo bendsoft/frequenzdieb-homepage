@@ -15,7 +15,7 @@ class TicketingRoutes(
 			accept(APPLICATION_JSON).nest {
 				GET("/", ticketingHandler::findAllBySubscriptionId)
 				POST("/", ticketingHandler::create)
-				POST("/{id}/paymentTransaction", ticketingHandler::createPaymentTransactionReference)
+				POST("/{id}/pay", ticketingHandler::createPaymentForTicket)
 				PUT("/invalidate", ticketingHandler::invalidate)
 				GET("/{id}/download", ticketingHandler::downloadTicket)
 				GET("/{id}/send", ticketingHandler::sendTicket)

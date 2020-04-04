@@ -11,9 +11,9 @@ class DatatransRoutes(
 ) {
 	@Bean
 	fun datatransRouter() = router {
-		"/api/ticketing/payment".nest {
+		"/api/payment".nest {
 			accept(APPLICATION_XML).nest {
-				POST("/datatrans/webhook", datatransHandler::datatransWebhook)
+				POST("/datatrans", datatransHandler::datatransWebhook)
 			}
 		}
 	}

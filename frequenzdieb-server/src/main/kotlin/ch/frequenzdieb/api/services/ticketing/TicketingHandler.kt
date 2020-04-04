@@ -3,6 +3,7 @@ package ch.frequenzdieb.api.services.ticketing
 import ch.frequenzdieb.api.services.common.EMailAttachment
 import ch.frequenzdieb.api.services.common.EmailService
 import ch.frequenzdieb.api.services.payment.PaymentService
+import ch.frequenzdieb.api.services.payment.datatrans.DatatransPayment
 import ch.frequenzdieb.api.services.subscription.SubscriptionRepository
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -18,7 +19,6 @@ import org.springframework.web.reactive.function.server.ServerResponse.ok
 import reactor.core.publisher.Mono
 import java.net.URI
 import java.time.LocalDateTime
-import java.util.Base64
 
 @Configuration
 class TicketingHandler {
@@ -29,7 +29,7 @@ class TicketingHandler {
 	lateinit var ticketService: TicketService
 
 	@Autowired
-	lateinit var paymentService: PaymentService
+	lateinit var paymentService: PaymentService<DatatransPayment>
 
 	@Autowired
 	lateinit var subscriptionRepository: SubscriptionRepository
@@ -59,20 +59,19 @@ class TicketingHandler {
 			}
 			.switchIfEmpty(badRequest().bodyValue("Ticket entity must be provided"))
 
-	fun createPaymentTransactionReference(req: ServerRequest) =
+	fun createPaymentForTicket(req: ServerRequest) =
 		ticketingRepository.findById(req.pathVariable("id"))
-			.map { paymentService.createPaymentTransactionRefHash(it.id!!) }
-			.flatMap { ok().bodyValue(it) }
-			.switchIfEmpty(badRequest().bodyValue("Ticket is not valid"))
+			.flatMap { ticket ->
+				req.bodyToMono(DatatransPayment::class.java)
+					.filter { it.reference == ticket.id }
+					.flatMap { ok().bodyValue(paymentService.initiatePayment(it)) }
+					.switchIfEmpty(badRequest().bodyValue("Please provide a valid payment-request"))
+			}
+			.switchIfEmpty(badRequest().bodyValue("Please provide a valid ticket-id"))
 
 	fun invalidate(req: ServerRequest) =
-		req.bodyToMono(object { val qrCodeHash: String = "" }.javaClass)
-			.zipWhen {
-				Mono.justOrEmpty(it.qrCodeHash.split('.').first())
-					.map { encodedTicketId -> Base64.getDecoder().decode(encodedTicketId).toString() }
-			}
-			.filter { checkQrCodeIntegrity(it.t2, it.t1.qrCodeHash) }
-			.map { it.t2 }
+		req.bodyToMono(object { val qrCodeValue: String = "" }.javaClass)
+			.map { ticketService.decoder(it.qrCodeValue).toString() }
 			.flatMap { ticketId ->
 				ticketingRepository.findById(ticketId)
 					.filter { it.isValid }
@@ -85,9 +84,6 @@ class TicketingHandler {
 
 			}
 			.switchIfEmpty(badRequest().bodyValue("Ticket is invalid"))
-
-	private fun checkQrCodeIntegrity(ticketId: String, qrCodeHash: String) =
-		ticketService.signTicketId(ticketId) == qrCodeHash
 
 	fun downloadTicket(req: ServerRequest) =
 		ticketingRepository.findById(req.pathVariable("id"))

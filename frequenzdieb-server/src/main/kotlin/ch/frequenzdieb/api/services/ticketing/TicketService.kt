@@ -4,33 +4,21 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import net.glxn.qrgen.core.image.ImageType
 import net.glxn.qrgen.javase.QRCode
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.ResourceLoader
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
-import java.util.*
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
+import java.util.Base64
 import javax.xml.parsers.DocumentBuilderFactory
 
 @Service
-class TicketService(
-	@Value("\${frequenzdieb.security.ticket.secret}") private val ticketSecret: String
-) {
+class TicketService {
 	@Autowired
 	lateinit var resourceLoader: ResourceLoader
 
-	private var mac: Mac = Mac.getInstance("HmacSHA256").apply {
-		init(SecretKeySpec(ticketSecret.toByteArray(), "RawBytes"))
-	}
-
-	fun signTicketId(ticketId: String): String =
-		"${encoder(ticketId.toByteArray())}.${mac.doFinal(ticketId.toByteArray())}"
-
 	fun createQRCode(ticket: Ticket) =
 		encoder(
-			QRCode.from(signTicketId(ticket.id!!))
+			QRCode.from(encoder(ticket.id!!.toByteArray()))
 				.withSize(250, 250)
 				.to(ImageType.PNG)
 				.stream()
@@ -65,7 +53,7 @@ class TicketService(
 		}.toByteArray())
 	}
 
-	private fun encoder(data: ByteArray): String {
-		return Base64.getEncoder().encodeToString(data)
-	}
+	fun encoder(data: ByteArray): String = Base64.getEncoder().encodeToString(data)
+
+	fun decoder(data: String): ByteArray = Base64.getDecoder().decode(data)
 }

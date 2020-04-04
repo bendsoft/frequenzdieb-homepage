@@ -26,8 +26,8 @@ class SubscriptionHandler {
     @Autowired
     lateinit var emailService: EmailService
 
-    @Value("\${frequenzdieb.host}")
-    lateinit var hostAddress: String
+    @Value("\${frequenzdieb.host.frontend}")
+    lateinit var frontendHostAddress: String
 
     fun findFirstByEmail(req: ServerRequest) =
         Mono.justOrEmpty(req.queryParam("email"))
@@ -86,7 +86,7 @@ class SubscriptionHandler {
                 p {
                     +"Bitte klicke den untenstehenden Link an, damit wir deine Registrierung bestätigen können."
                 }
-                a("${hostAddress}/subscription/${subscriptionId}/confirm") {
+                a("${frontendHostAddress}/#/subscription/${subscriptionId}/confirm") {
                     +"e-Mail bestätigen"
                 }
             }
