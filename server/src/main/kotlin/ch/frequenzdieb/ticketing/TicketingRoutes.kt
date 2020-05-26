@@ -24,12 +24,29 @@ class TicketingRoutes(
 				PUT("/invalidate", ticketingHandler::invalidate)
 				GET("/{id}/download", ticketingHandler::downloadTicket)
 				GET("/{id}/send", ticketingHandler::sendTicket)
+				"type".nest {
+					GET("/")
+					GET("/{id}")
+					POST("/")
+					PUT("/")
+					DELETE("/{id}")
+					"attribute".nest {
+						GET("/")
+						GET("/{id}")
+						POST("/")
+						PUT("/")
+						DELETE("/{id}")
+					}
+				}
 			}
 		}
 	}
 
 	@Bean
 	fun ticketingMatchers(): ServerHttpSecurity.AuthorizeExchangeSpec.() -> Unit = {
+		pathMatchers(HttpMethod.GET, "$baseRoute/type/**").permitAll()
+		pathMatchers("$baseRoute/type/**").hasRole(Role.ADMIN.toString())
+
 		pathMatchers(HttpMethod.GET, baseRoute).hasRole(Role.ADMIN.toString())
 		pathMatchers(HttpMethod.PUT, "$baseRoute/invalidate").hasRole(Role.ADMIN.toString())
 		pathMatchers(HttpMethod.POST, "$baseRoute/").hasRole(Role.USER.toString())
