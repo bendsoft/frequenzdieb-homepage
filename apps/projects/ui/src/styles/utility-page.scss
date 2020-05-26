@@ -1,0 +1,72 @@
+@import 'projects/ui/src/variables';
+
+.utility-page {
+  .text-box {
+    @include center;
+    text-align: center;
+    h2 {
+      color: $yellow;
+      font-size: 72px;
+      margin-bottom: 32px;
+      line-height: 1.1;
+    }
+    p {
+      max-width: 300px;
+      margin: 0 auto;
+      margin-bottom: 12px;
+      a {
+        color: $black;
+        transition: $t;
+        &:hover {
+          color: $blue;
+        }
+      }
+    }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 2px solid $gray;
+      outline: none;
+      transition: $t;
+      margin-bottom: 15px;
+      &:focus {
+        border-color: $yellow;
+      }
+    }
+    .button {
+      padding: 18px 36px;
+      background: $black;
+      color: $white;
+      border-radius: 30px;
+      transition: $t;
+      display: inline-block;
+      cursor: pointer;
+      &:hover {
+        background: $yellow;
+        color: $black;
+      }
+    }
+  }
+
+  .progress-bar {
+    position: fixed;
+    bottom: 0;
+    height: 10px;
+    width: 100%;
+    background: $black;
+    &.animated {
+      .bar {
+        transform: scaleX(1);
+      }
+    }
+    .bar {
+      width: 100%;
+      transform-origin: left;
+      height: 100%;
+      transform: scaleX(0);
+      background: $yellow;
+      transition: 3s;
+    }
+  }
+}

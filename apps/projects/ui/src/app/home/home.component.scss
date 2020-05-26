@@ -1,0 +1,310 @@
+@import 'projects/ui/src/variables';
+
+main {
+  header {
+    height: 100vh;
+
+    .background {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .date {
+      @include center;
+      font-size: 20vw;
+      line-height: 1;
+      font-weight: bolder;
+      color: $yellow;
+      text-align: center;
+
+      .location {
+        font-size: 3vw;
+        margin-top: 20px;
+
+        &:hover {
+        }
+      }
+
+      .shadow {
+        position: absolute;
+        bottom: -80px;
+        width: 100%;
+        height: 30px;
+        border-radius: 50%;
+        background: $yellow;
+        left: 50%;
+        transform: translate(-50%);
+        filter: blur(15px);
+        display: none;
+      }
+    }
+
+    h3 {
+      @include center;
+      font-size: 5vw;
+      transform: translate(-50%, -50%) rotate(-13deg);
+      color: $black;
+      line-height: 1.2;
+      font-family: 'Rock Salt', sans-serif;
+    }
+
+    .ticket-button {
+      position: absolute;
+      top: 70vh;
+      left: 73vw;
+      border: 2px solid $black;
+      padding: 16px 32px;
+      background: $black;
+      border-radius: 50px;
+      color: $white;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: $t;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+
+      &:hover {
+        padding: 20px 36px;
+        color: $black;
+        background: transparent;
+      }
+    }
+
+    .play-button {
+      position: absolute;
+      bottom: 22vh;
+      left: calc(100vw / 12 * 7);
+      transform: translate(-50%, 50%);
+      z-index: 30;
+      width: 100px;
+      height: 100px;
+      cursor: pointer;
+
+      .circle {
+        width: 80%;
+        height: 80%;
+        border-radius: 50%;
+        border: solid 2px $white;
+        transition: $t;
+        @include center;
+      }
+
+      .text {
+        position: absolute;
+        left: calc(110% + 15px);
+        top: 48%;
+        transform: translate(0, -50%);
+        transition: $pew;
+      }
+
+      .line {
+        position: absolute;
+        top: 50%;
+        left: 80%;
+        width: 30%;
+        height: 2px;
+        transition: $pew;
+        background: $white;
+      }
+
+      .triangle {
+        @include center;
+        left: 55%;
+        width: 0;
+        height: 0;
+        border-top: 10px solid transparent;
+        border-left: 15px solid $white;
+        border-bottom: 10px solid transparent;
+        transition: $t;
+      }
+
+      &:hover {
+        .circle {
+          width: 90px;
+          height: 90px;
+        }
+
+        .line {
+          width: 70%;
+          left: 80%;
+        }
+
+        .text {
+          left: calc(150% + 30px);
+        }
+
+        .triangle {
+          border-top: 8px solid transparent;
+          border-left: 12px solid $white;
+          border-bottom: 8px solid transparent;
+        }
+      }
+    }
+
+    h1 {
+      font-size: 96px;
+      text-transform: uppercase;
+      position: absolute;
+      left: calc(100vw / 12);
+      top: 25vh;
+      z-index: 20;
+    }
+  }
+
+  article  {
+    section {
+      padding: 60px;
+
+      .image {
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      &#about {
+        background: #fff;
+
+        h2 {
+          color: #222;
+          font-size: 96px;
+
+          .button {
+            position: relative;
+            top: -20px;
+          }
+        }
+      }
+
+      &#next-concert {
+        padding: 120px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+
+        .col {
+          width: calc(100vw / 3);
+        }
+
+        .button {
+          position: relative;
+          top: -20px;
+        }
+
+        h2 {
+          font-size: 24px;
+          font-weight: normal;
+          margin-bottom: -20px;
+        }
+
+        h3 {
+          font-size: 96px;
+        }
+      }
+
+      &#more {
+        display: flex;
+        height: 70vh;
+        padding: 60px 0;
+
+        .col {
+          width: 50%;
+          height: 100%;
+          position: relative;
+
+          .bg-image {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            z-index: 1;
+            overflow: hidden;
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              object-position: center;
+              transition: $t;
+            }
+          }
+
+          .button {
+            z-index: 10;
+            @include center;
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  90% {
+    transform: rotate(0deg);
+  }
+
+  10% {
+    transform: rotate(12deg);
+  }
+
+  25% {
+    transform: rotate(-20deg);
+  }
+
+  30%,
+  40%,
+  50%,
+  60%,
+  70% {
+    transform: rotate(-18deg);
+  }
+
+  35%,
+  45%,
+  55%,
+  65%,
+  75% {
+    transform: rotate(-22deg);
+  }
+
+  80% {
+    transform: rotate(3deg);
+  }
+}
+
+@media (max-width: $mobile-breakpoint) {
+  main {
+    header {
+      .ticket-button {
+        left: 50vw;
+        top: calc(100% - 30px);
+        transform: translate(-50%, -100%);
+      }
+      .date {
+        top: 45%;
+        font-size: 30vw;
+        .location {
+          font-size: 10vw;
+        }
+      }
+      .next-concert {
+        font-size: 7.5vw;
+        top: 45%;
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+.sub-page-main {
+  h2 {
+    font-size: 24px;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    font-size: 96px;
+    font-weight: normal;
+    line-height: 1.2;
+  }
+
+  header {
+    padding: 180px calc(200vw / 12);
+    padding-bottom: 60px;
+  }
+}

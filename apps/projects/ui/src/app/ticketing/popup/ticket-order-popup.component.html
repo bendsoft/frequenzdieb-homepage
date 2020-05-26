@@ -1,0 +1,208 @@
+<div
+  class="popup-backdrop"
+  (click)="closePopup()"
+  [class.open]="popups.isPopupOpen('tickets')"
+></div>
+<div
+  class="ticket-purchase-window popup"
+  [class.open]="popups.isPopupOpen('tickets')"
+>
+  <div class="close-button" (click)="closePopup()">
+    x
+  </div>
+  <h2>
+    Tickets bestellen
+  </h2>
+  <form [formGroup]="ticketForm">
+    <div
+      class="stage"
+      [class.visible]="ticketFormStage == ticketFormStages[0]"
+      [class.left]="ticketFormStages.indexOf(ticketFormStage) > 0"
+    >
+      <p>
+        Du kannst nur am Konzert teilnehmen wenn du auch eingeladen wurdest. Gib
+        dazu das Passwort ein welches du entweder dem Flyer oder der
+        Einladungsemail entnehmen kannst.
+      </p>
+      <input
+        type="text"
+        placeholder="passwort"
+        (keydown.enter)="checkPassword()"
+        (keydown.escape)="closePopup()"
+        formControlName="password"
+      />
+      <div class="button" (click)="checkPassword()">
+        <div class="text">
+          Passwort prüfen
+        </div>
+      </div>
+    </div>
+    <div
+      class="stage"
+      [class.visible]="ticketFormStage == ticketFormStages[1]"
+      [class.left]="ticketFormStages.indexOf(ticketFormStage) > 1"
+      [class.right]="ticketFormStages.indexOf(ticketFormStage) < 1"
+    >
+      <p>
+        Wieviele Tickets möchtest du bestellen?
+      </p>
+      <div class="ticket-cart">
+        <div class="cart-item">
+          <div class="name" *ngIf="concert">
+            {{ concert.date | date: 'dd.MM.yy' }} – {{ concert.name }}
+          </div>
+          <div class="price">{{ ticketPrice | number: '1.2' }} CHF</div>
+          <div class="amount">
+            <div class="amount-button" (click)="removeTicket()">
+              –
+            </div>
+            <input type="text" placeholder="0" formControlName="amount" />
+            <div class="amount-button" (click)="addTicket()">
+              +
+            </div>
+          </div>
+        </div>
+        <div class="total">Total: {{ totalPrice | number: '1.2' }} CHF</div>
+      </div>
+      <div
+        class="button"
+        (click)="selectTickets()"
+        [class.inactive]="ticketForm.value.amount == 0"
+      >
+        <div class="text" *ngIf="ticketForm.value.amount == 0">
+          Tickets auswählen
+        </div>
+        <div class="text" *ngIf="ticketForm.value.amount == 1">
+          Ticket bestellen
+        </div>
+        <div class="text" *ngIf="ticketForm.value.amount > 1">
+          Tickets bestellen
+        </div>
+      </div>
+    </div>
+    <div
+      class="stage"
+      [class.visible]="ticketFormStage == ticketFormStages[2]"
+      [class.left]="ticketFormStages.indexOf(ticketFormStage) > 2"
+      [class.right]="ticketFormStages.indexOf(ticketFormStage) < 2"
+    >
+      <p>
+        Gib bitte deine Kontaktinformationen ein
+      </p>
+      <label class="small half">
+        Vorname
+        <input type="text" placeholder="Max" formControlName="name" />
+      </label>
+      <label for="" class="small half">
+        Name
+        <input type="text" placeholder="Muster" formControlName="surname" />
+      </label>
+      <label class="small">
+        Email-Adresse
+        <input
+          type="text"
+          placeholder="max@muster.ch"
+          formControlName="email"
+        />
+      </label>
+      <div class="smallprint">
+        <p>
+          <input
+            type="checkbox"
+            name="newsletter"
+            id=""
+            formControlName="newsletterAccepted"
+          />
+          Newsletter abonnieren
+        </p>
+        <p>
+          Mit dem Kauf des Tickets akzeptierst du unsere
+          <a
+            (click)="
+              popups.setPopupOpen('message', true);
+              popups.setPopupData('message', {
+                text: concert.terms,
+                title: 'Bedingungen'
+              })
+            "
+            >Bedingungen</a
+          >, lies sie bitte vorher durch.
+        </p>
+      </div>
+      <div class="button" (click)="checkContactInfo()">
+        <div class="text">
+          Ticket bezahlen
+        </div>
+      </div>
+    </div>
+    <div
+      class="stage"
+      [class.visible]="ticketFormStage == ticketFormStages[3]"
+      [class.left]="ticketFormStages.indexOf(ticketFormStage) > 3"
+      [class.right]="ticketFormStages.indexOf(ticketFormStage) < 3"
+    >
+      <h3>
+        Email bestätigen
+      </h3>
+      <p>
+        Bitte bestätige deine email, so sind wir sicher dass du dein Ticket auch
+        bekommst. Schau in deiner Inbox nach, dort solltest du ein Mail mit
+        einem Link zum Bestätigen finden.
+      </p>
+      <p>
+        <a href="" (click)="resendConfirmationMail()"
+          >Bestätigungsmail erneut senden</a
+        >
+      </p>
+      <div class="button" (click)="checkEmailConfirmation(userId)">
+        Verifizieren
+      </div>
+    </div>
+    <div
+      class="stage"
+      [class.visible]="ticketFormStage == ticketFormStages[4]"
+      [class.left]="ticketFormStages.indexOf(ticketFormStage) > 4"
+      [class.right]="ticketFormStages.indexOf(ticketFormStage) < 4"
+    >
+      <h2>
+        Bezahlung
+      </h2>
+      <form id="paymentForm">
+        <button id="paymentButton" (click)="startPayment()">Pay</button>
+      </form>
+      <!-- <button id="paymentButton" (click)="startPayment()">Pay</button> -->
+      <!-- <script type="text/javascript">
+        document.getElementById('paymentButton').onclick = function () {
+          console.log('hi')
+          Datatrans.startPayment({ form: '#paymentForm' })
+        }
+      </script> -->
+    </div>
+    <div
+      class="stage"
+      [class.visible]="ticketFormStage == ticketFormStages[5]"
+      [class.left]="ticketFormStages.indexOf(ticketFormStage) > 5"
+      [class.right]="ticketFormStages.indexOf(ticketFormStage) < 5"
+    >
+      <h2>
+        Danke
+      </h2>
+      <p>
+        Dein Ticket wurde bestellt, du findest die Bestätigung in deiner Inbox
+        oder unter folgendem Link:
+      </p>
+      <p>
+        <a [href]="confirmedTicketUrl">{{ confirmedTicketUrl }}</a>
+      </p>
+    </div>
+  </form>
+  <div class="stage-indicator">
+    <ng-container *ngFor="let stage of ticketFormStages; let i = index">
+      <div
+        class="dot"
+        [class.active]="ticketFormStage == stage"
+        (click)="setTicketFormStage(stage)"
+      ></div
+    ></ng-container>
+  </div>
+</div>

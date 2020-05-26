@@ -1,0 +1,26 @@
+// colors
+
+$black: #211a1e;
+$white: #fcfcfc;
+$gray: #aaa694;
+$lightgray: #d5d5d4;
+$yellow: #f4e04d;
+$blue: #256eff;
+
+// breakpoints
+
+$mobile-breakpoint: 900px;
+
+// transitions
+
+$t: 0.3s ease-in-out;
+$pew: 0.6s cubic-bezier(0.6, 0, 0.4, 1);
+
+// utility
+
+@mixin center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

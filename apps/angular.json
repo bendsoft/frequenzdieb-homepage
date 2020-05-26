@@ -1,0 +1,309 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "@frequenzdieb/api": {
+      "projectType": "library",
+      "root": "projects/api",
+      "sourceRoot": "projects/api/src",
+      "prefix": "api",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/api/tsconfig.lib.json",
+            "project": "projects/api/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/api/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/api/src/test.ts",
+            "tsConfig": "projects/api/tsconfig.spec.json",
+            "karmaConfig": "projects/api/karma.conf.js"
+          }
+        }
+      }
+    },
+    "@frequenzdieb/bouncer": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/bouncer",
+      "sourceRoot": "projects/bouncer/src",
+      "prefix": "bncr",
+      "i18n": {
+        "sourceLocale": "en-US",
+        "locales": {
+          "de-CH": "projects/bouncer/src/locale/messages.de-ch.xlf"
+        }
+      },
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/bouncer",
+            "index": "projects/bouncer/src/index.html",
+            "main": "projects/bouncer/src/main.ts",
+            "polyfills": "projects/bouncer/src/polyfills.ts",
+            "tsConfig": "projects/bouncer/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "projects/bouncer/src/favicon.ico",
+              "projects/bouncer/src/assets",
+              "projects/bouncer/src/site.webmanifest"
+            ],
+            "styles": [
+              "./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
+              "projects/bouncer/src/styles.scss"
+            ],
+            "scripts": [],
+            "i18nMissingTranslation": "warning"
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/bouncer/src/environments/environment.ts",
+                  "with": "projects/bouncer/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ],
+              "serviceWorker": true,
+              "ngswConfigPath": "projects/bouncer/src/ngsw-config.json"
+            },
+            "de-CH": {
+              "localize": ["de-CH"],
+              "aot": true,
+              "outputPath": "dist/under-c-de/",
+              "i18nFile": "projects/bouncer/src/locale/messages.de-ch.xlf",
+              "i18nFormat": "xlf",
+              "i18nLocale": "de-CH",
+              "i18nMissingTranslation": "warning"
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "bouncer:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "bouncer:build:production"
+            },
+            "de-CH": {
+              "browserTarget": "frequenzdieb-bouncer:build:de-CH"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "bouncer:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/bouncer/src/test.ts",
+            "polyfills": "projects/bouncer/src/polyfills.ts",
+            "tsConfig": "projects/bouncer/tsconfig.spec.json",
+            "karmaConfig": "projects/bouncer/karma.conf.js",
+            "assets": [
+              "projects/bouncer/src/favicon.ico",
+              "projects/bouncer/src/assets"
+            ],
+            "styles": [
+              "projects/bouncer/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "projects/bouncer/e2e/protractor.conf.js",
+            "devServerTarget": "bouncer:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "bouncer:serve:production"
+            }
+          }
+        },
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/frequenzdieb-bouncer/server",
+            "main": "src/main.server.ts",
+            "tsConfig": "tsconfig.server.json"
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "media",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "sourceMap": false,
+              "optimization": true
+            }
+          }
+        },
+        "app-shell": {
+          "builder": "@angular-devkit/build-angular:app-shell",
+          "options": {
+            "browserTarget": "frequenzdieb-bouncer:build",
+            "serverTarget": "frequenzdieb-bouncer:server",
+            "route": "shell"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "frequenzdieb-bouncer:build:production",
+              "serverTarget": "frequenzdieb-bouncer:server:production"
+            }
+          }
+        }
+      }
+    },
+    "@frequenzdieb/ui": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/ui",
+      "sourceRoot": "projects/ui/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/ui",
+            "index": "projects/ui/src/index.html",
+            "main": "projects/ui/src/main.ts",
+            "polyfills": "projects/ui/src/polyfills.ts",
+            "tsConfig": "projects/ui/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "projects/ui/src/favicon.ico",
+              "projects/ui/src/assets"
+            ],
+            "styles": [
+              "projects/ui/src/styles.scss"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/ui/src/environments/environment.ts",
+                  "with": "projects/ui/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "ui:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "ui:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "ui:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ui/src/test.ts",
+            "polyfills": "projects/ui/src/polyfills.ts",
+            "tsConfig": "projects/ui/tsconfig.spec.json",
+            "karmaConfig": "projects/ui/karma.conf.js",
+            "assets": [
+              "projects/ui/src/favicon.ico",
+              "projects/ui/src/assets"
+            ],
+            "styles": [
+              "projects/ui/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "projects/ui/e2e/protractor.conf.js",
+            "devServerTarget": "ui:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "ui:serve:production"
+            }
+          }
+        }
+      }
+    }},
+  "defaultProject": "ui"
+}

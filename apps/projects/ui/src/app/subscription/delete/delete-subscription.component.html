@@ -1,0 +1,27 @@
+<div class="utility-page">
+  <div class="text-box">
+    <h2>
+      Daten entfernen
+    </h2>
+    <p>
+      Hierüber kannst du deine email aus unseren Daten komplett löschen, du
+      kannst dann aber auch keine Tickets bestellen ohne dich erneut anzumelden.
+    </p>
+    <form [formGroup]="deleteAccountForm" *ngIf="!submitted">
+      <input
+        type="text"
+        formControlName="email"
+        (keydown.enter)="deleteAccount()"
+        placeholder="max@muster.ch"
+      />
+      <div class="button" (click)="deleteAccount()">
+        email Löschen
+      </div>
+    </form>
+    <p *ngIf="submitted">
+      Alles klar, du solltest gleich eine e-mail bekommen mit einem Link zur
+      Bestätigung. Falls nichts kommt, schreib uns bitte über
+      <a href="mailto:webmaster@frequenzdieb.ch">webmaster@frequenzdieb.ch</a>
+    </p>
+  </div>
+</div>

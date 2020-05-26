@@ -1,0 +1,33 @@
+<div
+  class="popup-backdrop"
+  (click)="closePopup()"
+  [class.open]="popups.isPopupOpen('newsletter')"
+></div>
+<div
+  class="popup newsletter-sub-window"
+  [class.open]="popups.isPopupOpen('newsletter')"
+>
+  <div class="close-button" (click)="closePopup()">
+    x
+  </div>
+  <h2>
+    Melde dich jetzt an
+  </h2>
+  <p>
+    Über unseren Newsletter erfährst du (fast) als erster wann und wo das
+    nächste Konzert stattfindet. Wenn es mal News gibt erhälst du die auch, aber
+    wir werden dich auf keinen Fall zuspamen ;)
+  </p>
+  <input
+    type="text"
+    placeholder="max.muster@gmail.com"
+    (keydown.enter)="submitNewsletterSub()"
+    (keydown.escape)="closePopup()"
+    [formControl]="email"
+  />
+  <div class="button" (click)="submitNewsletterSub()">
+    <div class="text">
+      Anmeldung absenden
+    </div>
+  </div>
+</div>

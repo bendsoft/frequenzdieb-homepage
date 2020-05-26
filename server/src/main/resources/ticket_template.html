@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Ticket</title>
+    <style>
+        @page {
+            size: A5 landscape;
+        }
+    </style>
+</head>
+<body>
+    <span class="primary-header"><!--TICKET_TITLE--></span>
+
+    <table>
+        <tr class="qr-code-container">
+            <td class="qr-code-box"><!--TICKET_QR_CODE--></td>
+            <td class="secondary-header"><!--TICKET_SECONDARY_TITLE--></td>
+        </tr>
+    </table>
+
+    <span class="ticket-event-info"><!--TICKET_PRICE--></span>
+    <span class="ticket-event-info"><!--TICKET_EVENT_INFO--></span>
+    <span class="ticket-owner-info"><!--TICKET_OWNER_INFO--></span>
+    <span class="ticket-footer"><!--TICKET_FOOTER--></span>
+</body>
+</html>

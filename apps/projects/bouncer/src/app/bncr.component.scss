@@ -1,0 +1,54 @@
+svg.material-icons {
+  height: 24px;
+  width: auto;
+}
+
+.basic-container {
+  padding-top: 25px;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.container::after {
+  background: url("projects/bouncer/src/assets/bouncer_background.svg") no-repeat;
+  background-size: 150%;
+  content: "";
+  opacity: 0.1;
+  top: 25%;
+  left: 25%;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+.toolbar {
+  position: fixed;
+  z-index: 2;
+}
+
+h1.app-name {
+  margin-left: 8px;
+}
+
+mat-sidenav-container {
+  flex: 1 0 auto;
+}
+
+.mat-drawer-container {
+  background-color: transparent;
+}
+
+.disabled {
+  color: lightgray;
+}

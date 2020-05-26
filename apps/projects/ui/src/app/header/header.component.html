@@ -1,0 +1,82 @@
+<header>
+  <nav>
+    <div routerLink="/home" class="logo">
+      <img src="../../assets/frequenzdieb_logo_guitar_black.svg" alt="" />
+    </div>
+    <ul class="page-navigation" [class.open]="mobileNavigationOpen">
+      <!-- <li>
+        <a routerLink="/band" routerLinkActive="active">Die Band</a>
+      </li>
+      <li>
+        <a routerLink="/blog" routerLinkActive="active">Blog</a>
+      </li>
+      <li>
+        <a routerLink="/gallerie" routerLinkActive="active">Bildgallerie</a>
+      </li>
+      <li>
+        <a routerLink="/tickets" routerLinkActive="active">Tickets</a>
+      </li> -->
+      <li>
+        <a
+          class="button"
+          (click)="
+            popups.setPopupOpen('newsletter', true); closeMobileNavigation()
+          "
+        >
+          <div class="text">
+            Newsletter Abo
+          </div>
+        </a>
+      </li>
+      <li>
+        <a
+          routerLink="/home"
+          class="mobile-only"
+          routerLinkActive="active"
+          (click)="closeMobileNavigation()"
+          >Home</a
+        >
+      </li>
+      <li>
+        <a
+          routerLink="/impressum"
+          class="mobile-only"
+          routerLinkActive="active"
+          (click)="closeMobileNavigation()"
+          >Impressum</a
+        >
+      </li>
+      <li>
+        <a
+          routerLink="/datenschutz"
+          class="mobile-only"
+          routerLinkActive="active"
+          (click)="closeMobileNavigation()"
+          >Datenschutz</a
+        >
+      </li>
+      <li>
+        <a
+          href=""
+          class="button mobile-only"
+          (click)="
+            popups.setPopupOpen('tickets', true); closeMobileNavigation()
+          "
+        >
+          <div class="text">
+            Konzerttickets
+          </div>
+        </a>
+      </li>
+    </ul>
+    <div
+      class="menu-button"
+      (click)="toggleMobileNavigation()"
+      [class.close]="mobileNavigationOpen"
+    >
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </nav>
+</header>

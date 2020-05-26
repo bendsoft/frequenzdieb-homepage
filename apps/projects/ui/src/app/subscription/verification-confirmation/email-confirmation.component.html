@@ -1,0 +1,32 @@
+<div class="utility-page">
+  <div class="text-box">
+    <ng-container *ngIf="confirmationSuccessful">
+      <h2>
+        Gratulierski
+      </h2>
+      <p>
+        Deine email-adresse wurde <b>bestätigt</b>, wir leiten dich in Kürze
+        wieder zur Homepage um.
+      </p>
+    </ng-container>
+    <ng-container *ngIf="!confirmationSuccessful">
+      <h2>
+        Hoppla George
+      </h2>
+      <p>
+        Da hat was nicht geklappt. Hast du deine email-adresse eventuell bereits
+        einmal bestätigt?
+      </p>
+      <p>
+        Falls du denkst du hast hier einen Bug gefunden, schreib uns doch via
+        <a href="mailto:webmaster@frequenzdieb.ch">webmaster@frequenzdieb.ch</a>
+      </p>
+      <p>
+        <a routerLink="/home">Zurück zur Homepage</a>
+      </p>
+    </ng-container>
+  </div>
+  <div class="progress-bar" [class.animated]="progressLoading">
+    <div class="bar" [style.transition.s]="animationTime"></div>
+  </div>
+</div>

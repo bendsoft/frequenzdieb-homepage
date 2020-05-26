@@ -1,0 +1,12 @@
+<div class="response-container">
+
+  <div *ngIf="isLogoutSuccessful && !errorMsg">
+    <strong i18n="logout page|confirmation message that the user has been logged out@@SuccessfullyLoggedOutMsg">You have been successfully logged-out</strong>
+    <p i18n="logout page|countdown that the user is being redirected to the login page@@RedirectToLoginPageMsg">You will be redirected to the login-page {secondsLeft, plural, =0 {just now} =1 {in 1 second} other {in {{secondsLeft}} seconds}}</p>
+  </div>
+
+  <div *ngIf="errorMsg">
+    <p style="color: red">{{ errorMsg }}</p>
+  </div>
+
+</div>

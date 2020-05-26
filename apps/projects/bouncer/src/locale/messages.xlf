@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en-US" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="NavBtnLogout" datatype="html">
+        <source>Logout</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/bncr.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <note priority="1" from="description">logout button</note>
+        <note priority="1" from="meaning">main navigation</note>
+      </trans-unit>
+      <trans-unit id="NavBtnScanTickets" datatype="html">
+        <source>Scan Tickets</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/bncr.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <note priority="1" from="description">scan tickets button</note>
+        <note priority="1" from="meaning">main navigation</note>
+      </trans-unit>
+      <trans-unit id="NavBtnSyncData" datatype="html">
+        <source>Synchronize Data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/bncr.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <note priority="1" from="description">synchronize data button</note>
+        <note priority="1" from="meaning">main navigation</note>
+      </trans-unit>
+      <trans-unit id="NavBtnScannedTicketsLog" datatype="html">
+        <source>Ticket Scan Log</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/bncr.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <note priority="1" from="description">scanned tickets log button</note>
+        <note priority="1" from="meaning">main navigation</note>
+      </trans-unit>
+      <trans-unit id="PswFieldLabel" datatype="html">
+        <source>Password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/auth/login/login.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <note priority="1" from="description">input label for password field</note>
+        <note priority="1" from="meaning">login page</note>
+      </trans-unit>
+      <trans-unit id="PasswordShowHideAriaLabel" datatype="html">
+        <source>Hide password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/auth/login/login.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <note priority="1" from="description">aria-label for password show or hide button</note>
+        <note priority="1" from="meaning">login page</note>
+      </trans-unit>
+      <trans-unit id="LoadingEventsMsg" datatype="html">
+        <source>Loading Events ...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/auth/login/login.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <note priority="1" from="description">information, that there are events loaded from the backend</note>
+        <note priority="1" from="meaning">login page</note>
+      </trans-unit>
+      <trans-unit id="ChooseEventLabel" datatype="html">
+        <source>Choose event</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/auth/login/login.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <note priority="1" from="description">label for event-select field</note>
+        <note priority="1" from="meaning">login page</note>
+      </trans-unit>
+      <trans-unit id="NoEventSelectedError" datatype="html">
+        <source>Please choose an Event</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/auth/login/login.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <note priority="1" from="description">error message if the user did not select an event</note>
+        <note priority="1" from="meaning">login page</note>
+      </trans-unit>
+      <trans-unit id="LoginButtonLabel" datatype="html">
+        <source>Login</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/auth/login/login.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <note priority="1" from="description">button to actually log in</note>
+        <note priority="1" from="meaning">login page</note>
+      </trans-unit>
+      <trans-unit id="SuccessfullyLoggedOutMsg" datatype="html">
+        <source>You have been successfully logged-out</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/auth/logout/logout.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <note priority="1" from="description">confirmation message that the user has been logged out</note>
+        <note priority="1" from="meaning">logout page</note>
+      </trans-unit>
+      <trans-unit id="RedirectToLoginPageMsg" datatype="html">
+        <source>You will be redirected to the login-page <x id="ICU" equiv-text="{secondsLeft, plural, =0 {...} =1 {...} other {...}}"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/auth/logout/logout.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <note priority="1" from="description">countdown that the user is being redirected to the login page</note>
+        <note priority="1" from="meaning">logout page</note>
+      </trans-unit>
+      <trans-unit id="1c3b784d409f8087161f9e17d81da6e2bc2fb379" datatype="html">
+        <source>{VAR_PLURAL, plural, =0 {just now} =1 {in 1 second} other {in <x id="INTERPOLATION" equiv-text="{{secondsLeft}}"/> seconds} }</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/auth/logout/logout.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="WaitForTicketCheckResultMsg" datatype="html">
+        <source>Checking Ticket ...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/ticket-scanner-popup/ticket-scanner-popup.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <note priority="1" from="description">show a message while waiting for the check-result</note>
+        <note priority="1" from="meaning">ticket scanner popup</note>
+      </trans-unit>
+      <trans-unit id="SuccessfulTicketCheckMessage" datatype="html">
+        <source>The Ticket is valid.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/ticket-scanner-popup/ticket-scanner-popup.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <note priority="1" from="description">successful ticket check message</note>
+        <note priority="1" from="meaning">ticket scanner popup</note>
+      </trans-unit>
+      <trans-unit id="FailedTicketCheckMessage" datatype="html">
+        <source>The Ticket is not valid.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/ticket-scanner-popup/ticket-scanner-popup.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <note priority="1" from="description">failed ticket check message</note>
+        <note priority="1" from="meaning">ticket scanner popup</note>
+      </trans-unit>
+      <trans-unit id="FailedTicketCheckReasonLabel" datatype="html">
+        <source>The reason is:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/ticket-scanner-popup/ticket-scanner-popup.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <note priority="1" from="description">failed ticket check reason</note>
+        <note priority="1" from="meaning">ticket scanner popup</note>
+      </trans-unit>
+      <trans-unit id="TicketCheckPopupCloseButton" datatype="html">
+        <source>Close</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/ticket-scanner-popup/ticket-scanner-popup.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <note priority="1" from="description">close button for the popup</note>
+        <note priority="1" from="meaning">ticket scanner popup</note>
+      </trans-unit>
+      <trans-unit id="ScannedTicketsLogHeader" datatype="html">
+        <source>Checked Tickets</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/scanner-log/scanner-log.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+        <note priority="1" from="description">header for the log-table</note>
+        <note priority="1" from="meaning">scanned tickets log</note>
+      </trans-unit>
+      <trans-unit id="LogDetailsTicketHeader" datatype="html">
+        <source>Ticket</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/scanner-log/scanner-log.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+        <note priority="1" from="description">header for loaded ticket or customer details of a log entry</note>
+        <note priority="1" from="meaning">scanned tickets log</note>
+      </trans-unit>
+      <trans-unit id="LogDetailsCustomerName" datatype="html">
+        <source>Customer Name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/scanner-log/scanner-log.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <note priority="1" from="description">details of a log entry</note>
+        <note priority="1" from="meaning">scanned tickets log</note>
+      </trans-unit>
+      <trans-unit id="LogDetailsBuyDate" datatype="html">
+        <source>Buy Date</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/scanner-log/scanner-log.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <note priority="1" from="description">details of a log entry</note>
+        <note priority="1" from="meaning">scanned tickets log</note>
+      </trans-unit>
+      <trans-unit id="LogDetailsStatus" datatype="html">
+        <source>Status</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/scanner-log/scanner-log.component.html</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <note priority="1" from="description">details of a log entry</note>
+        <note priority="1" from="meaning">scanned tickets log</note>
+      </trans-unit>
+      <trans-unit id="LogDetailsEventHeader" datatype="html">
+        <source>Event</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/scanner-log/scanner-log.component.html</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+        <note priority="1" from="description">header for loaded event details of a log entry</note>
+        <note priority="1" from="meaning">scanned tickets log</note>
+      </trans-unit>
+      <trans-unit id="LogDetailsEventName" datatype="html">
+        <source>Name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/scanner-log/scanner-log.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <note priority="1" from="description">details of a log entry</note>
+        <note priority="1" from="meaning">scanned tickets log</note>
+      </trans-unit>
+      <trans-unit id="LogDetailsEventDate" datatype="html">
+        <source>Date</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/scanner-log/scanner-log.component.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <note priority="1" from="description">details of a log entry</note>
+        <note priority="1" from="meaning">scanned tickets log</note>
+      </trans-unit>
+      <trans-unit id="DeleteLogEntriesButton" datatype="html">
+        <source>Delete local log entries</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ticketing/scanner-log/scanner-log.component.html</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <note priority="1" from="description">button to delete all entries in the list</note>
+        <note priority="1" from="meaning">scanned tickets log</note>
+      </trans-unit>
+      <trans-unit id="CheckedDateScannerLogTableColumn" datatype="html">
+        <source>Checked-date</source>
+      </trans-unit>
+      <trans-unit id="NotPayedTicketInvalidationErrorMsg" datatype="html">
+        <source>The Ticket lacks a valid Payment</source>
+      </trans-unit>
+      <trans-unit id="TicketIdScannerLogTableColumn" datatype="html">
+        <source>Ticket-ID</source>
+      </trans-unit>
+      <trans-unit id="ScannedTicketValidationStatusUnused" datatype="html">
+        <source>Unused</source>
+      </trans-unit>
+      <trans-unit id="ScannedTicketValidationStatusVoid" datatype="html">
+        <source>Void</source>
+      </trans-unit>
+      <trans-unit id="NotFoundTicketInvalidationErrorMsg" datatype="html">
+        <source>Ticket could not be found</source>
+      </trans-unit>
+      <trans-unit id="AlreadyUsedTicketInvalidationErrorMsg" datatype="html">
+        <source>The Ticket has already been used</source>
+      </trans-unit>
+      <trans-unit id="ResultScannerLogTableColumn" datatype="html">
+        <source>Result</source>
+      </trans-unit>
+      <trans-unit id="AnotherEventTicketInvalidationErrorMsg" datatype="html">
+        <source>The Ticket belongs to another Event</source>
+      </trans-unit>
+      <trans-unit id="InvalidRequestErrorMsg" datatype="html">
+        <source>Something went wrong with the Request.</source>
+      </trans-unit>
+      <trans-unit id="UnknownErrorErrorMsg" datatype="html">
+        <source>An unknown Error has happened.</source>
+      </trans-unit>
+      <trans-unit id="ServerErrorErrorMsg" datatype="html">
+        <source>An Error happened on the server-side.</source>
+      </trans-unit>
+      <trans-unit id="NotFoundErrorMsg" datatype="html">
+        <source>Not found.</source>
+      </trans-unit>
+      <trans-unit id="NotAuthorizedErrorMsg" datatype="html">
+        <source>Not Authorized or Access-Token missing or invalid.</source>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

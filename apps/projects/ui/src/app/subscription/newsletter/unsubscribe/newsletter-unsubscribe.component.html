@@ -1,0 +1,31 @@
+<div class="utility-page">
+  <div class="text-box">
+    <ng-container *ngIf="confirmationSuccessful">
+      <h2>
+        Och wie schade
+      </h2>
+      <p>
+        Du hast dich vom Newsletter abgemeldet, naja, so ist es halt… Wir leiten
+        dich gleich auf die Homepage weiter.
+      </p>
+    </ng-container>
+    <ng-container *ngIf="!confirmationSuccessful">
+      <h2>
+        Hoppla George
+      </h2>
+      <p>
+        Da hat was nicht geklappt. Warst du eventuell gar nicht angemeldet?
+      </p>
+      <p>
+        Falls du denkst du hast hier einen Bug gefunden, schreib uns doch via
+        <a href="mailto:webmaster@frequenzdieb.ch">webmaster@frequenzdieb.ch</a>
+      </p>
+      <p>
+        <a routerLink="/home">Zurück zur Homepage</a>
+      </p>
+    </ng-container>
+  </div>
+  <div class="progress-bar" [class.animated]="progressLoading">
+    <div class="bar" [style.transition.s]="animationTime"></div>
+  </div>
+</div>

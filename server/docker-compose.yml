@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+  frequenz-db:
+    image: mongo:4.2.3
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb-data:/data/db
+
+  frequenzdieb-api:
+    image: ch.frequenzdieb/frequenzdieb-rest-api:latest
+    environment:
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - FREQUENZDIEB_MAIL_PSW=${FREQUENZDIEB_MAIL_PSW}
+      - FREQUENZDIEB_MAIL_USER=${FREQUENZDIEB_MAIL_USER}
+      - FREQUENZDIEB_MAIL_HOST=${FREQUENZDIEB_MAIL_HOST}
+      - FREQUENZDIEB_PROFILE=prod
+      - FREQUENZDIEB_MAIL_SENDER=${FREQUENZDIEB_MAIL_SENDER}
+      - FREQUENZDIEB_JWT_SECRET=${FREQUENZDIEB_JWT_SECRET}
+      - FREQUENZDIEB_DATATRANS_SECRET=${DATATRANS_SECRET}
+      - FREQUENZDIEB_DATATRANS_MERCHANT_ID=${DATATRANS_MERCHANT_ID}
+      - FREQUENZDIEB_ADMIN_PSW=${FREQUENZDIEB_ADMIN_PSW}
+    ports:
+      - 8080:8080
+    expose:
+      - 8080
+    logging:
+      driver: json-file
+    depends_on:
+      - frequenz-db
+
+volumes:
+  mongodb-data:
