@@ -2,7 +2,6 @@ package ch.frequenzdieb.subscription
 
 import ch.frequenzdieb.common.RequestParamReader.readQueryParam
 import ch.frequenzdieb.common.Validators.Companion.checkSignature
-import ch.frequenzdieb.common.Validators.Companion.validateAsyncWith
 import ch.frequenzdieb.common.Validators.Companion.validateEMail
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
 import ch.frequenzdieb.common.Validators.Companion.validateWith
@@ -39,19 +38,16 @@ class SubscriptionHandler(
                     .switchIfEmpty(notFound().build())
             }
 
-    fun find(req: ServerRequest) =
-        subscriptionRepository.findById(req.pathVariable("id"))
-            .flatMap { ok().bodyValue(it) }
-            .switchIfEmpty(notFound().build())
+    private val emailVerificationTitle = "E-Mail Verifizierung für Frequenzdieb.ch"
 
     fun create(req: ServerRequest) =
         req.bodyToMono(Subscription::class.java).validateEntity()
             .flatMap { newSubscription ->
-                subscriptionRepository.save(newSubscription)
+                subscriptionRepository.insert(newSubscription)
                     .doOnSuccess {
                         emailService.sendEmail(
                             emailAddress = it.email,
-                            subject = "E-Mail Verifizierung für den Frequenzdieb-Newsletter",
+                            subject = emailVerificationTitle,
                             message = createSubscriptionConfirmationMessage(it.id)
                         )
                     }
@@ -66,7 +62,7 @@ class SubscriptionHandler(
             .doOnSuccess {
                 emailService.sendEmail(
                     emailAddress = it.email,
-                    subject = "E-Mail Verifizierung für den Frequenzdieb-Newsletter",
+                    subject = emailVerificationTitle,
                     message = createSubscriptionConfirmationMessage(it.id)
                 )
             }
@@ -75,13 +71,22 @@ class SubscriptionHandler(
 
     fun update(req: ServerRequest) =
         req.bodyToMono(Subscription::class.java).validateEntity()
-            .validateWith ("SUBSCRIPTION_INVALID_ID") { !it?.id.isNullOrEmpty() }
-            .validateAsyncWith("SUBSCRIPTION_NOT_EXISTS") {
-                subscriptionRepository.findById(it.id).hasElement()
+            .validateWith ("SUBSCRIPTION_INVALID_ID") { it.id.isNotEmpty() }
+            .zipWhen { subscriptionRepository.findById(it.id) }
+            .validateWith("SUBSCRIPTION_NOT_EXISTS") { it.t2.id.isNotEmpty() }
+            .doOnNext {
+                if (it.t1.email != it.t2.email) {
+                    it.t2.isConfirmed = false
+                    emailService.sendEmail(
+                        emailAddress = it.t2.email,
+                        subject = emailVerificationTitle,
+                        message = createSubscriptionConfirmationMessage(it.t2.id)
+                    )
+                }
             }
-            .flatMap { changedSubscription ->
-                subscriptionRepository.save(changedSubscription)
-                    .flatMap { ok().bodyValue(it) }
+           .flatMap {
+                subscriptionRepository.save(it.t2)
+                    .flatMap { savedSubscription -> ok().bodyValue(savedSubscription) }
             }
 
     private fun createSubscriptionConfirmationMessage(subscriptionId: String) = createHTML().

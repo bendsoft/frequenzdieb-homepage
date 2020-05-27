@@ -1,5 +1,6 @@
 package ch.frequenzdieb.ticketing
 
+import ch.frequenzdieb.common.createDefaultRoutes
 import ch.frequenzdieb.security.auth.Role
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -10,7 +11,9 @@ import org.springframework.web.reactive.function.server.router
 
 @Configuration
 class TicketingRoutes(
-	private val ticketingHandler: TicketingHandler
+	private val ticketingHandler: TicketingHandler,
+	private val ticketAttributeRepository: TicketAttributeRepository,
+	private val ticketTypeRepository: TicketTypeRepository
 ) {
 	private val baseRoute = "/api/ticketing"
 
@@ -25,17 +28,9 @@ class TicketingRoutes(
 				GET("/{id}/download", ticketingHandler::downloadTicket)
 				GET("/{id}/send", ticketingHandler::sendTicket)
 				"type".nest {
-					GET("/")
-					GET("/{id}")
-					POST("/")
-					PUT("/")
-					DELETE("/{id}")
+					createDefaultRoutes(ticketTypeRepository)
 					"attribute".nest {
-						GET("/")
-						GET("/{id}")
-						POST("/")
-						PUT("/")
-						DELETE("/{id}")
+						createDefaultRoutes(ticketAttributeRepository)
 					}
 				}
 			}
@@ -49,7 +44,7 @@ class TicketingRoutes(
 
 		pathMatchers(HttpMethod.GET, baseRoute).hasRole(Role.ADMIN.toString())
 		pathMatchers(HttpMethod.PUT, "$baseRoute/invalidate").hasRole(Role.ADMIN.toString())
-		pathMatchers(HttpMethod.POST, "$baseRoute/").hasRole(Role.USER.toString())
+		pathMatchers(HttpMethod.POST, "$baseRoute/").hasAnyRole(Role.ADMIN.toString(), Role.USER.toString())
 		pathMatchers(HttpMethod.POST, "$baseRoute/*/pay").permitAll()
 	}
 }
