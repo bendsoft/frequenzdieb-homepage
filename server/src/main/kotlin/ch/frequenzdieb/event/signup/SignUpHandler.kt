@@ -1,6 +1,6 @@
 package ch.frequenzdieb.event.signup
 
-import ch.frequenzdieb.common.RequestParamReader.readQueryParam
+import ch.frequenzdieb.common.RequestParamReader.readQueryParamAsync
 import ch.frequenzdieb.common.Validators.Companion.validateAsyncWith
 import ch.frequenzdieb.common.Validators.Companion.validateEMail
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
@@ -43,7 +43,7 @@ class SignUpHandler(
             }
 
     fun deleteAllByEmail(req: ServerRequest) =
-        req.readQueryParam("email")
+        req.readQueryParamAsync("email")
             .validateEMail()
             .flatMap { email ->
                 subscriptionRepository.findFirstByEmail(email)

@@ -1,6 +1,6 @@
 package ch.frequenzdieb.subscription
 
-import ch.frequenzdieb.common.RequestParamReader.readQueryParam
+import ch.frequenzdieb.common.RequestParamReader.readQueryParamAsync
 import ch.frequenzdieb.common.Validators.Companion.checkSignature
 import ch.frequenzdieb.common.Validators.Companion.validateEMail
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
@@ -30,7 +30,7 @@ class SubscriptionHandler(
     private val signatureFactory: SignatureFactory
 ) {
     fun findFirstByEmail(req: ServerRequest) =
-        req.readQueryParam("email")
+        req.readQueryParamAsync("email")
             .validateEMail()
             .flatMap {
                 subscriptionRepository.findFirstByEmail(it)
@@ -102,7 +102,7 @@ class SubscriptionHandler(
         }
 
     fun deleteAllByEmail(req: ServerRequest) =
-        req.readQueryParam("email")
+        req.readQueryParamAsync("email")
             .validateEMail()
             .flatMap {
                 subscriptionRepository.deleteAllByEmail(it)
@@ -112,7 +112,7 @@ class SubscriptionHandler(
             }
 
     fun sendSubscriptionDeletionEMail(req: ServerRequest) =
-        req.readQueryParam("email")
+        req.readQueryParamAsync("email")
             .validateEMail()
             .flatMap {
                 subscriptionRepository.findFirstByEmail(it)
@@ -127,7 +127,7 @@ class SubscriptionHandler(
             }
 
     fun confirmWithSignature(req: ServerRequest) =
-        req.readQueryParam("signature")
+        req.readQueryParamAsync("signature")
             .flatMap { signature ->
                 subscriptionRepository.findById(req.pathVariable("id"))
                     .checkSignature(signature)
@@ -141,7 +141,7 @@ class SubscriptionHandler(
             }
 
     fun deleteWithSignature(req: ServerRequest) =
-        req.readQueryParam("signature")
+        req.readQueryParamAsync("signature")
             .flatMap { signature ->
                 subscriptionRepository.findById(req.pathVariable("id"))
                     .checkSignature(signature)

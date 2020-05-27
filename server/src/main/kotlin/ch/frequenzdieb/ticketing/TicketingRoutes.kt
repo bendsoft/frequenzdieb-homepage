@@ -21,7 +21,7 @@ class TicketingRoutes(
 	fun ticketingRouter() = router {
 		baseRoute.nest {
 			accept(APPLICATION_JSON).nest {
-				GET("/", ticketingHandler::findAllBySubscriptionId)
+				GET("/", ticketingHandler::findAllBySubscriptionIdAndEventId)
 				POST("/", ticketingHandler::create)
 				POST("/{id}/pay", ticketingHandler::createPaymentForTicket)
 				PUT("/invalidate", ticketingHandler::invalidate)

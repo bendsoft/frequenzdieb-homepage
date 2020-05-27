@@ -28,13 +28,13 @@ class TicketingHandler(
 	private val paymentService: PaymentService<DatatransPayment>,
 	private val emailService: EmailService
 ) {
-	fun findAllBySubscriptionId(req: ServerRequest) =
-		req.readQueryParam("subscriptionid")
-			.flatMap {
-				ticketingRepository.findAllBySubscriptionId(it).collectList()
-					.flatMap { tickets -> ok().bodyValue(tickets) }
-					.switchIfEmpty(notFound().build())
-			}
+	fun findAllBySubscriptionIdAndEventId(req: ServerRequest) =
+		ticketingRepository.findAllBySubscription_IdAndEvent_Id(
+			req.readQueryParam("subscriptionid"),
+			req.readQueryParam("eventId")
+		).collectList()
+			.flatMap { tickets -> ok().bodyValue(tickets) }
+			.switchIfEmpty(notFound().build())
 
 	fun create(req: ServerRequest) =
 		req.bodyToMono(Ticket::class.java).validateEntity()

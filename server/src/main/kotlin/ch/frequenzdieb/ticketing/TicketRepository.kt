@@ -6,5 +6,5 @@ import reactor.core.publisher.Flux
 
 @Repository
 interface TicketRepository : ReactiveMongoRepository<Ticket, String> {
-	fun findAllBySubscriptionId(subscriptionId: String): Flux<Ticket>
+	fun findAllBySubscription_IdAndEvent_Id(subscriptionId: String, eventId: String): Flux<Ticket>
 }
