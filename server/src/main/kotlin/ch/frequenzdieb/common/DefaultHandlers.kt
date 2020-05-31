@@ -11,9 +11,10 @@ import org.springframework.web.reactive.function.server.ServerResponse.notFound
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import java.net.URI
 
-inline fun <reified T : BaseEntity> RouterFunctionDsl.createDefaultRoutes(
-    repository: ReactiveMongoRepository<T, String>
-) = run {
+object DefaultHandlers {
+    inline fun <reified T : BaseEntity> RouterFunctionDsl.createDefaultRoutes(
+        repository: ReactiveMongoRepository<T, String>
+    ) = run {
         GET("/") { repository.getAll() }
         GET("/{id}") { repository.getById(it) }
         POST("/") { repository.create(it) }
@@ -21,36 +22,37 @@ inline fun <reified T : BaseEntity> RouterFunctionDsl.createDefaultRoutes(
         DELETE("/{id}") { repository.delete(it) }
     }
 
-inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.getById(
-    request: ServerRequest
-) = findAllById { request.pathVariable("id") }
-    .collectList()
-    .flatMap { ok().bodyValue(it) }
-    .switchIfEmpty(notFound().build())
-
-inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.getAll() =
-    findAll()
+    inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.getById(
+        request: ServerRequest
+    ) = findAllById { request.pathVariable("id") }
         .collectList()
         .flatMap { ok().bodyValue(it) }
         .switchIfEmpty(notFound().build())
 
-inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.create(
-    request: ServerRequest
-) = request.bodyToMono(T::class.java).validateEntity()
-    .flatMap { insert(it) }
-    .flatMap {
-        created(URI.create("${request.path()}/${it.id}"))
-            .bodyValue(it)
-    }
+    inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.getAll() =
+        findAll()
+            .collectList()
+            .flatMap { ok().bodyValue(it) }
+            .switchIfEmpty(notFound().build())
 
-inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.update(
-    request: ServerRequest
-) = request.bodyToMono(T::class.java).validateEntity()
-        .validateWith { it.id.isNotEmpty() }
+    inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.create(
+        request: ServerRequest
+    ) = request.bodyToMono(T::class.java).validateEntity()
+        .flatMap { insert(it) }
+        .flatMap {
+            created(URI.create("${request.path()}/${it.id}"))
+                .bodyValue(it)
+        }
+
+    inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.update(
+        request: ServerRequest
+    ) = request.bodyToMono(T::class.java).validateEntity()
+        .validateWith { !it.id.isNullOrEmpty() }
         .flatMap { save(it) }
         .flatMap { ok().bodyValue(it) }
         .switchIfEmpty(notFound().build())
 
-inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.delete(
-    request: ServerRequest
-) = noContent().build(deleteById(request.pathVariable("id")))
+    inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.delete(
+        request: ServerRequest
+    ) = noContent().build(deleteById(request.pathVariable("id")))
+}

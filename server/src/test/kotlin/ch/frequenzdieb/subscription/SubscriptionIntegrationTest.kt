@@ -1,6 +1,6 @@
 package ch.frequenzdieb.subscription
 
-import ch.frequenzdieb.api.BaseIntegrationTest
+import ch.frequenzdieb.common.BaseIntegrationTest
 import io.kotlintest.shouldBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -15,7 +15,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
             val subscriberName = subscriptionHelper.createRandomString(5)
 
             subscriptionHelper.resetCollection()
-            subscriptionHelper.insertSubscriptionForHans(subscriberName)
+            subscriptionHelper.createSubscriptionForHans(subscriberName)
 
             it("should not allow unauthenticated requests") {
                 getRestClientUnauthenticated()

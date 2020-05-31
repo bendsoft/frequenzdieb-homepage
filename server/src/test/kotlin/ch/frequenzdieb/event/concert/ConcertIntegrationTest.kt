@@ -1,24 +1,25 @@
 package ch.frequenzdieb.event.concert
 
-import ch.frequenzdieb.api.BaseIntegrationTest
+import ch.frequenzdieb.common.BaseIntegrationTest
+import ch.frequenzdieb.event.location.LocationHelper
 import io.kotlintest.shouldBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import java.time.LocalDateTime
 
-internal class ConcertIntegrationTest : BaseIntegrationTest() {
-    @Autowired
-    lateinit var concertHelper: ConcertHelper
-
+internal class ConcertIntegrationTest(
+    private val concertHelper: ConcertHelper,
+    private val locationHelper: LocationHelper
+) : BaseIntegrationTest() {
     init {
         val randomConcertName = concertHelper.createRandomString(10)
-        val randomLocation = concertHelper.createRandomString(10)
+        val randomLocation = locationHelper.createLocation()
         val randomLiveActs = listOf(concertHelper.createRandomString(10))
         val randomTerms = concertHelper.createRandomString(10)
 
         describe("existing concert") {
             concertHelper.resetCollection()
-            val insertedId = concertHelper.insertConcert(
+            val insertedId = concertHelper.createConcert(
                 concertName = randomConcertName
             )
 

@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.context.annotation.ComponentScan
 
 @DataMongoTest
-@ComponentScan(basePackages = ["ch.frequenzdieb.api.subscription"])
+@ComponentScan(basePackages = ["ch.frequenzdieb.common.subscription"])
 internal class SubscriptionDBTest : DescribeSpec() {
     @Autowired
     lateinit var subscriptionHelper: SubscriptionHelper
@@ -16,7 +16,7 @@ internal class SubscriptionDBTest : DescribeSpec() {
     init {
         describe("get subscription by email of hans muster") {
             subscriptionHelper.resetCollection()
-            subscriptionHelper.insertSubscriptionForHans("Muster")
+            subscriptionHelper.createSubscriptionForHans("Muster")
 
             it("should have inserted the email") {
                 subscriptionHelper.getAllSubscriptions().forOne { it.email shouldBe "hans.muster@example.com" }

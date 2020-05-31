@@ -1,6 +1,6 @@
 package ch.frequenzdieb.ticketing
 
-import ch.frequenzdieb.common.createDefaultRoutes
+import ch.frequenzdieb.common.DefaultHandlers.createDefaultRoutes
 import ch.frequenzdieb.security.auth.Role
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,17 +9,17 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.web.reactive.function.server.router
 
+const val ticketingRoute = "/api/ticketing"
+
 @Configuration
 class TicketingRoutes(
 	private val ticketingHandler: TicketingHandler,
 	private val ticketAttributeRepository: TicketAttributeRepository,
 	private val ticketTypeRepository: TicketTypeRepository
 ) {
-	private val baseRoute = "/api/ticketing"
-
 	@Bean
 	fun ticketingRouter() = router {
-		baseRoute.nest {
+		ticketingRoute.nest {
 			accept(APPLICATION_JSON).nest {
 				GET("/", ticketingHandler::findAllBySubscriptionIdAndEventId)
 				POST("/", ticketingHandler::create)
@@ -39,12 +39,12 @@ class TicketingRoutes(
 
 	@Bean
 	fun ticketingMatchers(): ServerHttpSecurity.AuthorizeExchangeSpec.() -> Unit = {
-		pathMatchers(HttpMethod.GET, "$baseRoute/type/**").permitAll()
-		pathMatchers("$baseRoute/type/**").hasRole(Role.ADMIN.toString())
+		pathMatchers(HttpMethod.GET, "$ticketingRoute/type/**").permitAll()
+		pathMatchers("$ticketingRoute/type/**").hasRole(Role.ADMIN.toString())
 
-		pathMatchers(HttpMethod.GET, baseRoute).hasRole(Role.ADMIN.toString())
-		pathMatchers(HttpMethod.PUT, "$baseRoute/invalidate").hasRole(Role.ADMIN.toString())
-		pathMatchers(HttpMethod.POST, "$baseRoute/").hasAnyRole(Role.ADMIN.toString(), Role.USER.toString())
-		pathMatchers(HttpMethod.POST, "$baseRoute/*/pay").permitAll()
+		pathMatchers(HttpMethod.GET, ticketingRoute).hasRole(Role.ADMIN.toString())
+		pathMatchers(HttpMethod.PUT, "$ticketingRoute/invalidate").hasRole(Role.ADMIN.toString())
+		pathMatchers(HttpMethod.POST, "$ticketingRoute/").hasAnyRole(Role.ADMIN.toString(), Role.USER.toString())
+		pathMatchers(HttpMethod.POST, "$ticketingRoute/*/pay").permitAll()
 	}
 }

@@ -42,7 +42,7 @@ class Validators (
 
         fun <T : BaseEntity> Mono<T>.checkSignature(signature: String, vararg additionalValuesInSignature: String) =
             validateWith("INVALID_SIGNATURE")
-                { signatureFactory.createSignature(it.id, *additionalValuesInSignature) != signature }
+                { !it.id.isNullOrEmpty() && signatureFactory.createSignature(it.id!!, *additionalValuesInSignature) != signature }
 
         inline fun <T> Mono<T>.validateAsyncWith(
             errorMessage: String? = null,

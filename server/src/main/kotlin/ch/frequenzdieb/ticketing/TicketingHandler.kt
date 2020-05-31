@@ -45,40 +45,27 @@ class TicketingHandler(
 			}
 
 	fun createPaymentForTicket(req: ServerRequest) =
-		Mono.justOrEmpty(req.pathVariable("id"))
+		req.bodyToMono(DatatransPayment::class.java).validateEntity()
 			.validateAsyncWith("INVALID_TICKET_ID")
 				{ ticketingRepository.existsById(req.pathVariable("id")) }
-			.flatMap { ticketId ->
-				req.bodyToMono(DatatransPayment::class.java).validateEntity()
-					.flatMap { datatransPayment ->
-						datatransPayment.reference = ticketId
-						paymentService.initiatePayment(datatransPayment)
-							.flatMap { ok().bodyValue(it) }
-					}
+			.flatMap { datatransPayment ->
+				datatransPayment.reference = req.pathVariable("id")
+				paymentService.initiatePayment(datatransPayment)
+					.flatMap { ok().bodyValue(it) }
 			}
 
 	fun invalidate(req: ServerRequest) =
 		req.bodyToMono(TicketInvalidationRequest::class.java).validateEntity()
-			.flatMap { invalidationRequest ->
-				val ticketId = ticketService.decoder(invalidationRequest.qrCodeValue)
-				paymentService.hasValidPayment(ticketId)
-					.flatMap { hasValidPayment ->
-						if (hasValidPayment == false) {
-							badRequest().bodyValue("NOT_PAYED")
-						} else {
-							ticketingRepository.findById(ticketId)
-								.validateWith ("ALREADY_USED") { !it.isValid }
-								.validateWith ("ANOTHER_EVENT") { invalidationRequest.eventId != it.event.id }
-								.flatMap { ticket ->
-									ticket.isValid = false
-									ticketingRepository.save(ticket).flatMap {
-										ok().bodyValue(it)
-									}
-								}
-								.switchIfEmpty(notFound().build())
-						}
-					}
+			.zipWhen { ticketingRepository.findById(ticketService.decoder(it.qrCodeValue)) }
+			.validateWith ("ALREADY_USED") { !it.t2.isValid }
+			.validateWith ("ANOTHER_EVENT") { it.t2.event.id != it.t1.eventId }
+			.validateAsyncWith("NOT_PAYED") { paymentService.hasValidPayment(it.t2.id!!) }
+			.flatMap { ticket ->
+				ticket.t2.isValid = false
+				ticketingRepository.save(ticket.t2)
+					.flatMap { ok().bodyValue(it) }
 			}
+			.switchIfEmpty(notFound().build())
 
 	fun downloadTicket(req: ServerRequest) =
 		ticketingRepository.findById(req.pathVariable("id"))

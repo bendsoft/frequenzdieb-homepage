@@ -47,7 +47,7 @@ class SignUpHandler(
             .validateEMail()
             .flatMap { email ->
                 subscriptionRepository.findFirstByEmail(email)
-                    .flatMap { repository.deleteAllBySubscriptionId(it.id) }
+                    .flatMap { repository.deleteAllBySubscriptionId(it.id!!) }
                     .filter { it > 0 }
                     .flatMap { noContent().build() }
                     .switchIfEmpty(notFound().build())

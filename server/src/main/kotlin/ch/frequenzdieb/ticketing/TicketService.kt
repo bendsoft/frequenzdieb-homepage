@@ -1,12 +1,14 @@
 package ch.frequenzdieb.ticketing
 
 import ch.frequenzdieb.common.TemplateParser
+import ch.frequenzdieb.common.ValidationError
 import ch.frequenzdieb.event.Event
 import ch.frequenzdieb.event.EventRepository
 import ch.frequenzdieb.event.concert.Concert
 import ch.frequenzdieb.subscription.Subscription
 import ch.frequenzdieb.subscription.SubscriptionRepository
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
+import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.html.br
 import kotlinx.html.dom.create
 import kotlinx.html.h1
@@ -24,6 +26,7 @@ import org.springframework.core.io.ResourceLoader
 import org.springframework.stereotype.Service
 import org.w3c.dom.Document
 import org.w3c.dom.Element
+import reactor.core.publisher.Mono
 import java.io.ByteArrayOutputStream
 import java.time.format.DateTimeFormatter
 import java.util.Base64
@@ -37,26 +40,31 @@ class TicketService(
 	private val templateParser: TemplateParser
 ) {
 	fun createQRCode(ticket: Ticket) =
-		encoder(
-			QRCode.from(encoder(ticket.id.toByteArray()))
-				.withSize(200, 200)
-				.to(ImageType.PNG)
-				.stream()
-				.toByteArray()
-		)
+		ticket.id?.let {
+			encoder(
+				QRCode.from(encoder(it.toByteArray()))
+					.withSize(200, 200)
+					.to(ImageType.PNG)
+					.stream()
+					.toByteArray()
+			)
+		}.orEmpty()
 
-	fun createPDF(ticket: Ticket) =
-		eventRepository.findById(ticket.event.id)
-			.zipWhen { subscriptionRepository.findById(ticket.subscription.id) }
-			.map {
-				val event = it.t1
-				val owner = it.t2
+	fun createPDF(ticket: Ticket): Mono<ByteArrayResource> {
+		if (ticket.subscription.id.isNullOrEmpty() || ticket.event.id.isNullOrEmpty()) {
+			return Mono.empty()
+		} else {
+			return eventRepository.findById(ticket.event.id!!)
+				.zipWhen { subscriptionRepository.findById(ticket.subscription.id!!) }
+				.map {
+					val event = it.t1
+					val owner = it.t2
 
-				templateParser.createHTMLTemplate(
-					resourceLoader.getResource("classpath:ticket_template.html").inputStream
-				) {
-					createMarkupReplacementMap(event, ticket, owner)
-				}.let { htmlTemplate ->
+					templateParser.createHTMLTemplate(
+						resourceLoader.getResource("classpath:ticket_template.html").inputStream
+					) {
+						createMarkupReplacementMap(event, ticket, owner)
+					}.let { htmlTemplate ->
 						ByteArrayResource(ByteArrayOutputStream().apply {
 							use {
 								PdfRendererBuilder().apply {
@@ -68,7 +76,9 @@ class TicketService(
 							}
 						}.toByteArray())
 					}
-			}
+				}
+		}
+	}
 
 	private fun Document.createMarkupReplacementMap(
 		event: Event,
@@ -94,7 +104,14 @@ class TicketService(
 		ticket.type.attributes
 			.filter { !it.tag.isNullOrEmpty() }
 			.forEach {
-				markupReplacements[it.key] = create.p {
+				if (markupReplacements.containsKey(it.tag)) {
+					ValidationError(
+						"DUPLICATE_TICKET_TEMPLATE_TAG",
+						mapOf("reason" to "The tag \"${it.tag}\" has already been used")
+					).throwAsServerResponse()
+				}
+
+				markupReplacements[it.tag!!] = create.p {
 					+"${it.key}: ${it.value}"
 				}
 			}

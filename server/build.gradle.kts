@@ -1,6 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
+val kotlinVersion = "1.3.70"
+
 plugins {
 	java
 	idea
@@ -39,9 +41,9 @@ sourceSets {
 }
 
 repositories {
-	mavenCentral()
 	jcenter()
 	maven(url = "https://jitpack.io")
+	mavenCentral()
 }
 
 dependencies {
@@ -63,6 +65,10 @@ dependencies {
 	implementation("javax.xml.bind:jaxb-api:2.3.1")
 	implementation("com.sun.xml.bind:jaxb-core:2.3.0.1")
 	implementation("com.sun.xml.bind:jaxb-impl:2.3.2")
+	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.+")
+	implementation("org.jetbrains.kotlin:kotlin-script-util:$kotlinVersion")
+	implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
+	implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion")
 	kapt("org.springframework.boot:spring-boot-configuration-processor")
 	runtimeOnly("org.springframework.boot:spring-boot-devtools")
 	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

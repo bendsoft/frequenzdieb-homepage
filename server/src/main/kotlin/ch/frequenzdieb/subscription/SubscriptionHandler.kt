@@ -48,7 +48,7 @@ class SubscriptionHandler(
                         emailService.sendEmail(
                             emailAddress = it.email,
                             subject = emailVerificationTitle,
-                            message = createSubscriptionConfirmationMessage(it.id)
+                            message = createSubscriptionConfirmationMessage(it.id!!)
                         )
                     }
                     .flatMap {
@@ -63,7 +63,7 @@ class SubscriptionHandler(
                 emailService.sendEmail(
                     emailAddress = it.email,
                     subject = emailVerificationTitle,
-                    message = createSubscriptionConfirmationMessage(it.id)
+                    message = createSubscriptionConfirmationMessage(it.id!!)
                 )
             }
             .flatMap { ok().build() }
@@ -71,16 +71,16 @@ class SubscriptionHandler(
 
     fun update(req: ServerRequest) =
         req.bodyToMono(Subscription::class.java).validateEntity()
-            .validateWith ("SUBSCRIPTION_INVALID_ID") { it.id.isNotEmpty() }
-            .zipWhen { subscriptionRepository.findById(it.id) }
-            .validateWith("SUBSCRIPTION_NOT_EXISTS") { it.t2.id.isNotEmpty() }
+            .validateWith ("SUBSCRIPTION_INVALID_ID") { !it.id.isNullOrEmpty() }
+            .zipWhen { subscriptionRepository.findById(it.id!!) }
+            .validateWith("SUBSCRIPTION_NOT_EXISTS") { !it.t2.id.isNullOrEmpty() }
             .doOnNext {
                 if (it.t1.email != it.t2.email) {
                     it.t2.isConfirmed = false
                     emailService.sendEmail(
                         emailAddress = it.t2.email,
                         subject = emailVerificationTitle,
-                        message = createSubscriptionConfirmationMessage(it.t2.id)
+                        message = createSubscriptionConfirmationMessage(it.t2.id!!)
                     )
                 }
             }
@@ -120,7 +120,7 @@ class SubscriptionHandler(
                         emailService.sendEmail(
                             emailAddress = subscription.email,
                             subject = "Bitte verifiziere die Löschung deiner e-Mail von der Frequenzdieb-Homepage",
-                            message = createSubscriptionDeletionMessage(subscription.id)
+                            message = createSubscriptionDeletionMessage(subscription.id!!)
                         )
                         ok().build()
                     }
@@ -146,7 +146,7 @@ class SubscriptionHandler(
                 subscriptionRepository.findById(req.pathVariable("id"))
                     .checkSignature(signature)
                     .flatMap {
-                        noContent().build(subscriptionRepository.deleteById(it.id))
+                        noContent().build(subscriptionRepository.deleteById(it.id!!))
                     }
                     .switchIfEmpty(notFound().build())
             }
