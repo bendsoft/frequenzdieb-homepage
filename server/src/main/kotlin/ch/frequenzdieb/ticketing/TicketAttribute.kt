@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class TicketAttribute (
     val key: String,
     val value: String,
-    val tag: String?,
+    val tag: String? = null,
     val archived: Boolean = false,
-    val validationRules: Any // TODO: For later implementation
+    val validationRules: List<Any> = emptyList() // TODO: For later implementation
 ) : BaseEntity()

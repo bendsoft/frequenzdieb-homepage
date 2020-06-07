@@ -11,7 +11,7 @@ abstract class BaseEntity(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Id
-    open var id: String = "",
+    open var id: String? = null,
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @CreatedDate

@@ -1,6 +1,6 @@
 package ch.frequenzdieb.subscription
 
-import ch.frequenzdieb.common.getById
+import ch.frequenzdieb.common.DefaultHandlers.getById
 import ch.frequenzdieb.security.auth.Role
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -23,7 +23,7 @@ class SubscriptionRoutes(
                 GET("/{id}/confirm", subscriptionHandler::confirmWithSignature)
                 GET("/{id}/resend-confirmation", subscriptionHandler::resendConfirmation)
                 GET("/", subscriptionHandler::findFirstByEmail)
-                GET("/{id}", subscriptionRepository::getById)
+                GET("/{id}") { subscriptionRepository.getById(it) }
                 POST("/", subscriptionHandler::create)
                 PUT("/", subscriptionHandler::update)
                 DELETE("/", subscriptionHandler::deleteAllByEmail)

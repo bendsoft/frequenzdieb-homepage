@@ -1,7 +1,6 @@
 package ch.frequenzdieb.subscription
 
-import ch.frequenzdieb.api.BaseHelper
-import com.mongodb.BasicDBObjectBuilder
+import ch.frequenzdieb.common.BaseHelper
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Component
@@ -11,17 +10,15 @@ import org.springframework.stereotype.Component
 internal class SubscriptionHelper(
     mongoTemplate: MongoTemplate
 ) : BaseHelper(mongoTemplate, Subscription::class.java) {
-    fun insertSubscriptionForHans(subscriberName: String): String {
-        val objectToSave = BasicDBObjectBuilder.start()
-            .add("email", "hans.${subscriberName}@example.com")
-            .add("name", subscriberName)
-            .add("surname", "Hans")
-            .get()
-
-        val insertedObject = mongoTemplate.insert(objectToSave, collectionName)
-        return insertedObject.toMap()["_id"].toString()
-    }
+    fun createSubscriptionForHans(subscriberName: String): Subscription =
+        Subscription(
+            name = subscriberName,
+            surname = "Hans",
+            email = "${createRandomString(5)}.${subscriberName}@example.com",
+            isNewsletterAccepted = true,
+            isConfirmed = true
+        )
 
     fun getAllSubscriptions(): MutableList<Subscription> =
-        mongoTemplate.findAll(Subscription::class.java, collectionName)
+        mongoTemplate.findAll(Subscription::class.java)
 }

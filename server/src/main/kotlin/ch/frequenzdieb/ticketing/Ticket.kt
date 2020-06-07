@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 
-@Document(collection = "ticket")
+@Document(collection = "tickets")
 @TypeAlias("model.ticket")
 @CompoundIndexes(
 	CompoundIndex(name = "event_subscription", def = "{'event.id' : 1, 'subscription.id': 1}")
@@ -22,6 +22,7 @@ data class Ticket(
 	@DBRef
 	val event: Event,
 
+	@DBRef
 	val type: TicketType,
 
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
