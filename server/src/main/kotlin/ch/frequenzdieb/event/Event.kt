@@ -9,7 +9,7 @@ import javax.validation.constraints.Future
 import javax.validation.constraints.Size
 
 @Document(collection = "events")
-abstract class Event(
+open class Event(
     @Size(min = 2, max = 100, message = "INVALID_INPUT_SIZE")
     val name: String,
 

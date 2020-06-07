@@ -1,12 +1,11 @@
 package ch.frequenzdieb.common
 
-import io.kotlintest.extensions.TestListener
 import org.springframework.data.mongodb.core.MongoTemplate
 
 abstract class BaseHelper(
     protected val mongoTemplate: MongoTemplate,
     private val entityClass: Class<*>
-) : TestListener {
+) {
     init {
         Dsl.mongoTemplate = mongoTemplate
     }

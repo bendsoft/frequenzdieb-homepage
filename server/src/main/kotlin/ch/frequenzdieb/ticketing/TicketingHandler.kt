@@ -4,6 +4,7 @@ import ch.frequenzdieb.common.RequestParamReader.readQueryParam
 import ch.frequenzdieb.common.Validators.Companion.validateAsyncWith
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
 import ch.frequenzdieb.common.Validators.Companion.validateWith
+import ch.frequenzdieb.common.zipToPairWhen
 import ch.frequenzdieb.email.EMailAttachment
 import ch.frequenzdieb.email.EmailService
 import ch.frequenzdieb.payment.PaymentService
@@ -14,11 +15,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse.badRequest
 import org.springframework.web.reactive.function.server.ServerResponse.created
 import org.springframework.web.reactive.function.server.ServerResponse.notFound
 import org.springframework.web.reactive.function.server.ServerResponse.ok
-import reactor.core.publisher.Mono
 import java.net.URI
 
 @Configuration
@@ -30,7 +29,7 @@ class TicketingHandler(
 ) {
 	fun findAllBySubscriptionIdAndEventId(req: ServerRequest) =
 		ticketingRepository.findAllBySubscription_IdAndEvent_Id(
-			req.readQueryParam("subscriptionid"),
+			req.readQueryParam("subscriptionId"),
 			req.readQueryParam("eventId")
 		).collectList()
 			.flatMap { tickets -> ok().bodyValue(tickets) }
@@ -56,27 +55,35 @@ class TicketingHandler(
 
 	fun invalidate(req: ServerRequest) =
 		req.bodyToMono(TicketInvalidationRequest::class.java).validateEntity()
-			.zipWhen { ticketingRepository.findById(ticketService.decoder(it.qrCodeValue)) }
-			.validateWith ("ALREADY_USED") { !it.t2.isValid }
-			.validateWith ("ANOTHER_EVENT") { it.t2.event.id != it.t1.eventId }
-			.validateAsyncWith("NOT_PAYED") { paymentService.hasValidPayment(it.t2.id!!) }
-			.flatMap { ticket ->
-				ticket.t2.isValid = false
-				ticketingRepository.save(ticket.t2)
-					.flatMap { ok().bodyValue(it) }
+			.zipToPairWhen { ticketingRepository.findById(ticketService.decoder(it.qrCodeValue)) }
+			.validateWith ("ALREADY_USED") {
+				(_, ticket) -> ticket.isValid
 			}
-			.switchIfEmpty(notFound().build())
+			.validateWith ("ANOTHER_EVENT") {
+				(validationRequest, ticket) -> ticket.event.id == validationRequest.eventId
+			}
+			.validateAsyncWith("NOT_PAYED") {
+				(_, ticket) -> paymentService.hasValidPayment(ticket.id!!)
+			}
+			.flatMap { (_, ticket) ->
+				ticket.isValid = false
+				ticketingRepository.save(ticket)
+					.flatMap {
+						println(it)
+						ok().body(BodyInserters.fromValue(it))
+					}
+			}
 
 	fun downloadTicket(req: ServerRequest) =
 		ticketingRepository.findById(req.pathVariable("id"))
-			.zipWhen { ticketService.createPDF(it) }
-			.flatMap {
+			.zipToPairWhen { ticketService.createPDF(it) }
+			.flatMap { (ticket, pdf) ->
 				ok()
 					.contentType(MediaType.APPLICATION_PDF)
 					.headers { httpHeaders ->
-						httpHeaders.setContentDispositionFormData(createTicketName(it.t1), createTicketName(it.t1))
+						httpHeaders.setContentDispositionFormData(createTicketName(ticket), createTicketName(ticket))
 					}
-					.body(BodyInserters.fromResource(it.t2))
+					.body(BodyInserters.fromResource(pdf))
 			}
 			.switchIfEmpty(notFound().build())
 

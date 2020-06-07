@@ -22,6 +22,7 @@ data class Ticket(
 	@DBRef
 	val event: Event,
 
+	@DBRef
 	val type: TicketType,
 
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)

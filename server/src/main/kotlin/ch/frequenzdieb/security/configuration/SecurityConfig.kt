@@ -84,20 +84,19 @@ class SecurityConfig (
                 .pathMatchers("/api/**").permitAll()
             .and().build()
 
-    private fun ServerHttpSecurity.disableCorsWhenDevProfileActive(): ServerHttpSecurity {
-        if (arrayListOf("dev", "localdev").contains(activeProfile)) {
-            this.cors().configurationSource {
-                CorsConfiguration().apply {
-                    allowCredentials = true
-                    allowedHeaders = listOf(CorsConfiguration.ALL)
-                    allowedMethods = listOf(CorsConfiguration.ALL)
-                    allowedOrigins = listOf(CorsConfiguration.ALL)
+    private fun ServerHttpSecurity.disableCorsWhenDevProfileActive(): ServerHttpSecurity =
+        apply {
+            if (arrayListOf("dev", "localdev").contains(activeProfile)) {
+                this.cors().configurationSource {
+                    CorsConfiguration().apply {
+                        allowCredentials = true
+                        allowedHeaders = listOf(CorsConfiguration.ALL)
+                        allowedMethods = listOf(CorsConfiguration.ALL)
+                        allowedOrigins = listOf(CorsConfiguration.ALL)
+                    }
                 }
             }
         }
-
-        return this
-    }
 
     @Bean
     fun encoder() = BCryptPasswordEncoder()

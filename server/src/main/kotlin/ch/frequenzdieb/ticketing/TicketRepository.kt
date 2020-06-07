@@ -8,5 +8,5 @@ import reactor.core.publisher.Mono
 @Repository
 interface TicketRepository : ReactiveMongoRepository<Ticket, String> {
 	fun findAllBySubscription_IdAndEvent_Id(subscriptionId: String, eventId: String): Flux<Ticket>
-	fun countTicketsByType_NameAndEvent_Id(typeId: String, eventId: String): Mono<Long>
+	fun countTicketsByType_IdAndEvent_Id(typeId: String, eventId: String): Mono<Long>
 }

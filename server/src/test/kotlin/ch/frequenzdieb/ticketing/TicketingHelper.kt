@@ -17,7 +17,7 @@ internal class TicketingHelper(
     private val subscriptionHelper: SubscriptionHelper,
     private val ticketTypeHelper: TicketTypeHelper
 ) : BaseHelper(mongoTemplate, Ticket::class.java) {
-    fun createFakeStandingTicket(
+    fun createFakeTicket(
         subscription: Subscription = subscriptionHelper.createSubscriptionForHans(createRandomString(5)).insert(),
         event: Event = concertHelper.createConcert().insert(),
         type: TicketType = ticketTypeHelper.createTicketType().insert()
@@ -29,9 +29,9 @@ internal class TicketingHelper(
             isValid = true
         )
 
-    fun createFakeStandingTicket(
+    fun createFakeTicket(
         amount: Int,
-        ticketProducer: TicketingHelper.() -> Ticket = { createFakeStandingTicket() }
+        ticketProducer: TicketingHelper.() -> Ticket = { createFakeTicket() }
     ): List<Ticket> =
         (1..amount).map {
             ticketProducer()
