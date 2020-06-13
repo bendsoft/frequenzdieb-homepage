@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core'
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { Observable } from 'rxjs'
 import { HttpErrorResponse } from '@angular/common/http'
-import { Ticket } from '../Ticket'
+import { Ticket } from '@bendsoft/ticketing-api'
 
 @Component({
   selector: 'bncr-ticket-scanner-popup',

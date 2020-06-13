@@ -18,6 +18,6 @@ internal class LocationHelper(
         ticketTypes: List<TicketType> = ticketTypeHandler.createTicketType(2).insert()
     ) = Location(
         name = name,
-        ticketTypes = ticketTypes
+        ticketTypeIds = ticketTypes.map { it.id!! }
     )
 }

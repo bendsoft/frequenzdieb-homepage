@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
-import { ApplicationContextService } from '../../common/service/application-context.service'
-import { Event } from '../Event'
 import { catchError } from 'rxjs/operators'
 import { throwError } from 'rxjs'
+import { ApplicationContextService } from '../../common/service/application-context.service'
+import { Event } from '../Event'
 import { LocalizedErrorMessage } from '../../common/LocalizedErrorMessage'
 
 @Injectable({
@@ -16,7 +16,7 @@ export class EventService {
     private httpClient: HttpClient,
     private applicationContext: ApplicationContextService
   ) {
-    this.getEventsApiUrl = `${applicationContext.apiServerUrl}/event`
+    this.getEventsApiUrl = `${applicationContext.apiContext.apiServerUrl}/event`
   }
 
   getEvents() {

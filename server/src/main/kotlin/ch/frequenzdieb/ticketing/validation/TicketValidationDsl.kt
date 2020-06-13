@@ -33,17 +33,12 @@ class TicketValidationDsl(
 
         @TicketValidationMarker
         infix fun Int.availableOfType(ticketTypeId: String) {
-            val validator = ticketingRepository.countTicketsByType_IdAndEvent_Id(
+            val validator = ticketingRepository.countTicketsByTypeIdAndEventId(
                 ticketTypeId,
-                ticket.event.id!!
+                ticket.eventId
             )
                 .filter { minus(it) <= 0.toLong() }
-                .map {
-                    ValidationError(
-                        code = "NO_MORE_TICKETS_AVAILABLE",
-                        value = ticket.type
-                    )
-                }
+                .map { ValidationError("NO_MORE_TICKETS_AVAILABLE") }
 
             validators.add(validator)
             validator.subscribe {

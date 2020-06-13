@@ -23,9 +23,9 @@ internal class TicketingHelper(
         type: TicketType = ticketTypeHelper.createTicketType().insert()
     ) =
         Ticket(
-            subscription = subscription,
-            event = event,
-            type = type,
+            subscriptionId = subscription.id!!,
+            eventId = event.id!!,
+            typeId = type.id!!,
             isValid = true
         )
 

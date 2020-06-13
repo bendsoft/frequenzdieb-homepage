@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core'
-import { BehaviorSubject, Subject } from 'rxjs'
-import { HttpHeaders } from '@angular/common/http'
+import { Inject, Injectable } from '@angular/core'
+import { Subject } from 'rxjs'
+import { ApiContextService, BROWSER_STORAGE } from '@bendsoft/ticketing-api'
 import { Event } from '../../event/Event'
-import { Ticket } from '../../ticketing/Ticket'
+import { Ticket } from '../../../../../ticketing-api/src/ticketing/Ticket'
 import { ScannedTicketLogEntry } from './ScannedTicketLogEntry'
 import { LogUtil } from './LogUtil'
 
@@ -10,36 +10,12 @@ import { LogUtil } from './LogUtil'
   providedIn: 'root'
 })
 export class ApplicationContextService {
-  apiServerUrl = 'https://dev-api.frequenzdieb.ch'
-  // apiServerUrl = 'http://localhost:8085/api'
-
-  db = window.localStorage
-
   scannedTicketsLog$ = new Subject<ScannedTicketLogEntry>()
-  isAuthenticated = new BehaviorSubject(false)
 
-  login(token) {
-    this.db.setItem('jwt', token)
-    this.isAuthenticated.next(true)
-  }
-
-  logout() {
-    this.db.removeItem('jwt')
-    this.isAuthenticated.next(false)
-  }
-
-  createWithAuthorizationHeaders(): Partial<{ headers?: HttpHeaders }> {
-    return {
-      headers: new HttpHeaders(this.createBearerHeader())
-    }
-  }
-
-  createBearerHeader() {
-    return {
-      'Content-Type': 'application/json; charset=utf-8',
-      Authorization: `Bearer ${this.db.getItem('jwt')}`
-    }
-  }
+  constructor(
+    @Inject(BROWSER_STORAGE) public db: Storage,
+    @Inject(ApiContextService) public apiContext: ApiContextService
+  ) {}
 
   setEvent(event: Event) {
     this.db.setItem('event', JSON.stringify(event))

@@ -12,11 +12,9 @@ import javax.validation.constraints.Size
 @Document(collection = "signups")
 @TypeAlias("model.signup")
 data class SignUp(
-    @DBRef
-    val event: Event,
+    val eventId: String,
 
-    @DBRef
-    val subscription: Subscription,
+    val subscriptionId: String,
 
     @field:Size(max = 250, message = "INVALID_INPUT_SIZE")
     val message: String?,

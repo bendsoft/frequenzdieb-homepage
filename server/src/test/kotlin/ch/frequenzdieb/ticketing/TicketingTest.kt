@@ -99,8 +99,8 @@ internal class TicketingTest(
                     restClient.getAuthenticatedAsAdmin()
                         .get().uri { it
                             .path(ticketingRoute)
-                            .queryParam("subscriptionId", fakeTicket.subscription.id)
-                            .queryParam("eventId", fakeTicket.event.id)
+                            .queryParam("subscriptionId", fakeTicket.subscriptionId)
+                            .queryParam("eventId", fakeTicket.eventId)
                             .build()
                         }
                         .accept(MediaType.APPLICATION_JSON)
@@ -131,7 +131,7 @@ internal class TicketingTest(
                     .put().uri("$ticketingRoute/invalidate")
                     .bodyValue(TicketInvalidationRequest(
                         qrCodeValue = ticketService.encoder(fakeTicket.id!!.toByteArray()),
-                        eventId = fakeTicket.event.id!!
+                        eventId = fakeTicket.eventId
                     ))
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()

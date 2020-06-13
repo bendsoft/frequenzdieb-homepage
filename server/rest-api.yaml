@@ -1,0 +1,1217 @@
+openapi: 3.0.0
+info:
+  description: REST-API for the frequenzdieb.ch homepage
+  version: "0.0.1"
+  title: Frequenzdieb REST-API
+  contact:
+    email: band@frequenzdieb.ch
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+servers:
+  - url: https://dev-api.frequenzdieb.ch
+    description: dev api
+  - url: https://api.frequenzdieb.ch
+    description: production api
+
+tags:
+  - name: auth
+    description: Login to get a jwt-token
+  - name: subscriptions
+    description: Subscribe and unsubscribe to the newsletter
+  - name: blog
+    description: Operations available for the blog
+  - name: event
+    description: Operations for events
+  - name: location
+    description: Operations for locations
+  - name: concert
+    description: Concerts are a type of event
+  - name: ticketing
+    description: Operations available for ticketing
+  - name: ticket type
+    description: Operations available for ticket-types
+  - name: ticket type attributes
+    description: Operations available for ticket-type-attributes
+paths:
+  '/subscription':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - subscriptions
+      summary: gets a subscription
+      description: finds a subscription by the given email-address
+      parameters:
+        - in: query
+          name: email
+          description: an email that has been subscribed to
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+      responses:
+        '200':
+          description: the subscription has been found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: something went wrong
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - subscriptions
+      summary: deletes a subscription
+      description: Delete a subscription
+      parameters:
+        - in: query
+          name: searchString
+          description: pass an optional search string for looking up inventory
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+      responses:
+        '200':
+          description: the subscription has been deleted
+        '400':
+          description: something went wrong
+    post:
+      tags:
+        - subscriptions
+      summary: adds an e-mail address as a subscription
+      operationId: addSubscription
+      description: Adds e-mail as a subscription
+      responses:
+        '201':
+          description: subscription created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        description: Subscription to add
+  '/subscription/{id}/confirm':
+    get:
+      tags:
+        - subscriptions
+      summary: confirms a subscription
+      description: Confirm an e-mail address
+      parameters:
+        - in: path
+          name: id
+          description: the id of the subscription to confirm
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+      responses:
+        '200':
+          description: the subscription has been confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: something went wrong
+  '/subscription/{id}/newsletter/subscribe':
+    get:
+      tags:
+        - subscriptions
+      summary: subscribe for the newsletter
+      description: accepted to receive the newsletter
+      parameters:
+        - in: path
+          name: id
+          description: the id of the subscription
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+      responses:
+        '200':
+          description: successfully subscribed to newsletter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: something went wrong
+  '/subscription/{id}/newsletter/unsubscribe':
+    get:
+      tags:
+        - subscriptions
+      summary: unsubscribe for the newsletter
+      description: do not receive the newsletter
+      parameters:
+        - in: path
+          name: id
+          description: the id of the subscription
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+      responses:
+        '200':
+          description: successfully unsubscribed from newsletter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: something went wrong
+  '/subscription/{id}/remove':
+    get:
+      tags:
+        - subscriptions
+      summary: send a email to verify a removal of a subscription
+      parameters:
+        - in: path
+          name: id
+          description: the id of the subscription
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+      responses:
+        '200':
+          description: successfully sent an email
+        '400':
+          description: something went wrong
+  '/subscription/{id}':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - subscriptions
+      summary: gets a subscription
+      description: finds a subscription
+      parameters:
+        - in: path
+          name: id
+          description: the id of the subscription
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+      responses:
+        '200':
+          description: the subscription has been found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '404':
+          description: not found
+    delete:
+      tags:
+        - subscriptions
+      summary: remove a subscription
+      parameters:
+        - in: path
+          name: id
+          description: the id of the subscription
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+        - in: query
+          name: signature
+          description: a signature to verify the request
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: successfully deleted a subscription
+        '400':
+          description: VALIDATION_ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  '/blog/{id}':
+    get:
+      tags:
+        - blog
+      summary: load a blog entry
+      description: load a specific blog entry
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Blog id
+          schema:
+            type: string
+      responses:
+        '201':
+          description: blog entry found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogEntry'
+        '404':
+          description: blog entry not found
+  '/blog':
+    get:
+      tags:
+        - blog
+      summary: load all blog entries
+      description: load all blog entries
+      responses:
+        '201':
+          description: blog entries found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlogEntry'
+        '400':
+          description: invalid input, object invalid
+  '/event/concert':
+    get:
+      tags:
+        - concert
+      summary: find all concerts
+      description: find all concerts
+      responses:
+        '200':
+          description: all concerts in an array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Concert'
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - concert
+      summary: add a new concert
+      description: add a new concert
+      responses:
+        '204':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Concert'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Concert'
+        description: Concert to add
+  '/event/concert/{id}':
+    get:
+      tags:
+        - concert
+      summary: get a concert
+      description: find a concert
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Concert id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: a concert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Concert'
+        '404':
+          description: not found
+  '/event/location/{id}':
+    get:
+      tags:
+        - location
+      summary: find a location
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Event id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+  '/event/location':
+    get:
+      tags:
+        - location
+      summary: find all locations
+      description: find all locations
+      responses:
+        '200':
+          description: all locations in an array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - location
+      summary: add a new location
+      description: add a new location
+      responses:
+        '204':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+        description: Location to add
+  '/event':
+    get:
+      tags:
+        - event
+      summary: find all events
+      responses:
+        '200':
+          description: all events in an array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+  '/event/{id}':
+    get:
+      tags:
+        - event
+      summary: get an event
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Event id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: an event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: not found
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - event
+      summary: remove an event
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Event id
+          schema:
+            type: string
+      responses:
+        '204':
+          description: NO_CONTENT
+        '400':
+          description: VALIDATION_ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  '/event/{eventId}/signup':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - event
+      summary: get all registrations for an event
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          description: Event id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: All registrations for an event
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SignUp'
+    post:
+      tags:
+        - event
+      summary: register as a guest for an event
+      description: register as a guest for an event
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          description: Event id
+          schema:
+            type: string
+      responses:
+        '204':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignUp'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUp'
+        description: Registration to add
+    delete:
+      tags:
+        - event
+      summary: remove a guest for an event
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          description: Event id
+          schema:
+            type: string
+        - in: query
+          name: email
+          description: an email that has been subscribed to
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+      responses:
+        '204':
+          description: NO_CONTENT
+        '400':
+          description: VALIDATION_ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  '/ticketing/type':
+    get:
+      tags:
+        - ticket type
+      summary: get all TicketTypes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TicketType'
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticket type
+      summary: create a TicketType
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketType'
+        description: TicketType to add
+      responses:
+        '204':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketType'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  '/ticketing/type/{id}':
+    get:
+      tags:
+        - ticket type
+      summary: get a TicketType
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: TicketType id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketType'
+        '404':
+          description: NOT_FOUND
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticket type
+      summary: delete a TicketType
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: TicketType id
+          schema:
+            type: string
+      responses:
+        '204':
+          description: NO_CONTENT
+        '400':
+          description: VALIDATION_ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticket type
+      summary: update a TicketType
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: TicketType id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketType'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: NOT_FOUND
+  '/ticketing/type/attribute':
+    get:
+      tags:
+        - ticket type attributes
+      summary: get all TicketAttributes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TicketAttribute'
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticket type attributes
+      summary: create a TicketAttribute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketAttribute'
+        description: TicketAttribute to add
+      responses:
+        '204':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketAttribute'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  '/ticketing/type/attribute/{id}':
+    get:
+      tags:
+        - ticket type attributes
+      summary: get a TicketAttribute
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: TicketAttribute id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketAttribute'
+        '404':
+          description: NOT_FOUND
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticket type attributes
+      summary: delete a TicketAttribute
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: TicketAttribute id
+          schema:
+            type: string
+      responses:
+        '204':
+          description: NO_CONTENT
+        '400':
+          description: VALIDATION_ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticket type attributes
+      summary: update a TicketAttribute
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: TicketAttribute id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketAttribute'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: NOT_FOUND
+  '/ticketing':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticketing
+      summary: get all tickets
+      description: get all tickets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ticket'
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticketing
+      summary: create a new ticket
+      description: create a new ticket
+      responses:
+        '204':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  qrcode:
+                    type: string
+                    description: the qr-code as base64/png image
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - subscriptionId
+                - eventId
+              properties:
+                subscriptionId:
+                  type: string
+                  example: '234567'
+                eventId:
+                  type: string
+                  example: '345678'
+  '/ticketing/invalidate':
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticketing
+      summary: invalidate a ticket
+      description: invalidate a ticket
+      parameters:
+        - in: query
+          name: qrCodeHash
+          description: the value in the qrcode
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - qrCodeHash
+              properties:
+                qrCodeHash:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  '/ticketing/{id}/download':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticketing
+      summary: get a ticket as pdf
+      description: starts a download of a generated pdf-ticket
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Ticket id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ticket as pdf
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: not found
+  '/ticketing/{id}/send':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticketing
+      summary: send ticket in email
+      description: send a ticket as e-email with attached pdf
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Ticket id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ticket sent
+        '404':
+          description: not found
+  '/ticketing/{id}/pay':
+    post:
+      tags:
+        - ticketing
+      summary: create payment for ticket
+      description: returns a model with reference-id that is signed with the secret, only the server and payment-service knows
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Ticket id
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatatransPayment'
+        description: Concert to add
+      responses:
+        '200':
+          description: payment-object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatatransPayment'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  '/security/auth/login':
+    post:
+      tags:
+        - auth
+      summary: get a jwt-token
+      description: get a jwt-token
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: '345678'
+        '401':
+          description: UNAUTHORIZED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationRequest'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    BaseEntity:
+      type: object
+      properties:
+        id:
+          readOnly: true
+          type: string
+          example: '345678'
+        createdDate:
+          readOnly: true
+          type: integer
+          format: int64
+        lastModifiedDate:
+          readOnly: true
+          type: integer
+          format: int64
+    Location:
+      required:
+        - name
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            name:
+              type: string
+              example: 'Smmer Come Back 2042'
+            ticketTypeIds:
+              type: array
+              items:
+                type: string
+    Event:
+      required:
+        - name
+        - date
+        - location
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            name:
+              type: string
+              example: 'Smmer Come Back 2042'
+            date:
+              type: string
+              format: date-time
+              example: '1985-04-12T23:20:50.520Z'
+            ticketTypeIds:
+              type: array
+              items:
+                type: string
+            locationId:
+              type: string
+            terms:
+              type: string
+    Concert:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          properties:
+            liveActs:
+              type: array
+              items:
+                type: string
+    SignUp:
+      required:
+        - event
+        - subscription
+        - acceptedConditions
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            eventId:
+              type: string
+            subscriptionId:
+              type: string
+            message:
+              type: string
+              example: 'bla bla bla'
+            acceptedConditions:
+              type: boolean
+    Subscription:
+      required:
+        - name
+        - surname
+        - email
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            name:
+              type: string
+              example: 'Muster'
+            surname:
+              type: string
+              example: 'Hans'
+            email:
+              type: string
+              example: 'example@example.com'
+            isNewsletterAccepted:
+              type: boolean
+              default: false
+            isConfirmed:
+              readOnly: true
+              type: boolean
+              default: false
+    BlogEntry:
+      required:
+        - title
+        - content
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            title:
+              type: string
+              example: 'Han Solo shot first!'
+            content:
+              type: string
+    Ticket:
+      required:
+        - subscription
+        - event
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            subscriptionId:
+              type: string
+            eventId:
+              type: string
+            isValid:
+              readOnly: true
+              type: boolean
+              default: true
+            ticketTypeId:
+              type: string
+    TicketAttribute:
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+        text:
+          type: string
+        tag:
+          type: string
+        archived:
+          type: boolean
+          default: false
+        validationRules:
+          readOnly: true
+          type: array
+          items:
+            type: string
+    TicketType:
+      required:
+        - name
+        - attributes
+      properties:
+        name:
+          type: string
+        attributeIds:
+          type: array
+          items:
+            type: string
+        validationRules:
+          type: array
+          items:
+            type: string
+    AuthenticationRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    DatatransPayment:
+      type: object
+      required:
+        - amount
+        - currency
+        - reference
+      properties:
+        merchantId:
+          readOnly: true
+          type: string
+          example: '123456'
+        amount:
+          type: string
+          example: '234567'
+        currency:
+          type: string
+          example: '345678'
+        reference:
+          type: string
+          example: '345678'
+        signature:
+          readOnly: true
+          type: string
+          example: 'sdhe4209qth3q0494th0q9834'
+    ValidationError:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+        details:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: object
+        value:
+          type: object
+        nested:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'

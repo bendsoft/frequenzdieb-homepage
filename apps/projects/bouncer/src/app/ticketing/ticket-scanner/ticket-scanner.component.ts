@@ -1,7 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core'
 import { Router } from '@angular/router'
 import { MatDialog } from '@angular/material/dialog'
-import { TicketingService } from '../service/ticketing.service'
+import { TicketingService } from '@bendsoft/ticketing-api'
 import { TicketScannerPopupComponent } from '../ticket-scanner-popup/ticket-scanner-popup.component'
 import { ApplicationContextService } from '../../common/service/application-context.service'
 import { Event } from '../../event/Event'
@@ -25,9 +25,11 @@ export class TicketScannerComponent implements AfterViewInit {
     private dialog: MatDialog,
     private applicationContext: ApplicationContextService
   ) {
-    applicationContext.isAuthenticated.subscribe((isAuthenticated) => {
-      this.isAuthenticationValid = isAuthenticated
-    })
+    applicationContext.apiContext.isAuthenticated.subscribe(
+      (isAuthenticated) => {
+        this.isAuthenticationValid = isAuthenticated
+      }
+    )
 
     this.eventToCheckTicketsFor = applicationContext.getEvent()
   }

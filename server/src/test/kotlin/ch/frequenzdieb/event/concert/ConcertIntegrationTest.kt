@@ -78,7 +78,7 @@ internal class ConcertIntegrationTest(
                 .post().uri("/api/concert")
                 .bodyValue(Concert(
                     name = randomConcertName,
-                    location = randomLocation,
+                    locationId = randomLocation.id!!,
                     date = LocalDateTime.of(2099, 5, 2, 0, 0),
                     liveActs = randomLiveActs,
                     terms = randomTerms
@@ -95,7 +95,7 @@ internal class ConcertIntegrationTest(
                 .post().uri("/api/concert")
                 .bodyValue(Concert(
                     name = randomConcertName,
-                    location = randomLocation,
+                    locationId = randomLocation.id!!,
                     date = LocalDateTime.of(2099, 5, 2, 0, 0),
                     liveActs = randomLiveActs,
                     terms = randomTerms

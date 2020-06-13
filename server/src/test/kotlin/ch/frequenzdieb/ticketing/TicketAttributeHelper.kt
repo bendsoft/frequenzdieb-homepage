@@ -18,7 +18,8 @@ internal class TicketAttributeHelper(
     fun createFakeAttribute() = TicketAttribute(
         key = createRandomString(5),
         value = createRandomString(5),
-        tag = createRandomString(5)
+        tag = createRandomString(5),
+        text = createRandomString(5)
     )
 
     fun createFakeAttribute(

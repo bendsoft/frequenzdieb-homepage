@@ -25,7 +25,10 @@ class AuthHandler {
             .validateEntity()
             .flatMap { authRequest ->
                 accountRepository.findOneByUsername(authRequest.username)
-                    .validateWith(httpStatus = HttpStatus.UNAUTHORIZED) { passwordEncoder.matches(authRequest.password, it.password) }
+                    .validateWith(
+                        errorCode = "UNAUTHORIZED",
+                        httpStatus = HttpStatus.UNAUTHORIZED
+                    ) { passwordEncoder.matches(authRequest.password, it.password) }
                     .map { AuthenticationResult(jwtTokenService.generateToken(it)) }
                     .flatMap { ok().bodyValue(it) }
             }

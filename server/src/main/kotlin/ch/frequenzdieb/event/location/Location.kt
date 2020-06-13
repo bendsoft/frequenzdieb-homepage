@@ -13,6 +13,5 @@ data class Location (
     @Size(min = 2, max = 100, message = "INVALID_INPUT_SIZE")
     val name: String,
 
-    @DBRef
-    val ticketTypes: List<TicketType> = emptyList()
+    val ticketTypeIds: List<String> = emptyList()
 ) : BaseEntity()

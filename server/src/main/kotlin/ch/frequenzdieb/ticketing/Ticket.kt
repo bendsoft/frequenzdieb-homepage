@@ -13,17 +13,14 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "tickets")
 @TypeAlias("model.ticket")
 @CompoundIndexes(
-	CompoundIndex(name = "event_subscription", def = "{'event.id' : 1, 'subscription.id': 1}")
+	CompoundIndex(name = "event_subscription", def = "{'eventId' : 1, 'subscriptionId': 1}")
 )
 data class Ticket(
-	@DBRef
-	val subscription: Subscription,
+	val subscriptionId: String,
 
-	@DBRef
-	val event: Event,
+	val eventId: String,
 
-	@DBRef
-	val type: TicketType,
+	val typeId: String,
 
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	var isValid: Boolean = true

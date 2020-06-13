@@ -1,19 +1,19 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
-val kotlinVersion = "1.3.70"
+val kotlinVersion = "1.3.72"
 val kotestVersion = "4.0.6"
 
 plugins {
 	java
 	idea
 	id("com.palantir.docker") version "0.25.0"
-	id("org.springframework.boot") version "2.2.5.RELEASE"
+	id("org.springframework.boot") version "2.3.0.RELEASE"
 	id("io.spring.dependency-management") version "1.0.9.RELEASE"
 	id("org.unbroken-dome.xjc") version "1.4.3"
-	kotlin("jvm") version "1.3.70"
-	kotlin("plugin.spring") version "1.3.70"
-	kotlin("kapt") version "1.3.70"
+	kotlin("jvm") version "1.3.72"
+	kotlin("plugin.spring") version "1.3.72"
+	kotlin("kapt") version "1.3.72"
 }
 
 group = "ch.frequenzdieb"
@@ -52,6 +52,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
+	compileOnly("org.springdoc:springdoc-openapi-webflux-ui:1.4.0")
+	compileOnly("org.springdoc:springdoc-openapi-kotlin:1.4.0")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.+")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")

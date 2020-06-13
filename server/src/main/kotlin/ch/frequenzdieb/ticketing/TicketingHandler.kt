@@ -9,6 +9,7 @@ import ch.frequenzdieb.email.EMailAttachment
 import ch.frequenzdieb.email.EmailService
 import ch.frequenzdieb.payment.PaymentService
 import ch.frequenzdieb.payment.datatrans.DatatransPayment
+import ch.frequenzdieb.subscription.SubscriptionRepository
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.springframework.context.annotation.Configuration
@@ -23,12 +24,13 @@ import java.net.URI
 @Configuration
 class TicketingHandler(
 	private val ticketingRepository: TicketRepository,
+	private val subscriptionRepository: SubscriptionRepository,
 	private val ticketService: TicketService,
 	private val paymentService: PaymentService<DatatransPayment>,
 	private val emailService: EmailService
 ) {
 	fun findAllBySubscriptionIdAndEventId(req: ServerRequest) =
-		ticketingRepository.findAllBySubscription_IdAndEvent_Id(
+		ticketingRepository.findAllBySubscriptionIdAndEventId(
 			req.readQueryParam("subscriptionId"),
 			req.readQueryParam("eventId")
 		).collectList()
@@ -60,7 +62,7 @@ class TicketingHandler(
 				(_, ticket) -> ticket.isValid
 			}
 			.validateWith ("ANOTHER_EVENT") {
-				(validationRequest, ticket) -> ticket.event.id == validationRequest.eventId
+				(validationRequest, ticket) -> ticket.eventId == validationRequest.eventId
 			}
 			.validateAsyncWith("NOT_PAYED") {
 				(_, ticket) -> paymentService.hasValidPayment(ticket.id!!)
@@ -95,14 +97,15 @@ class TicketingHandler(
 
 	private fun sendTicketByEmail(ticket: Ticket) = GlobalScope.launch {
 		ticketService.createPDF(ticket)
-			.doOnSuccess {
+			.zipToPairWhen { subscriptionRepository.findById(ticket.subscriptionId) }
+			.doOnSuccess { (pdf, subscription) ->
 				emailService.sendEmail(
-					emailAddress = ticket.subscription.email,
+					emailAddress = subscription.email,
 					subject = "Dein Ticket zum Frequenzdieb-Konzert",
 					message = "Anbei dein Ticket. Wir freuen uns auf einen tollen Abend mit dir!",
 					attachment = EMailAttachment(
 						attachmentFilename = createTicketName(ticket),
-						file = it
+						file = pdf
 					)
 				)
 			}.subscribe()

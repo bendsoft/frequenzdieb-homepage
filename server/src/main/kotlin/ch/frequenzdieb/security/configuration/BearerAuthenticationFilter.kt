@@ -1,5 +1,6 @@
 package ch.frequenzdieb.security.configuration
 
+import ch.frequenzdieb.common.Validators.Companion.executeValidation
 import ch.frequenzdieb.security.auth.JwtTokenService
 import ch.frequenzdieb.security.auth.Role
 import io.jsonwebtoken.Claims
@@ -9,7 +10,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
 import org.springframework.stereotype.Component
-import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Mono
 
 @Component
@@ -24,7 +24,11 @@ class BearerAuthenticationFilter(
                 .map { jwtTokenService.getAllClaimsFromToken(extractTokenFromHeader(it)) }
                 .filter { isClaimValid(it) }
                 .doOnError {
-                    throw ResponseStatusException(HttpStatus.UNAUTHORIZED, it.localizedMessage)
+                    executeValidation(
+                        errorCode = "UNAUTHORIZED",
+                        httpStatus = HttpStatus.UNAUTHORIZED,
+                        errorDetails = arrayOf("Reason" to it.localizedMessage)
+                    ) { false }
                 }
                 .map { claims ->
                     UsernamePasswordAuthenticationToken(

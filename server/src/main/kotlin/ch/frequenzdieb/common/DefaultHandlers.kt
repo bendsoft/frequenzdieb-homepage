@@ -1,8 +1,10 @@
 package ch.frequenzdieb.common
 
+import ch.frequenzdieb.common.Validators.Companion.validateAsyncWith
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
 import ch.frequenzdieb.common.Validators.Companion.validateWith
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
+import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.RouterFunctionDsl
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse.created
@@ -18,16 +20,17 @@ object DefaultHandlers {
         GET("/") { repository.getAll() }
         GET("/{id}") { repository.getById(it) }
         POST("/") { repository.create(it) }
-        PUT("/") { repository.update(it) }
+        PUT("/{id}") { repository.update(it) }
         DELETE("/{id}") { repository.delete(it) }
     }
 
     inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.getById(
         request: ServerRequest
-    ) = findAllById { request.pathVariable("id") }
-        .collectList()
-        .flatMap { ok().bodyValue(it) }
-        .switchIfEmpty(notFound().build())
+    ) =
+        findAllById { request.pathVariable("id") }
+            .collectList()
+            .flatMap { ok().bodyValue(it) }
+            .switchIfEmpty(notFound().build())
 
     inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.getAll() =
         findAll()
@@ -37,22 +40,27 @@ object DefaultHandlers {
 
     inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.create(
         request: ServerRequest
-    ) = request.bodyToMono(T::class.java).validateEntity()
-        .flatMap { insert(it) }
-        .flatMap {
-            created(URI.create("${request.path()}/${it.id}"))
-                .bodyValue(it)
-        }
+    ) =
+        request.bodyToMono(T::class.java).validateEntity()
+            .flatMap { insert(it) }
+            .flatMap {
+                created(URI.create("${request.path()}/${it.id}"))
+                    .bodyValue(it)
+            }
 
     inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.update(
         request: ServerRequest
-    ) = request.bodyToMono(T::class.java).validateEntity()
-        .validateWith { !it.id.isNullOrEmpty() }
-        .flatMap { save(it) }
-        .flatMap { ok().bodyValue(it) }
-        .switchIfEmpty(notFound().build())
+    ) =
+        request.bodyToMono(T::class.java).validateEntity()
+            .validateWith { !it.id.isNullOrEmpty() }
+            .validateAsyncWith(
+                httpStatus = HttpStatus.NOT_FOUND
+            ) { existsById(request.pathVariable("id")) }
+            .flatMap { save(it) }
+            .flatMap { ok().bodyValue(it) }
 
     inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.delete(
         request: ServerRequest
-    ) = noContent().build(deleteById(request.pathVariable("id")))
+    ) =
+        noContent().build(deleteById(request.pathVariable("id")))
 }

@@ -14,7 +14,9 @@ class EventHandler {
     lateinit var eventRepository: EventRepository
 
     fun findAll(req: ServerRequest) =
-        ok().body(eventRepository.findAll())
+        eventRepository.findAll()
+            .collectList()
+            .flatMap { ok().bodyValue(it) }
             .switchIfEmpty(notFound().build())
 
     fun findById(req: ServerRequest) =

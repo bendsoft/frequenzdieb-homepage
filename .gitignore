@@ -21,3 +21,5 @@ out/
 ### Docker ###
 */.env
 /.env
+
+/.npmrc

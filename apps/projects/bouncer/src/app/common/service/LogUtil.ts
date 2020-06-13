@@ -1,4 +1,4 @@
-import { Ticket } from '../../ticketing/Ticket'
+import { Ticket } from '../../../../../ticketing-api/src/ticketing/Ticket'
 import { ScannedTicketLogEntry } from './ScannedTicketLogEntry'
 
 export class LogUtil {

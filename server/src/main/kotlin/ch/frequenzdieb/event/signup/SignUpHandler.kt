@@ -28,7 +28,7 @@ class SignUpHandler(
 
     fun create(req: ServerRequest) =
         req.bodyToMono(SignUp::class.java).validateEntity()
-            .validateWith ("INVALID_EVENT_ID") { req.pathVariable("eventId") == it.event.id }
+            .validateWith ("INVALID_EVENT_ID") { req.pathVariable("eventId") == it.eventId }
             .validateAsyncWith("INVALID_EVENT") {
                 eventRepository.findById(req.pathVariable("eventId")).hasElement()
             }
@@ -37,7 +37,7 @@ class SignUpHandler(
             }
             .flatMap { repository.save(it)
                 .flatMap { createdSignup ->
-                    created(URI.create("/event/${it.event.id}/signup/${createdSignup.id}\""))
+                    created(URI.create("/event/${it.eventId}/signup/${createdSignup.id}\""))
                         .bodyValue(it)
                 }
             }

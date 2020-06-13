@@ -23,8 +23,8 @@ export class LogoutComponent {
   errorMsg
 
   constructor(router: Router, applicationContext: ApplicationContextService) {
-    if (applicationContext.isAuthenticated.getValue()) {
-      applicationContext.logout()
+    if (applicationContext.apiContext.isAuthenticated.getValue()) {
+      applicationContext.apiContext.logout()
       this.isLogoutSuccessful = true
       this.startRedirectCountdown(router)
     }

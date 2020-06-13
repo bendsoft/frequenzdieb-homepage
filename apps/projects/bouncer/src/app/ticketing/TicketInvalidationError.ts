@@ -1,4 +1,4 @@
-import { LocalizedErrorMessage } from '../../common/LocalizedErrorMessage'
+import { LocalizedErrorMessage } from '../common/LocalizedErrorMessage'
 
 export class TicketInvalidationError extends LocalizedErrorMessage {
   public static NOT_FOUND = $localize`:@@NotFoundTicketInvalidationErrorMsg:Ticket could not be found`

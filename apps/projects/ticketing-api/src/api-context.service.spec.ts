@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing'
 
-import { LoginService } from './login.service'
+import { ApiContextService } from './api-context.service'
 
-describe('SecurityService', () => {
-  let service: LoginService
+describe('LoginStateServiceService', () => {
+  let service: ApiContextService
 
   beforeEach(() => {
     TestBed.configureTestingModule({})
-    service = TestBed.inject(LoginService)
+    service = TestBed.inject(ApiContextService)
   })
 
   it('should be created', () => {

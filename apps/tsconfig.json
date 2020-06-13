@@ -16,9 +16,8 @@
       "dom"
     ],
     "paths": {
-      "api": [
-        "dist/api/api",
-        "dist/api"
+      "@bendsoft/ticketing-api": [
+        "dist/ticketing-api"
       ]
     }
   },

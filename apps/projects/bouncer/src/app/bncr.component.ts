@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core'
 import { NavigationEnd, NavigationStart, Router } from '@angular/router'
 import { filter } from 'rxjs/operators'
 import { MatSidenav } from '@angular/material/sidenav'
-import { LoginService } from './auth/service/login.service'
+import { LoginService } from '@bendsoft/ticketing-api'
 import { ApplicationContextService } from './common/service/application-context.service'
 import { getAllNavRoutes, NavRoute } from './NavRoute'
 
@@ -31,16 +31,19 @@ export class BncrComponent {
     private applicationContext: ApplicationContextService,
     private router: Router
   ) {
-    applicationContext.isAuthenticated.subscribe((isAuthenticated) => {
-      this.isAuthenticationValid = isAuthenticated
-    })
+    applicationContext.apiContext.isAuthenticated.subscribe(
+      (isAuthenticated) => {
+        this.isAuthenticationValid = isAuthenticated
+      }
+    )
 
     router.events
       .pipe(filter((event) => event instanceof NavigationStart))
       .subscribe((event: NavigationStart) => {
         if (event.url !== NavRoute.LOGIN) {
           if (
-            applicationContext.isAuthenticated.getValue() === false ||
+            applicationContext.apiContext.isAuthenticated.getValue() ===
+              false ||
             !applicationContext.getEvent()
           ) {
             router.navigateByUrl(NavRoute.LOGIN)

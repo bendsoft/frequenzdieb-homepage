@@ -2,6 +2,7 @@ package ch.frequenzdieb.event
 
 import ch.frequenzdieb.common.BaseEntity
 import ch.frequenzdieb.event.location.Location
+import ch.frequenzdieb.ticketing.TicketType
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
@@ -16,8 +17,9 @@ open class Event(
     @Future
     val date: LocalDateTime,
 
-    @DBRef
-    val location: Location,
+    val locationId: String,
+
+    val ticketTypeIds: List<String>,
 
     val terms: String?
 ) : BaseEntity()

@@ -16,14 +16,14 @@ export class SubscriptionService {
     private httpClient: HttpClient,
     private applicationContext: ApplicationContextService
   ) {
-    this.subscriptionRoute = `${applicationContext.apiServerUrl}/subscription`
+    this.subscriptionRoute = `${applicationContext.apiContext.apiServerUrl}/subscription`
   }
 
   get(subscriptionId: string): Observable<Subscription> {
     return this.httpClient
       .get<Subscription>(
         `${this.subscriptionRoute}/${subscriptionId}`,
-        this.applicationContext.createWithAuthorizationHeaders()
+        this.applicationContext.apiContext.createWithAuthorizationHeaders()
       )
       .pipe(
         catchError((response: HttpErrorResponse) =>

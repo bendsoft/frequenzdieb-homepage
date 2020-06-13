@@ -23,27 +23,25 @@ class TemplateParser {
 
     fun createHTMLTemplate(
         template: InputStream,
-        markupReplacementMapCreator: Document.() -> MutableMap<String, Element>
-    ): Document {
-        return DocumentBuilderFactory
-            .newInstance()
-            .newDocumentBuilder()
-            .parse(template)
-            .apply {
-                val markupReplacements = markupReplacementMapCreator()
+        markupReplacementMapSupplier: Document.() -> MutableMap<String, Element>
+    ): Document = DocumentBuilderFactory
+        .newInstance()
+        .newDocumentBuilder()
+        .parse(template)
+        .apply {
+            val markupReplacements = markupReplacementMapSupplier()
 
-                findAllMarkups {
-                    markupReplacements[textContent]
-                        ?.let { replaceMarkup { it } }
-                }
-                normalize()
-
-                logger.info(ByteArrayOutputStream().let { out ->
-                    printDocument(out)
-                    out.toString("UTF-8")
-                })
+            findAllMarkups {
+                markupReplacements[textContent]
+                    ?.let { replaceMarkup { it } }
             }
-    }
+            normalize()
+
+            logger.info(ByteArrayOutputStream().let { out ->
+                printDocument(out)
+                out.toString("UTF-8")
+            })
+        }
 
     private fun Document.printDocument(out: OutputStream) =
         TransformerFactory.newInstance().apply {

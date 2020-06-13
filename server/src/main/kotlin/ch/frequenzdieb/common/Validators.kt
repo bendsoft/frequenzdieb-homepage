@@ -26,7 +26,6 @@ class Validators (
 
         inline fun <reified T> Mono<T>.validateEntity(): Mono<T> =
             doOnNext { entity ->
-                println("validateEntity called for: $entity")
                 BeanPropertyBindingResult(entity, T::class.java.name).let { errors ->
                     webFluxValidator.validate(entity!!, errors)
 
@@ -36,7 +35,7 @@ class Validators (
                             code ="INVALID_ENTITY",
                             nested = errors.allErrors
                                 .mapNotNull {
-                                    ValidationError(it.defaultMessage)
+                                    ValidationError(it.defaultMessage.orEmpty())
                                 }
                         ).throwAsServerResponse()
                     }
@@ -53,16 +52,16 @@ class Validators (
             }
 
         fun <T> Mono<T>.validateAsyncWith(
-            errorMessage: String? = null,
+            errorCode: String = "VALIDATION_ERROR",
+            httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
             vararg errorDetails: Pair<String, Any>,
             asyncPredicate: (param: T) -> Mono<Boolean>
         ): Mono<T> =
             zipToPairWhen { asyncPredicate(it) }
             .flatMap { (entity, checkResult) ->
-                println("validateAsyncWith called for: $entity")
-
                 entity.executeValidation(
-                    errorMessage = errorMessage,
+                    errorCode = errorCode,
+                    httpStatus = httpStatus,
                     errorDetails = errorDetails,
                     predicate = { checkResult }
                 )
@@ -71,16 +70,15 @@ class Validators (
             }
 
         fun <T> Mono<T>.validateWith(
-            errorMessage: String? = null,
+            errorCode: String = "VALIDATION_ERROR",
             validationError: ValidationError? = null,
             httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
             vararg errorDetails: Pair<String, Any>,
             predicate: (param: T) -> Boolean
         ): Mono<T> =
             doOnNext {
-                println("validateWith called for: $it")
                 it.executeValidation(
-                    errorMessage = errorMessage,
+                    errorCode = errorCode,
                     validationError = validationError,
                     httpStatus = httpStatus,
                     errorDetails = errorDetails,
@@ -88,20 +86,17 @@ class Validators (
                 )
             }.log()
 
-        private fun <T> T.executeValidation(
-            errorMessage: String? = null,
+        fun <T> T.executeValidation(
+            errorCode: String = "VALIDATION_ERROR",
             httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
-            errorDetails: Array<out Pair<String, Any>>,
+            errorDetails: Array<out Pair<String, Any>> = emptyArray(),
             validationError: ValidationError? = null,
             predicate: (param: T) -> Boolean
         ) {
-            println("validation executed for: $this")
             if (!predicate(this)) {
-                println("throw error, because: $errorMessage")
-
                 Optional.ofNullable(validationError)
                     .orElse(ValidationError(
-                        code = errorMessage,
+                        code = errorCode,
                         details = errorDetails
                             .takeIf { it.isNotEmpty() }
                             ?.let { mapOf(*it) }

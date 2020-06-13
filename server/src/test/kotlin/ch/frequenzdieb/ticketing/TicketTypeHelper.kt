@@ -17,7 +17,7 @@ internal class TicketTypeHelper(
         validationRules: List<String> = emptyList()
     ) = TicketType(
         name = name,
-        attributes = attributes,
+        attributeIds = attributes.map { it.id!! },
         validationRules = validationRules
     )
 

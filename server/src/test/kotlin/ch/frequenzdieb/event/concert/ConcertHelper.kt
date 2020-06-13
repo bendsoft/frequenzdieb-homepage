@@ -24,7 +24,7 @@ internal class ConcertHelper(
         liveActs = liveActs,
         name = concertName,
         date = date,
-        location = location,
+        locationId = location.id!!,
         terms = terms
     )
 }

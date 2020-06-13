@@ -74,6 +74,7 @@ class SecurityConfig (
             .authorizeExchange()
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
                 .pathMatchers("/api/security/auth/login").permitAll()
+                .pathMatchers("/v3/api-docs/**", "/v3/api-docs.yaml", "/swagger-ui/**", "/swagger-ui.html", "/webjars/swagger-ui/**").permitAll()
             .and()
                 .addFilterAt(bearerAuthenticationFilter, SecurityWebFiltersOrder.FIRST)
                 .addFilterAt(recaptchaFilter, SecurityWebFiltersOrder.AUTHENTICATION)
