@@ -107,6 +107,30 @@ paths:
             schema:
               $ref: '#/components/schemas/Subscription'
         description: Subscription to add
+    put:
+      tags:
+        - subscriptions
+      summary: updates a subscription
+      description: Updates subscription
+      responses:
+        '200':
+          description: subscription update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: INVALID_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        description: Subscription to update
   '/subscription/{id}/confirm':
     get:
       tags:
@@ -125,54 +149,6 @@ paths:
       responses:
         '200':
           description: the subscription has been confirmed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Subscription'
-        '400':
-          description: something went wrong
-  '/subscription/{id}/newsletter/subscribe':
-    get:
-      tags:
-        - subscriptions
-      summary: subscribe for the newsletter
-      description: accepted to receive the newsletter
-      parameters:
-        - in: path
-          name: id
-          description: the id of the subscription
-          required: true
-          schema:
-            type: string
-            minimum: 5
-            maximum: 50
-      responses:
-        '200':
-          description: successfully subscribed to newsletter
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Subscription'
-        '400':
-          description: something went wrong
-  '/subscription/{id}/newsletter/unsubscribe':
-    get:
-      tags:
-        - subscriptions
-      summary: unsubscribe for the newsletter
-      description: do not receive the newsletter
-      parameters:
-        - in: path
-          name: id
-          description: the id of the subscription
-          required: true
-          schema:
-            type: string
-            minimum: 5
-            maximum: 50
-      responses:
-        '200':
-          description: successfully unsubscribed from newsletter
           content:
             application/json:
               schema:
