@@ -24,18 +24,20 @@
         dazu das Passwort ein welches du entweder dem Flyer oder der
         Einladungsemail entnehmen kannst.
       </p>
-      <input
-        type="text"
-        placeholder="passwort"
-        (keydown.enter)="checkPassword()"
-        (keydown.escape)="closePopup()"
-        formControlName="password"
-      />
-      <div class="button" (click)="checkPassword()">
-        <div class="text">
-          Passwort prüfen
-        </div>
-      </div>
+      <mat-form-field appearance="outline">
+        <mat-label>passwort</mat-label>
+        <input
+          type="password"
+          matInput
+          placeholder="passwort"
+          formControlName="password"
+          (keydown.enter)="checkPassword()"
+          (keydown.escape)="closePopup()"
+        /> </mat-form-field
+      ><br />
+      <button mat-raised-button color="accent" (click)="checkPassword()">
+        Passwort prüfen
+      </button>
     </div>
     <div
       class="stage"
@@ -46,10 +48,15 @@
       <p>
         Wieviele Tickets möchtest du bestellen?
       </p>
+      <p class="ticket-overview" *ngIf="concert">
+        <b class="name">{{ concert.name }}</b
+        ><br />
+        {{ concert.date | date: 'dd.MM.yy' }} @ {{ concert.location }}
+      </p>
       <div class="ticket-cart">
         <div class="cart-item">
           <div class="name" *ngIf="concert">
-            {{ concert.date | date: 'dd.MM.yy' }} – {{ concert.name }}
+            {{ ticket.name }}
           </div>
           <div class="price">{{ ticketPrice | number: '1.2' }} CHF</div>
           <div class="amount">

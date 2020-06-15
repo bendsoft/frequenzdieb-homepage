@@ -5,6 +5,14 @@ import { HttpClientModule } from '@angular/common/http'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RECAPTCHA_V3_SITE_KEY, RecaptchaV3Module } from 'ng-recaptcha'
 
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
+
+import { MatInputModule } from '@angular/material/input'
+import { MatSelectModule } from '@angular/material/select'
+import { MatButtonModule } from '@angular/material/button'
+import { MatCheckboxModule } from '@angular/material/checkbox'
+import { MatChipsModule } from '@angular/material/chips'
+
 import { AppRoutingModule } from './app-routing.module'
 import { AppComponent } from './app.component'
 import { HomeComponent } from './home/home.component'
@@ -42,7 +50,13 @@ import { MessageComponent } from './service/common/popup/message/message.compone
     HttpClientModule,
     ReactiveFormsModule,
     FormsModule,
-    RecaptchaV3Module
+    RecaptchaV3Module,
+    BrowserAnimationsModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatChipsModule
   ],
   providers: [
     {
