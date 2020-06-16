@@ -1,4 +1,4 @@
-import { Ticket } from '../../../../../ticketing-api/src/ticketing/Ticket'
+import { Ticket } from '@bendsoft/ticketing-api'
 import { ScannedTicketLogEntry } from './ScannedTicketLogEntry'
 
 export class LogUtil {

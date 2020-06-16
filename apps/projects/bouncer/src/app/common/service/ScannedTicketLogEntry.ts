@@ -1,4 +1,4 @@
-import { Ticket } from '../../../../../ticketing-api/src/ticketing/Ticket'
+import { Ticket } from '@bendsoft/ticketing-api'
 
 export interface ScannedTicketLogEntry {
   date: Date

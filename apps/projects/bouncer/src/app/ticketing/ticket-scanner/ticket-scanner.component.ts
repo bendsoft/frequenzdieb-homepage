@@ -1,10 +1,9 @@
 import { AfterViewInit, Component } from '@angular/core'
 import { Router } from '@angular/router'
 import { MatDialog } from '@angular/material/dialog'
-import { TicketingService } from '@bendsoft/ticketing-api'
+import { Event, TicketingService } from '@bendsoft/ticketing-api'
 import { TicketScannerPopupComponent } from '../ticket-scanner-popup/ticket-scanner-popup.component'
 import { ApplicationContextService } from '../../common/service/application-context.service'
-import { Event } from '../../event/Event'
 import { environment } from '../../../environments/environment'
 
 @Component({

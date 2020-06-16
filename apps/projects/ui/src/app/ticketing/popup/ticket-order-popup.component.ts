@@ -2,7 +2,11 @@ import { AfterViewInit, Component, OnInit } from '@angular/core'
 import { FormBuilder, FormGroup } from '@angular/forms'
 import { Router } from '@angular/router'
 import { HttpResponse } from '@angular/common/http'
-import { Concert, DatatransPayment, SubscriptionService } from '@bendsoft/ticketing-api'
+import {
+  Concert,
+  DatatransPayment,
+  SubscriptionService
+} from '@bendsoft/ticketing-api'
 import { ApiService } from '../../service/common/api/api.service'
 import { OpenPopupsService } from '../../service/common/popup/open-popups.service'
 

@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import { FormControl, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
-import { LoginService } from '@bendsoft/ticketing-api'
-import { Event } from '../../event/Event'
-import { EventService } from '../../event/service/event.service'
+import { Event, EventService, LoginService } from '@bendsoft/ticketing-api'
 import { ApplicationContextService } from '../../common/service/application-context.service'
 
 @Component({
@@ -35,7 +33,7 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     if (this.events.length === 0) {
       this.loadingEvents = true
-      this.eventService.getEvents().subscribe((events) => {
+      this.eventService.getAll().subscribe((events: Event[]) => {
         this.events = events
         this.loadingEvents = false
         this.eventSelect.enable()

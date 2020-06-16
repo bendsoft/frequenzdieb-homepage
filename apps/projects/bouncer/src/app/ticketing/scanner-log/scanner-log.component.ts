@@ -2,15 +2,16 @@ import { Component, Inject, LOCALE_ID, OnDestroy } from '@angular/core'
 import { animate, state, style, transition, trigger } from '@angular/animations'
 import { forkJoin, Subscription as RxSubscription } from 'rxjs'
 import { get, isEmpty } from 'lodash'
-import { delay } from 'rxjs/operators'
 import { formatDate } from '@angular/common'
+import {
+  Event,
+  EventService,
+  Subscription,
+  SubscriptionService
+} from '@bendsoft/ticketing-api'
 import { ApplicationContextService } from '../../common/service/application-context.service'
 import { ScannedTicketLogEntry } from '../../common/service/ScannedTicketLogEntry'
 import { LogUtil } from '../../common/service/LogUtil'
-import { EventService } from '../../event/service/event.service'
-import { SubscriptionService } from '../../subscription/service/subscription.service'
-import { Subscription } from '../../subscription/Subscription'
-import { Event } from '../../event/Event'
 
 enum LogEntryDetailsState {
   COLLAPSED = 'collapsed',
@@ -121,7 +122,7 @@ export class ScannerLogComponent implements OnDestroy {
       }
     } else {
       const detailsLoadingSubscription = this.loadDetails(logEntry).subscribe(
-        (result) => {
+        (result: { subscription: Subscription; event: Event }) => {
           const logEntryDetails = this.loadedDetailsForLogEntry.get(logEntry)
           logEntryDetails.subscription = result.subscription
           logEntryDetails.event = result.event
@@ -144,7 +145,7 @@ export class ScannerLogComponent implements OnDestroy {
         logEntry.ticket.subscriptionId
       ),
       event: this.eventService.get(logEntry.ticket.eventId)
-    }).pipe(delay(2000))
+    })
   }
 
   private onFinishedLoading(logEntry: ScannedTicketLogEntry) {
