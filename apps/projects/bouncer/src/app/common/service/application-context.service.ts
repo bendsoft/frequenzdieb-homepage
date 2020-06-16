@@ -1,8 +1,11 @@
 import { Inject, Injectable } from '@angular/core'
 import { Subject } from 'rxjs'
-import { ApiContextService, BROWSER_STORAGE } from '@bendsoft/ticketing-api'
-import { Event } from '../../event/Event'
-import { Ticket } from '../../../../../ticketing-api/src/ticketing/Ticket'
+import {
+  ApiContextService,
+  BROWSER_STORAGE,
+  Event,
+  Ticket
+} from '@bendsoft/ticketing-api'
 import { ScannedTicketLogEntry } from './ScannedTicketLogEntry'
 import { LogUtil } from './LogUtil'
 
