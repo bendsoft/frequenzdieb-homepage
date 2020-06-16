@@ -1,5 +1,8 @@
 import { AfterViewInit, Component } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
+
+import { clone } from 'lodash'
+import { SubscriptionService } from '@bendsoft/ticketing-api'
 import { ApiService } from '../../../service/common/api/api.service'
 
 @Component({
@@ -11,7 +14,8 @@ export class NewsletterUnsubscribeComponent implements AfterViewInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private api: ApiService
+    private api: ApiService,
+    private subscription: SubscriptionService
   ) {}
 
   animationTime = 4
@@ -22,19 +26,20 @@ export class NewsletterUnsubscribeComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.route.params.subscribe((data) => {
       this.subscriptionId = data.id
-      this.api.unsubscribeFromNewsletterById(this.subscriptionId).subscribe(
-        (answer) => {
+      this.subscription.get(this.subscriptionId).subscribe((subscription) => {
+        if (subscription.isNewsletterAccepted) {
+          const loadedSubscription = clone(subscription)
+          loadedSubscription.isNewsletterAccepted = false
+          this.subscription.update(loadedSubscription).subscribe(
+            (updatedSubscription) => {
+              this.confirmationSuccessful = true
+            },
+            (error) => {}
+          )
+        } else {
           this.confirmationSuccessful = true
-          this.progressLoading = true
-          setTimeout(() => {
-            this.router.navigateByUrl('/home')
-          }, this.animationTime * 1000)
-        },
-        (error) => {
-          console.error(error)
-          this.confirmationSuccessful = false
         }
-      )
+      })
     })
   }
 }
