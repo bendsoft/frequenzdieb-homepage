@@ -1,13 +1,8 @@
 import { Injectable } from '@angular/core'
-import { HttpClient, HttpErrorResponse } from '@angular/common/http'
-import { ReCaptchaV3Service } from 'ng-recaptcha'
-import { merge } from 'lodash'
-
-import { Observable, throwError } from 'rxjs'
-import { catchError, switchMap } from 'rxjs/operators'
-import { Subscription } from './Subscription'
+import { HttpClient } from '@angular/common/http'
+import { Observable } from 'rxjs'
 import { ApiContextService } from '../api-context.service'
-import { LocalizedErrorMessage } from '../common/LocalizedErrorMessage'
+import { Subscription } from '../@types/subscription'
 
 @Injectable({
   providedIn: 'root'
@@ -17,9 +12,7 @@ export class SubscriptionService {
 
   constructor(
     private httpClient: HttpClient,
-    private apiContext: ApiContextService,
-    private localizedErrorMessage: LocalizedErrorMessage,
-    private recaptcha: ReCaptchaV3Service
+    private apiContext: ApiContextService
   ) {
     this.subscriptionRoute = `${apiContext.apiServerUrl}/subscription`
   }
@@ -30,47 +23,31 @@ export class SubscriptionService {
         `${this.subscriptionRoute}/${subscriptionId}`,
         this.apiContext.createWithAuthorizationHeaders()
       )
-      .pipe(
-        catchError((response: HttpErrorResponse) =>
-          throwError(
-            this.localizedErrorMessage.getErrorMessageFromResponse(response)
-          )
-        )
-      )
+      .pipe(this.apiContext.translateServerError())
+  }
+
+  getByEmail(email: string): Observable<Subscription> {
+    return this.apiContext.enrichApiRequestWithRecaptcha(
+      '',
+      (httpOptions) =>
+        this.httpClient
+          .get<Subscription>(`${this.subscriptionRoute}`, httpOptions)
+          .pipe(this.apiContext.translateServerError()),
+      {
+        params: { email }
+      }
+    )
   }
 
   update(updatedSubscription: Subscription) {
-    return this.enrichApiRequestWithRecaptcha(
+    return this.apiContext.enrichApiRequestWithRecaptcha(
       'requestSubscriptionDeletion',
       () => this.httpClient.put(this.subscriptionRoute, updatedSubscription)
     )
   }
 
-  public enrichApiRequestWithRecaptcha<
-    T extends Partial<{
-      params: Record<string, string | string[]>
-    }>,
-    R
-  >(
-    actionName: string,
-    httpRequestCallback: (
-      httpOptions: T & { params: { recaptcha: string } }
-    ) => Observable<R>,
-    options?: T
-  ): Observable<R> {
-    return this.recaptcha.execute(actionName).pipe(
-      switchMap((token) =>
-        httpRequestCallback(
-          merge({}, options, {
-            params: { recaptcha: token }
-          })
-        )
-      )
-    )
-  }
-
-  requestEmailConfirmation(id) {
-    return this.enrichApiRequestWithRecaptcha(
+  requestEmailConfirmation(id: string) {
+    return this.apiContext.enrichApiRequestWithRecaptcha(
       'requestEmailConfirmation',
       (httpOptions) =>
         this.httpClient.get(
@@ -86,36 +63,26 @@ export class SubscriptionService {
     })
   }
 
-  create(
-    email: string,
-    name: string,
-    surname: string,
-    isNewsletterAccepted: boolean
-  ) {
-    return this.enrichApiRequestWithRecaptcha(
+  create(newSubscription: Subscription) {
+    return this.apiContext.enrichApiRequestWithRecaptcha(
       'createSubscription',
       (httpOptions) =>
         this.httpClient.post(
           `${this.subscriptionRoute}`,
-          {
-            name,
-            surname,
-            email,
-            isNewsletterAccepted
-          },
+          newSubscription,
           httpOptions
         )
     )
   }
 
-  delete(id, signature) {
+  delete(id: string, signature: string) {
     return this.httpClient.delete(`${this.subscriptionRoute}/${id}`, {
       params: { signature }
     })
   }
 
-  sendDeletionConfirmationEmail(email) {
-    return this.enrichApiRequestWithRecaptcha(
+  sendDeletionConfirmationEmail(email: string) {
+    return this.apiContext.enrichApiRequestWithRecaptcha(
       'sendDeletionConfirmationEmail',
       (httpOptions) =>
         this.httpClient.get(`${this.subscriptionRoute}/remove`, httpOptions),

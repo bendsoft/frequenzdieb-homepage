@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { Observable, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
-import { Ticket } from './Ticket'
 import { ApiContextService } from '../api-context.service'
 import { LocalizedErrorMessage } from '../common/LocalizedErrorMessage'
+import { Ticket } from '../@types/ticket'
 
 @Injectable({
   providedIn: 'root'

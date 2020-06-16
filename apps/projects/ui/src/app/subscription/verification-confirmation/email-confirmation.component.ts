@@ -1,6 +1,6 @@
 import { AfterViewInit, Component } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { SubscriptionService } from '../../service/subscription/subscription.service'
+import { SubscriptionService } from '@bendsoft/ticketing-api'
 
 @Component({
   selector: 'app-email-confirmation',

@@ -1,14 +1,10 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core'
 import { FormBuilder, FormGroup } from '@angular/forms'
 import { Router } from '@angular/router'
-
 import { HttpResponse } from '@angular/common/http'
-
-import { DatatransPayment } from '../../@types/models'
-
+import { Concert, DatatransPayment, SubscriptionService } from '@bendsoft/ticketing-api'
 import { ApiService } from '../../service/common/api/api.service'
 import { OpenPopupsService } from '../../service/common/popup/open-popups.service'
-import { SubscriptionService } from '../../service/subscription/subscription.service'
 
 @Component({
   selector: 'app-ticket-order-popup',
@@ -32,7 +28,7 @@ export class TicketOrderPopupComponent implements OnInit, AfterViewInit {
 
   ticketFormStage: string = this.ticketFormStages[0]
 
-  concert: any
+  concert: Concert
 
   totalPrice = 0
 
@@ -53,7 +49,7 @@ export class TicketOrderPopupComponent implements OnInit, AfterViewInit {
 
   constructor(
     private api: ApiService,
-    private subscriptionApi: SubscriptionService,
+    private subscriptionService: SubscriptionService,
     public popups: OpenPopupsService,
     private route: Router,
     private formBuilder: FormBuilder
@@ -70,7 +66,7 @@ export class TicketOrderPopupComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.popups.addPopup(this.popupName, this)
-    this.api.getConcert().subscribe((data) => {
+    this.api.getConcert().subscribe((data: Concert) => {
       this.concert = data
     })
   }
@@ -164,8 +160,8 @@ export class TicketOrderPopupComponent implements OnInit, AfterViewInit {
   }
 
   checkEmailConfirmation() {
-    this.subscriptionApi
-      .getSubscription(this.ticketForm.value.email)
+    this.subscriptionService
+      .getByEmail(this.ticketForm.value.email)
       .subscribe((subscribedUser: any) => {
         if (subscribedUser.isConfirmed) {
           this.ticketFormStage = 'payment'
@@ -174,13 +170,13 @@ export class TicketOrderPopupComponent implements OnInit, AfterViewInit {
   }
 
   createNewSubscription() {
-    this.subscriptionApi
-      .createSubscription(
-        this.ticketForm.value.email,
-        this.ticketForm.value.name,
-        this.ticketForm.value.surname,
-        this.ticketForm.value.newsletterAccepted
-      )
+    this.subscriptionService
+      .create({
+        email: this.ticketForm.value.email,
+        name: this.ticketForm.value.name,
+        surname: this.ticketForm.value.surname,
+        isNewsletterAccepted: this.ticketForm.value.newsletterAccepted
+      })
       .subscribe((res: any) => {
         console.log(res)
         this.userId = res.id
@@ -188,11 +184,11 @@ export class TicketOrderPopupComponent implements OnInit, AfterViewInit {
   }
 
   resendConfirmationMail(id) {
-    return this.subscriptionApi.requestEmailConfirmation(id)
+    return this.subscriptionService.requestEmailConfirmation(id)
   }
 
   checkContactInfo() {
-    this.subscriptionApi.getSubscription(this.ticketForm.value.email).subscribe(
+    this.subscriptionService.getByEmail(this.ticketForm.value.email).subscribe(
       (subscribedUser: any) => {
         if (subscribedUser.id && !subscribedUser.isConfirmed) {
           this.resendConfirmationMail(subscribedUser.id).subscribe(

@@ -1,11 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { FormControl } from '@angular/forms'
-
-import { SubscriptionService } from 'projects/ui/src/app/service/subscription/subscription.service'
-
+import { SubscriptionService } from '@bendsoft/ticketing-api'
 import { OpenPopupsService } from '../../../service/common/popup/open-popups.service'
-
 import { Popup } from '../../../service/common/popup/open-popups.interface'
 
 @Component({
@@ -22,7 +19,7 @@ export class NewsletterSubComponent implements OnInit, Popup, OnDestroy {
   isOpen: boolean
 
   constructor(
-    private subscriptionApi: SubscriptionService,
+    private subscriptionService: SubscriptionService,
     public popups: OpenPopupsService,
     private route: Router
   ) {}
@@ -47,8 +44,13 @@ export class NewsletterSubComponent implements OnInit, Popup, OnDestroy {
   }
 
   submitNewsletterSub() {
-    this.subscriptionApi
-      .createSubscription(this.email.value, '', '', true)
+    this.subscriptionService
+      .create({
+        email: this.email.value,
+        surname: '',
+        name: '',
+        isNewsletterAccepted: false
+      })
       .subscribe((data) => {
         console.log(data)
       })

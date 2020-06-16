@@ -11,6 +11,7 @@ plugins {
 	id("org.springframework.boot") version "2.3.0.RELEASE"
 	id("io.spring.dependency-management") version "1.0.9.RELEASE"
 	id("org.unbroken-dome.xjc") version "1.4.3"
+	id("org.openapi.generator") version "4.3.1"
 	kotlin("jvm") version "1.3.72"
 	kotlin("plugin.spring") version "1.3.72"
 	kotlin("kapt") version "1.3.72"
@@ -31,11 +32,13 @@ xjc {
 	includeInMainCompilation = false
 }
 
-val xjcGenerate: org.unbrokendome.gradle.plugins.xjc.XjcGenerate by tasks
-xjcGenerate.source = fileTree("src/main/resources") { include("*.xsd") }
-
 val compileKotlin: KotlinCompile by tasks
+val xjcGenerate: org.unbrokendome.gradle.plugins.xjc.XjcGenerate by tasks
+
+xjcGenerate.source = fileTree("src/main/resources") { include("*.xsd") }
 compileKotlin.dependsOn(xjcGenerate)
+
+compileKotlin.dependsOn("openApiGenerate")
 
 sourceSets {
 	main { java { srcDir(xjcGenerate.outputDirectory) } }
@@ -90,6 +93,28 @@ dependencies {
 }
 
 tasks {
+	val pathToGeneratedAngular = "$projectDir/../apps/dist/generated"
+
+	openApiGenerate {
+		generatorName.set("typescript-angular")
+		inputSpec.set("$projectDir/rest-api.yaml")
+		outputDir.set(pathToGeneratedAngular)
+		configOptions.putAll(mutableMapOf(
+			"legacyDiscriminatorBehavior" to "false",
+			"supportsES6" to "true"
+		))
+	}
+
+	register("generateModelsForTicketingApi", Copy::class) {
+		val openApiGenerate by existing
+		dependsOn(openApiGenerate)
+		from("$pathToGeneratedAngular/model") {
+			exclude("*AllOf.ts")
+			exclude("inline*.ts")
+		}
+		into("$projectDir/../apps/projects/ticketing-api/src/@types")
+	}
+
 	register("unpack", Copy::class) {
 		val bootJar by existing
 		dependsOn(bootJar)

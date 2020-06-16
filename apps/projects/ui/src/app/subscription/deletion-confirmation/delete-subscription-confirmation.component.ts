@@ -1,6 +1,6 @@
 import { AfterViewInit, Component } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { ApiService } from '../../service/common/api/api.service'
+import { SubscriptionService } from '@bendsoft/ticketing-api'
 
 @Component({
   selector: 'app-delete-subscription-confirmation',
@@ -17,7 +17,7 @@ export class DeleteSubscriptionConfirmationComponent implements AfterViewInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private api: ApiService
+    private api: SubscriptionService
   ) {}
 
   ngAfterViewInit() {
@@ -26,21 +26,19 @@ export class DeleteSubscriptionConfirmationComponent implements AfterViewInit {
     })
     this.route.params.subscribe((data) => {
       this.subscriptionId = data.id
-      this.api
-        .deleteSubscription(this.subscriptionId, this.signature)
-        .subscribe(
-          (answer) => {
-            this.confirmationSuccessful = true
-            this.progressLoading = true
-            setTimeout(() => {
-              this.router.navigateByUrl('/home')
-            }, this.animationTime * 1000)
-          },
-          (error) => {
-            console.error(error)
-            this.confirmationSuccessful = false
-          }
-        )
+      this.api.delete(this.subscriptionId, this.signature).subscribe(
+        (answer) => {
+          this.confirmationSuccessful = true
+          this.progressLoading = true
+          setTimeout(() => {
+            this.router.navigateByUrl('/home')
+          }, this.animationTime * 1000)
+        },
+        (error) => {
+          console.error(error)
+          this.confirmationSuccessful = false
+        }
+      )
     })
   }
 }

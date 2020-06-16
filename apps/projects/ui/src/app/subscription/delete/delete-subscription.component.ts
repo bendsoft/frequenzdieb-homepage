@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { FormBuilder, FormGroup } from '@angular/forms'
-import { ApiService } from '../../service/common/api/api.service'
+import { SubscriptionService } from '@bendsoft/ticketing-api'
 
 @Component({
   selector: 'app-delete-subscription',
@@ -9,7 +9,10 @@ import { ApiService } from '../../service/common/api/api.service'
 })
 export class DeleteSubscriptionComponent implements OnInit {
   deleteAccountForm: FormGroup
-  constructor(private formBuilder: FormBuilder, private api: ApiService) {
+  constructor(
+    private formBuilder: FormBuilder,
+    private api: SubscriptionService
+  ) {
     this.deleteAccountForm = this.formBuilder.group({
       email: ''
     })
@@ -22,7 +25,7 @@ export class DeleteSubscriptionComponent implements OnInit {
   deleteAccount() {
     console.log(this.deleteAccountForm.value.email)
     this.api
-      .requestSubscriptionDeletion(this.deleteAccountForm.value.email)
+      .sendDeletionConfirmationEmail(this.deleteAccountForm.value.email)
       .subscribe((res) => {
         console.log(res)
       })

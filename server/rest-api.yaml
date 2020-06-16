@@ -1103,38 +1103,44 @@ components:
       required:
         - key
         - value
-      properties:
-        key:
-          type: string
-        value:
-          type: string
-        text:
-          type: string
-        tag:
-          type: string
-        archived:
-          type: boolean
-          default: false
-        validationRules:
-          readOnly: true
-          type: array
-          items:
-            type: string
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            key:
+              type: string
+            value:
+              type: string
+            text:
+              type: string
+            tag:
+              type: string
+            archived:
+              type: boolean
+              default: false
+            validationRules:
+              readOnly: true
+              type: array
+              items:
+                type: string
     TicketType:
       required:
         - name
         - attributes
-      properties:
-        name:
-          type: string
-        attributeIds:
-          type: array
-          items:
-            type: string
-        validationRules:
-          type: array
-          items:
-            type: string
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            name:
+              type: string
+            attributeIds:
+              type: array
+              items:
+                type: string
+            validationRules:
+              type: array
+              items:
+                type: string
     AuthenticationRequest:
       type: object
       required:
