@@ -1,8 +1,6 @@
 package ch.frequenzdieb.event.concert
 
 import ch.frequenzdieb.event.Event
-import ch.frequenzdieb.event.location.Location
-import ch.frequenzdieb.ticketing.TicketType
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime

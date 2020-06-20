@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 
-import { OpenPopupsService } from '../service/common/popup/open-popups.service'
+import { OpenPopupsService } from '../common/popup/open-popups.service'
 
 declare var $: any
 

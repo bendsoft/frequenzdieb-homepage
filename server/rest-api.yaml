@@ -28,7 +28,7 @@ tags:
     description: Operations for locations
   - name: concert
     description: Concerts are a type of event
-  - name: ticketing
+  - name: ticket
     description: Operations available for ticketing
   - name: ticket type
     description: Operations available for ticket-types
@@ -529,7 +529,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-  '/ticketing/type':
+  '/ticket/type':
     get:
       tags:
         - ticket type
@@ -568,7 +568,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-  '/ticketing/type/{id}':
+  '/ticket/type/{id}':
     get:
       tags:
         - ticket type
@@ -639,7 +639,7 @@ paths:
                 $ref: '#/components/schemas/ValidationError'
         '404':
           description: NOT_FOUND
-  '/ticketing/type/attribute':
+  '/ticket/type/attribute':
     get:
       tags:
         - ticket type attributes
@@ -678,7 +678,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-  '/ticketing/type/attribute/{id}':
+  '/ticket/type/attribute/{id}':
     get:
       tags:
         - ticket type attributes
@@ -749,12 +749,12 @@ paths:
                 $ref: '#/components/schemas/ValidationError'
         '404':
           description: NOT_FOUND
-  '/ticketing':
+  '/ticket':
     get:
       security:
         - bearerAuth: []
       tags:
-        - ticketing
+        - ticket
       summary: get all tickets
       description: get all tickets
       responses:
@@ -770,7 +770,7 @@ paths:
       security:
         - bearerAuth: []
       tags:
-        - ticketing
+        - ticket
       summary: create a new ticket
       description: create a new ticket
       responses:
@@ -798,6 +798,7 @@ paths:
               required:
                 - subscriptionId
                 - eventId
+                - typeId
               properties:
                 subscriptionId:
                   type: string
@@ -805,12 +806,15 @@ paths:
                 eventId:
                   type: string
                   example: '345678'
-  '/ticketing/invalidate':
+                typeId:
+                  type: string
+                  example: '345678'
+  '/ticket/invalidate':
     put:
       security:
         - bearerAuth: []
       tags:
-        - ticketing
+        - ticket
       summary: invalidate a ticket
       description: invalidate a ticket
       parameters:
@@ -845,12 +849,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-  '/ticketing/{id}/download':
+  '/ticket/{id}/download':
     get:
       security:
         - bearerAuth: []
       tags:
-        - ticketing
+        - ticket
       summary: get a ticket as pdf
       description: starts a download of a generated pdf-ticket
       parameters:
@@ -870,12 +874,12 @@ paths:
                 format: binary
         '404':
           description: not found
-  '/ticketing/{id}/send':
+  '/ticket/{id}/send':
     get:
       security:
         - bearerAuth: []
       tags:
-        - ticketing
+        - ticket
       summary: send ticket in email
       description: send a ticket as e-email with attached pdf
       parameters:
@@ -890,10 +894,10 @@ paths:
           description: ticket sent
         '404':
           description: not found
-  '/ticketing/{id}/pay':
+  '/ticket/{id}/pay':
     post:
       tags:
-        - ticketing
+        - ticket
       summary: create payment for ticket
       description: returns a model with reference-id that is signed with the secret, only the server and payment-service knows
       parameters:

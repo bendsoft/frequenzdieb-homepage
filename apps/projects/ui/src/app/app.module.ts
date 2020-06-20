@@ -26,7 +26,7 @@ import { ImpressumComponent } from './footer/impressum/impressum.component'
 import { DataProcessingAgreementComponent } from './footer/data-processing-agreement/data-processing-agreement.component'
 import { DeleteSubscriptionComponent } from './subscription/delete/delete-subscription.component'
 import { DeleteSubscriptionConfirmationComponent } from './subscription/deletion-confirmation/delete-subscription-confirmation.component'
-import { MessageComponent } from './service/common/popup/message/message.component'
+import { MessageComponent } from './common/popup/message/message.component'
 
 @NgModule({
   declarations: [

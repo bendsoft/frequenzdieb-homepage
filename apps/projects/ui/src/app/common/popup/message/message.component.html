@@ -1,0 +1,17 @@
+<div class="popup-backdrop" [class.open]="popups.isPopupOpen('message')"></div>
+<div class="popup" [class.open]="popups.isPopupOpen('message')">
+  <div class="close-button" (click)="popups.setPopupOpen('message', false)">
+    x
+  </div>
+  <ng-container *ngIf="data">
+    <h2 *ngIf="data.title">
+      {{ data.title }}
+    </h2>
+    <p>
+      {{ data.text }}
+    </p>
+  </ng-container>
+  <div class="button" (click)="popups.setPopupOpen('message', false)">
+    OK
+  </div>
+</div>

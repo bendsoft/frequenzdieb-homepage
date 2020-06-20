@@ -2,8 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { FormControl } from '@angular/forms'
 import { SubscriptionService } from '@bendsoft/ticketing-api'
-import { OpenPopupsService } from '../../../service/common/popup/open-popups.service'
-import { Popup } from '../../../service/common/popup/open-popups.interface'
+import { OpenPopupsService } from '../../../common/popup/open-popups.service'
+import { Popup } from '../../../common/popup/open-popups.interface'
 
 @Component({
   selector: 'app-newsletter-sub',

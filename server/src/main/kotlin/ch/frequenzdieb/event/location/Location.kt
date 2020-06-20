@@ -1,9 +1,7 @@
 package ch.frequenzdieb.event.location
 
 import ch.frequenzdieb.common.BaseEntity
-import ch.frequenzdieb.ticketing.TicketType
 import org.springframework.data.annotation.TypeAlias
-import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 import javax.validation.constraints.Size
 

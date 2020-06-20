@@ -21,16 +21,15 @@ import javax.xml.transform.stream.StreamResult
 class TemplateParser {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun createHTMLTemplate(
-        template: InputStream,
-        markupReplacementMapSupplier: Document.() -> MutableMap<String, Element>
+    fun parseHTMLTemplate(
+        template: InputStream
     ): Document = DocumentBuilderFactory
         .newInstance()
         .newDocumentBuilder()
         .parse(template)
-        .apply {
-            val markupReplacements = markupReplacementMapSupplier()
 
+    fun replaceMarkups(document: Document, markupReplacements: Map<String, Element>): Document =
+        document.apply {
             findAllMarkups {
                 markupReplacements[textContent]
                     ?.let { replaceMarkup { it } }
