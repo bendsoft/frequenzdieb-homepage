@@ -1,10 +1,9 @@
-import { Inject, Injectable } from '@angular/core'
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
-import { catchError, tap } from 'rxjs/operators'
-import { throwError } from 'rxjs'
+import { Injectable } from '@angular/core'
+import { HttpClient, HttpParams } from '@angular/common/http'
+import { tap } from 'rxjs/operators'
 import { LoginRequest } from '../../../@types/loginRequest'
 import { LoginResponse } from '../../../@types/loginResponse'
-import { LocalizedErrorMessage } from '../../../common/LocalizedErrorMessage'
+import { defaultErrorTranslator } from '../../../common/ErrorMessageHandler'
 import { ApiContextService } from '../../../api-context.service'
 
 @Injectable({
@@ -15,9 +14,7 @@ export class LoginService {
 
   constructor(
     private httpClient: HttpClient,
-    private apiContext: ApiContextService,
-    @Inject(LocalizedErrorMessage)
-    private localizedErrorMessage: LocalizedErrorMessage
+    private apiContext: ApiContextService
   ) {
     this.loginApiUrl = `${apiContext.apiServerUrl}/security/auth/login`
   }
@@ -32,11 +29,7 @@ export class LoginService {
           },
           () => this.apiContext.logout()
         ),
-        catchError((response: HttpErrorResponse) =>
-          throwError(
-            this.localizedErrorMessage.getErrorMessageFromResponse(response)
-          )
-        )
+        defaultErrorTranslator()
       )
   }
 }

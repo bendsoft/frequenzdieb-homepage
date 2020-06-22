@@ -1,7 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core'
 import { Router } from '@angular/router'
 import { MatDialog } from '@angular/material/dialog'
-import { Event, TicketingService } from '@bendsoft/ticketing-api'
+import { Event, TicketService } from '@bendsoft/ticketing-api'
 import { TicketScannerPopupComponent } from '../ticket-scanner-popup/ticket-scanner-popup.component'
 import { ApplicationContextService } from '../../common/service/application-context.service'
 import { environment } from '../../../environments/environment'
@@ -19,7 +19,7 @@ export class TicketScannerComponent implements AfterViewInit {
   isScanningEnabled = true
 
   constructor(
-    private ticketingService: TicketingService,
+    private ticketingService: TicketService,
     private router: Router,
     private dialog: MatDialog,
     private applicationContext: ApplicationContextService

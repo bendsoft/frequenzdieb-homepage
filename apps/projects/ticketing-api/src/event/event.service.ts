@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http'
 import { ApiContextService } from '../api-context.service'
 import { Event } from '../@types/event'
 import { Concert } from '../@types/concert'
+import { defaultErrorTranslator } from '../common/ErrorMessageHandler'
 
 @Injectable({
   providedIn: 'root'
@@ -20,18 +21,18 @@ export class EventService {
   getAll() {
     return this.httpClient
       .get<Event[]>(this.getEventsApiUrl)
-      .pipe(this.apiContext.translateServerError())
+      .pipe(defaultErrorTranslator())
   }
 
   get(eventId: string) {
     return this.httpClient
       .get<Event>(`${this.getEventsApiUrl}/${eventId}`)
-      .pipe(this.apiContext.translateServerError())
+      .pipe(defaultErrorTranslator())
   }
 
   getConcert(concertId: string) {
     return this.httpClient
       .get<Concert>(`${this.getEventsApiUrl}/concert/${concertId}`)
-      .pipe(this.apiContext.translateServerError())
+      .pipe(defaultErrorTranslator())
   }
 }

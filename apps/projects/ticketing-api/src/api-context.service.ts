@@ -1,10 +1,9 @@
-import { Inject, Injectable, InjectionToken } from '@angular/core'
-import { BehaviorSubject, Observable, throwError } from 'rxjs'
-import { HttpErrorResponse, HttpHeaders } from '@angular/common/http'
-import { catchError, switchMap } from 'rxjs/operators'
+import { Inject, Injectable, InjectionToken, Optional } from '@angular/core'
+import { BehaviorSubject, Observable } from 'rxjs'
+import { HttpHeaders } from '@angular/common/http'
+import { switchMap } from 'rxjs/operators'
 import { merge } from 'lodash'
 import { ReCaptchaV3Service } from 'ng-recaptcha'
-import { LocalizedErrorMessage } from './common/LocalizedErrorMessage'
 
 export const BROWSER_STORAGE = new InjectionToken<Storage>('Browser Storage', {
   providedIn: 'root',
@@ -20,18 +19,9 @@ export class ApiContextService {
 
   isAuthenticated = new BehaviorSubject(false)
 
-  translateServerError<T>() {
-    return catchError.bind((response: HttpErrorResponse) =>
-      throwError(
-        this.localizedErrorMessage.getErrorMessageFromResponse(response)
-      )
-    )
-  }
-
   constructor(
     @Inject(BROWSER_STORAGE) public db: Storage,
-    private recaptcha: ReCaptchaV3Service,
-    private localizedErrorMessage: LocalizedErrorMessage
+    @Optional() private recaptcha: ReCaptchaV3Service
   ) {}
 
   login(token) {
@@ -65,20 +55,24 @@ export class ApiContextService {
   >(
     actionName: string,
     httpRequestCallback: (
-      httpOptions: T & { params: { recaptcha: string } }
+      httpOptions: (T & { params: { recaptcha: string } }) | T
     ) => Observable<R>,
     options?: T
   ): Observable<R> {
-    return this.recaptcha.execute(actionName).pipe(
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore
-      switchMap((token: string) =>
-        httpRequestCallback(
-          merge({}, options, {
-            params: { recaptcha: token }
-          })
+    if (this.recaptcha !== null) {
+      return this.recaptcha.execute(actionName).pipe(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // @ts-ignore
+        switchMap((token: string) =>
+          httpRequestCallback(
+            merge({}, options, {
+              params: { recaptcha: token }
+            })
+          )
         )
       )
-    )
+    }
+
+    return httpRequestCallback(options)
   }
 }

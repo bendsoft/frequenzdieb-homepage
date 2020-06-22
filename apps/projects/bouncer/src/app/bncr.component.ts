@@ -2,7 +2,6 @@ import { Component, ViewChild } from '@angular/core'
 import { NavigationEnd, NavigationStart, Router } from '@angular/router'
 import { filter } from 'rxjs/operators'
 import { MatSidenav } from '@angular/material/sidenav'
-import { LoginService } from '@bendsoft/ticketing-api'
 import { ApplicationContextService } from './common/service/application-context.service'
 import { getAllNavRoutes, NavRoute } from './NavRoute'
 
@@ -27,7 +26,6 @@ export class BncrComponent {
   NavRoute = NavRoute
 
   constructor(
-    private loginService: LoginService,
     private applicationContext: ApplicationContextService,
     private router: Router
   ) {

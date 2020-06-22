@@ -1,22 +1,21 @@
 import { HttpErrorResponse } from '@angular/common/http'
 import { cloneDeep } from 'lodash'
-import { Injectable } from '@angular/core'
+import { catchError } from 'rxjs/operators'
+import { throwError } from 'rxjs'
 
-@Injectable({
-  providedIn: 'root'
-})
-export class LocalizedErrorMessage {
-  public INVALID_REQUEST = 'Something went wrong with the Request.'
-  public UNKNOWN_ERROR = 'An unknown Error has happened.'
-  public SERVER_ERROR = 'An Error happened on the server-side.'
-  public NOT_FOUND = 'Not found.'
-  public NOT_AUTHORIZED = 'Not Authorized or Access-Token missing or invalid.'
+class ErrorMessageHandler {
+  public static INVALID_REQUEST = 'Something went wrong with the Request.'
+  public static UNKNOWN_ERROR = 'An unknown Error has happened.'
+  public static SERVER_ERROR = 'An Error happened on the server-side.'
+  public static NOT_FOUND = 'Not found.'
+  public static NOT_AUTHORIZED =
+    'Not Authorized or Access-Token missing or invalid.'
 
-  valueOf(key: string) {
+  static valueOf(key: string) {
     return this[key] || ''
   }
 
-  getErrorMessageFromResponse(response: HttpErrorResponse) {
+  static getErrorMessageFromResponse(response: HttpErrorResponse) {
     const localizedResponse = cloneDeep(response)
 
     switch (response.status) {
@@ -30,7 +29,7 @@ export class LocalizedErrorMessage {
         localizedResponse.message = this.INVALID_REQUEST
         break
       default: {
-        if (LocalizedErrorMessage.hasServerError(response)) {
+        if (ErrorMessageHandler.hasServerError(response)) {
           localizedResponse.message = this.SERVER_ERROR
         }
         const errorMessage = this.valueOf(response.message)
@@ -47,4 +46,13 @@ export class LocalizedErrorMessage {
   private static hasServerError(response: HttpErrorResponse) {
     return response.status / 100 >= 5
   }
+}
+
+export function defaultErrorTranslator(
+  translator = (response: HttpErrorResponse) =>
+    ErrorMessageHandler.getErrorMessageFromResponse(response)(response)
+) {
+  return catchError((response: HttpErrorResponse) =>
+    throwError(translator(response))
+  )
 }

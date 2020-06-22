@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component } from '@angular/core'
 import { FormControl, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { Event, EventService, LoginService } from '@bendsoft/ticketing-api'
@@ -9,7 +9,7 @@ import { ApplicationContextService } from '../../common/service/application-cont
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   hide = true
   passwordInput = new FormControl('')
 
@@ -27,10 +27,8 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private loginService: LoginService,
     private eventService: EventService,
-    private applicationContextService: ApplicationContextService
-  ) {}
-
-  ngOnInit(): void {
+    private applicationContext: ApplicationContextService
+  ) {
     if (this.events.length === 0) {
       this.loadingEvents = true
       this.eventService.getAll().subscribe((events: Event[]) => {
@@ -52,7 +50,7 @@ export class LoginComponent implements OnInit {
   login() {
     if (!this.isLoginPossible()) return
 
-    this.applicationContextService.setEvent(this.eventSelect.value)
+    this.applicationContext.setEvent(this.eventSelect.value)
 
     this.loginService
       .login({

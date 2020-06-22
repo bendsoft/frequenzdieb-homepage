@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
 import { ApiContextService } from '../api-context.service'
 import { Ticket } from '../@types/ticket'
+import { defaultErrorTranslator } from '../common/ErrorMessageHandler'
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,7 @@ export class TicketService {
         { qrCodeValue, eventId },
         this.apiContext.createWithAuthorizationHeaders()
       )
-      .pipe(this.apiContext.translateServerError())
+      .pipe(defaultErrorTranslator())
   }
 
   createPayment(
@@ -34,6 +35,6 @@ export class TicketService {
   ) {
     return this.httpClient
       .post<Ticket>(`${this.ticketRoute}/${ticketId}/pay`, paymentInformation)
-      .pipe(this.apiContext.translateServerError())
+      .pipe(defaultErrorTranslator())
   }
 }
