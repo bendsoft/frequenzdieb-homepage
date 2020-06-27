@@ -1,5 +1,6 @@
 package ch.frequenzdieb.ticket
 
+import ch.frequenzdieb.common.ErrorCode
 import ch.frequenzdieb.common.RequestParamReader.readQueryParam
 import ch.frequenzdieb.common.Validators.Companion.validateAsyncWith
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
@@ -47,7 +48,7 @@ class TicketHandler(
 
 	fun createPaymentForTicket(req: ServerRequest) =
 		req.bodyToMono(DatatransPayment::class.java).validateEntity()
-			.validateAsyncWith("INVALID_TICKET_ID")
+			.validateAsyncWith(ErrorCode.TICKET_ID_INVALID)
 				{ ticketingRepository.existsById(req.pathVariable("id")) }
 			.flatMap { datatransPayment ->
 				datatransPayment.reference = req.pathVariable("id")
@@ -58,13 +59,13 @@ class TicketHandler(
 	fun invalidate(req: ServerRequest) =
 		req.bodyToMono(TicketInvalidationRequest::class.java).validateEntity()
 			.zipToPairWhen { ticketingRepository.findById(ticketService.decoder(it.qrCodeValue)) }
-			.validateWith ("ALREADY_USED") {
+			.validateWith (ErrorCode.TICKET_ALREADY_USED) {
 				(_, ticket) -> ticket.isValid
 			}
-			.validateWith ("ANOTHER_EVENT") {
+			.validateWith (ErrorCode.TICKET_FOR_ANOTHER_EVENT) {
 				(validationRequest, ticket) -> ticket.eventId == validationRequest.eventId
 			}
-			.validateAsyncWith("NOT_PAYED") {
+			.validateAsyncWith(ErrorCode.TICKET_NOT_PAID) {
 				(_, ticket) -> paymentService.hasValidPayment(ticket.id!!)
 			}
 			.flatMap { (_, ticket) ->

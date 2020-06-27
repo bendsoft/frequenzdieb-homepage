@@ -4,6 +4,7 @@ import { HttpHeaders } from '@angular/common/http'
 import { switchMap } from 'rxjs/operators'
 import { merge } from 'lodash'
 import { ReCaptchaV3Service } from 'ng-recaptcha'
+import { ErrorMessageHandler } from './common/error-message-handler.service'
 
 export const BROWSER_STORAGE = new InjectionToken<Storage>('Browser Storage', {
   providedIn: 'root',
@@ -14,6 +15,8 @@ export const BROWSER_STORAGE = new InjectionToken<Storage>('Browser Storage', {
   providedIn: 'root'
 })
 export class ApiContextService {
+  static errorMessageHandlerInstance
+
   // apiServerUrl = 'https://dev-api.frequenzdieb.ch'
   apiServerUrl = 'http://localhost:8085/api'
 
@@ -21,8 +24,11 @@ export class ApiContextService {
 
   constructor(
     @Inject(BROWSER_STORAGE) public db: Storage,
+    @Inject(ErrorMessageHandler) messageHandler,
     @Optional() private recaptcha: ReCaptchaV3Service
-  ) {}
+  ) {
+    ApiContextService.errorMessageHandlerInstance = messageHandler
+  }
 
   login(token) {
     this.db.setItem('jwt', token)

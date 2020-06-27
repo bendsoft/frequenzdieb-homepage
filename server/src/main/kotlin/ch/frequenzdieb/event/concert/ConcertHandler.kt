@@ -20,11 +20,6 @@ class ConcertHandler(
             .flatMap { ok().bodyValue(it) }
             .switchIfEmpty(notFound().build())
 
-    fun findById(req: ServerRequest) =
-        eventRepository.findById(req.pathVariable("id"))
-            .flatMap { ok().bodyValue(it) }
-            .switchIfEmpty(notFound().build())
-
     fun create(req: ServerRequest) =
         req.bodyToMono(Concert::class.java).validateEntity()
             .flatMap {

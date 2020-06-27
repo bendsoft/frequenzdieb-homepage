@@ -32,11 +32,10 @@ class Validators (
                     if (errors.hasErrors()) {
                         ValidationError (
                             value = entity,
-                            code ="INVALID_ENTITY",
-                            nested = errors.allErrors
-                                .mapNotNull {
-                                    ValidationError(it.defaultMessage.orEmpty())
-                                }
+                            code = ErrorCode.ENTITY_INVALID,
+                            details = mapOf(
+                                "reason" to errors.allErrors
+                            )
                         ).throwAsServerResponse()
                     }
                 }
@@ -46,13 +45,13 @@ class Validators (
             signature: String,
             vararg additionalValuesInSignature: String
         ) =
-            validateWith("INVALID_SIGNATURE") {
+            validateWith(ErrorCode.SIGNATURE_INVALID) {
                 !it.id.isNullOrEmpty()
                     && signatureFactory.createSignature(it.id!!, *additionalValuesInSignature) != signature
             }
 
         fun <T> Mono<T>.validateAsyncWith(
-            errorCode: String = "VALIDATION_ERROR",
+            errorCode: ErrorCode = ErrorCode.VALIDATION_ERROR,
             httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
             vararg errorDetails: Pair<String, Any>,
             asyncPredicate: (param: T) -> Mono<Boolean>
@@ -70,7 +69,7 @@ class Validators (
             }
 
         fun <T> Mono<T>.validateWith(
-            errorCode: String = "VALIDATION_ERROR",
+            errorCode: ErrorCode = ErrorCode.VALIDATION_ERROR,
             validationError: ValidationError? = null,
             httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
             vararg errorDetails: Pair<String, Any>,
@@ -87,7 +86,7 @@ class Validators (
             }.log()
 
         fun <T> T.executeValidation(
-            errorCode: String = "VALIDATION_ERROR",
+            errorCode: ErrorCode = ErrorCode.VALIDATION_ERROR,
             httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
             errorDetails: Array<out Pair<String, Any>> = emptyArray(),
             validationError: ValidationError? = null,
@@ -113,7 +112,7 @@ class Validators (
                     }
                 } catch (addressException: AddressException) {
                     ValidationError(
-                        "INVALID_EMAIL",
+                        ErrorCode.EMAIL_INVALID,
                         mapOf("reason" to addressException.localizedMessage)
                     ).throwAsServerResponse()
                 }

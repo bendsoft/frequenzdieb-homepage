@@ -14,16 +14,10 @@ import { MatSidenavModule } from '@angular/material/sidenav'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
 import { MatInputModule } from '@angular/material/input'
-import {
-  MAT_FORM_FIELD_DEFAULT_OPTIONS,
-  MatFormFieldModule
-} from '@angular/material/form-field'
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldModule } from '@angular/material/form-field'
 import { MatExpansionModule } from '@angular/material/expansion'
 import { ZXingScannerModule } from '@zxing/ngx-scanner'
-import {
-  MAT_DIALOG_DEFAULT_OPTIONS,
-  MatDialogModule
-} from '@angular/material/dialog'
+import { MAT_DIALOG_DEFAULT_OPTIONS, MatDialogModule } from '@angular/material/dialog'
 import { ServiceWorkerModule } from '@angular/service-worker'
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 import { MatSelectModule } from '@angular/material/select'
@@ -31,12 +25,11 @@ import { MatProgressBarModule } from '@angular/material/progress-bar'
 import { SyncComponent } from './ticket/sync/sync.component'
 import { ScannerLogComponent } from './ticket/scanner-log/scanner-log.component'
 import { LogoutComponent } from './auth/logout/logout.component'
+import { LoginComponent } from './auth/login/login.component'
 import { TicketScannerPopupComponent } from './ticket/ticket-scanner-popup/ticket-scanner-popup.component'
 import { environment } from '../environments/environment.prod'
-import { LoginComponent } from './auth/login/login.component'
 import { AppRoutingModule } from './app-routing.module'
 import { TicketScannerComponent } from './ticket/ticket-scanner/ticket-scanner.component'
-
 import { BncrComponent } from './bncr.component'
 
 registerLocaleData(localeDeCH, 'de-CH', localeDeCHExtra)

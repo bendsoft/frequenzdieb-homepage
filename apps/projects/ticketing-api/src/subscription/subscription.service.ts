@@ -2,18 +2,17 @@ import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { ApiContextService } from '../api-context.service'
 import { Subscription } from '../@types/subscription'
-import { defaultErrorTranslator } from '../common/ErrorMessageHandler'
+import { catchServerError } from '../common/error-message-handler.service'
 
 @Injectable({
   providedIn: 'root'
 })
 export class SubscriptionService {
   private readonly subscriptionRoute: string
+  private readonly serverErrorCatcher
 
-  constructor(
-    private httpClient: HttpClient,
-    private apiContext: ApiContextService
-  ) {
+  constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {
+    this.serverErrorCatcher = catchServerError()
     this.subscriptionRoute = `${apiContext.apiServerUrl}/subscription`
   }
 
@@ -23,7 +22,7 @@ export class SubscriptionService {
         `${this.subscriptionRoute}/${subscriptionId}`,
         this.apiContext.createWithAuthorizationHeaders()
       )
-      .pipe(defaultErrorTranslator())
+      .pipe(this.serverErrorCatcher)
   }
 
   getByEmail(email: string) {
@@ -32,7 +31,7 @@ export class SubscriptionService {
       (httpOptions) =>
         this.httpClient
           .get<Subscription>(`${this.subscriptionRoute}`, httpOptions)
-          .pipe(defaultErrorTranslator()),
+          .pipe(this.serverErrorCatcher),
       {
         params: { email }
       }
@@ -40,12 +39,8 @@ export class SubscriptionService {
   }
 
   update(updatedSubscription: Subscription) {
-    return this.apiContext.enrichApiRequestWithRecaptcha(
-      'requestSubscriptionDeletion',
-      () =>
-        this.httpClient
-          .put(this.subscriptionRoute, updatedSubscription)
-          .pipe(defaultErrorTranslator())
+    return this.apiContext.enrichApiRequestWithRecaptcha('requestSubscriptionDeletion', () =>
+      this.httpClient.put(this.subscriptionRoute, updatedSubscription).pipe(this.serverErrorCatcher)
     )
   }
 
@@ -53,10 +48,7 @@ export class SubscriptionService {
     return this.apiContext.enrichApiRequestWithRecaptcha(
       'requestEmailConfirmation',
       (httpOptions) =>
-        this.httpClient.get(
-          `${this.subscriptionRoute}/${id}/resend-confirmation`,
-          httpOptions
-        )
+        this.httpClient.get(`${this.subscriptionRoute}/${id}/resend-confirmation`, httpOptions)
     )
   }
 
@@ -65,16 +57,14 @@ export class SubscriptionService {
       .get(`${this.subscriptionRoute}/${id}/confirm`, {
         params: { signature }
       })
-      .pipe(defaultErrorTranslator())
+      .pipe(this.serverErrorCatcher)
   }
 
   create(newSubscription: Subscription) {
-    return this.apiContext.enrichApiRequestWithRecaptcha(
-      'createSubscription',
-      (httpOptions) =>
-        this.httpClient
-          .post(`${this.subscriptionRoute}`, newSubscription, httpOptions)
-          .pipe(defaultErrorTranslator())
+    return this.apiContext.enrichApiRequestWithRecaptcha('createSubscription', (httpOptions) =>
+      this.httpClient
+        .post(`${this.subscriptionRoute}`, newSubscription, httpOptions)
+        .pipe(this.serverErrorCatcher)
     )
   }
 
@@ -83,7 +73,7 @@ export class SubscriptionService {
       .delete(`${this.subscriptionRoute}/${id}`, {
         params: { signature }
       })
-      .pipe(defaultErrorTranslator())
+      .pipe(this.serverErrorCatcher)
   }
 
   sendDeletionConfirmationEmail(email: string) {
@@ -92,7 +82,7 @@ export class SubscriptionService {
       (httpOptions) =>
         this.httpClient
           .get(`${this.subscriptionRoute}/remove`, httpOptions)
-          .pipe(defaultErrorTranslator()),
+          .pipe(this.serverErrorCatcher),
       {
         params: { email }
       }

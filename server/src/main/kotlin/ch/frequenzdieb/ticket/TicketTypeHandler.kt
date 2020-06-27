@@ -1,5 +1,6 @@
 package ch.frequenzdieb.ticket
 
+import ch.frequenzdieb.common.ErrorCode
 import ch.frequenzdieb.common.Validators.Companion.validateAsyncWith
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
 import org.springframework.context.annotation.Configuration
@@ -15,7 +16,7 @@ class TicketTypeHandler(
     fun create(req: ServerRequest) =
         req.bodyToMono(TicketType::class.java).validateEntity()
             .validateAsyncWith(
-                errorCode = "DUPLICATE_KEY",
+                errorCode = ErrorCode.TICKET_TYPE_DUPLICATE_KEY,
                 errorDetails = *arrayOf("reason" to "Cannot add attributes with the same key")
             ) { ticketType ->
                 ticketAttributeRepository.findAllById(ticketType.attributeIds)

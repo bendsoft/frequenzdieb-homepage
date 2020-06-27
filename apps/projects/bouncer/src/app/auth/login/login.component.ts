@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 import { FormControl, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
-import { Event, EventService, LoginService } from '@bendsoft/ticketing-api'
+import { ApiErrorStateMatcher, Event, EventService, LoginService } from '@bendsoft/ticketing-api'
 import { ApplicationContextService } from '../../common/service/application-context.service'
 
 @Component({
@@ -11,7 +11,9 @@ import { ApplicationContextService } from '../../common/service/application-cont
 })
 export class LoginComponent {
   hide = true
-  passwordInput = new FormControl('')
+
+  apiErrorState = new ApiErrorStateMatcher()
+  passwordInput = new FormControl('', this.apiErrorState.apiErrorValidator())
 
   events: Event[] = []
   loadingEvents = false
@@ -41,24 +43,29 @@ export class LoginComponent {
 
   isLoginPossible() {
     return (
-      this.passwordInput.value &&
-      this.passwordInput.value.length > 0 &&
-      !!this.eventSelect.value
+      this.passwordInput.value && this.passwordInput.value.length > 0 && !!this.eventSelect.value
     )
   }
 
   login() {
     if (!this.isLoginPossible()) return
 
-    this.applicationContext.setEvent(this.eventSelect.value)
-
     this.loginService
       .login({
         username: 'admin',
         password: this.passwordInput.value
       })
-      .subscribe(() => {
-        this.router.navigateByUrl('/scan')
-      })
+      .subscribe(
+        () => {
+          this.applicationContext.setEvent(this.eventSelect.value)
+          this.router.navigateByUrl('/scan')
+        },
+        (error) => {
+          this.apiErrorState.errorMessage = error.message
+          this.passwordInput.updateValueAndValidity({
+            onlySelf: true
+          })
+        }
+      )
   }
 }

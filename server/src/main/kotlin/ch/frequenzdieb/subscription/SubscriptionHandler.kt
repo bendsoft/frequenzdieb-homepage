@@ -1,5 +1,6 @@
 package ch.frequenzdieb.subscription
 
+import ch.frequenzdieb.common.ErrorCode
 import ch.frequenzdieb.common.RequestParamReader.readQueryParamAsync
 import ch.frequenzdieb.common.Validators.Companion.checkSignature
 import ch.frequenzdieb.common.Validators.Companion.validateEMail
@@ -71,9 +72,9 @@ class SubscriptionHandler(
 
     fun update(req: ServerRequest) =
         req.bodyToMono(Subscription::class.java).validateEntity()
-            .validateWith ("SUBSCRIPTION_INVALID_ID") { !it.id.isNullOrEmpty() }
+            .validateWith (ErrorCode.SUBSCRIPTION_INVALID_ID) { !it.id.isNullOrEmpty() }
             .zipWhen { subscriptionRepository.findById(it.id!!) }
-            .validateWith("SUBSCRIPTION_NOT_EXISTS") { !it.t2.id.isNullOrEmpty() }
+            .validateWith(ErrorCode.SUBSCRIPTION_NOT_EXISTS) { !it.t2.id.isNullOrEmpty() }
             .doOnNext {
                 if (it.t1.email != it.t2.email) {
                     it.t2.isConfirmed = false
@@ -131,7 +132,7 @@ class SubscriptionHandler(
             .flatMap { signature ->
                 subscriptionRepository.findById(req.pathVariable("id"))
                     .checkSignature(signature)
-                    .validateWith("ALREADY_CONFIRMED") { it.isConfirmed }
+                    .validateWith(ErrorCode.SUBSCRIPTION_ALREADY_CONFIRMED) { it.isConfirmed }
                     .flatMap {
                         it.isConfirmed = true
                         subscriptionRepository.save(it)

@@ -1,5 +1,6 @@
 package ch.frequenzdieb.ticket
 
+import ch.frequenzdieb.common.ErrorCode
 import ch.frequenzdieb.common.TemplateParser
 import ch.frequenzdieb.common.Validators.Companion.executeValidation
 import ch.frequenzdieb.common.zipToPairWhen
@@ -54,7 +55,7 @@ class TicketService(
 		}.orEmpty()
 
 	fun createPDF(ticket: Ticket): Mono<ByteArrayResource> {
-		ticket.executeValidation("SUBSCRIPTION_MISSING") { ticket.subscriptionId.isNotEmpty() }
+		ticket.executeValidation(ErrorCode.TICKET_MISSING_SUBSCRIPTION) { ticket.subscriptionId.isNotEmpty() }
 
 		return templateParser.parseHTMLTemplate(
 			resourceLoader.getResource("classpath:ticket_template.html").inputStream
@@ -135,7 +136,7 @@ class TicketService(
 					.filter { !it.tag.isNullOrEmpty() }
 					.forEach { attribute ->
 						attribute.executeValidation(
-							errorCode = "DUPLICATE_TICKET_TEMPLATE_TAG",
+							errorCode = ErrorCode.TICKET_DUPLICATE_TEMPLATE_TAG,
 							errorDetails = arrayOf("reason" to "The tag \"${attribute.tag}\" has already been used")
 						) { !markupReplacements.containsKey(it.tag) }
 

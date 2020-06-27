@@ -8,6 +8,8 @@
   "peerDependencies": {
     "@angular/common": "~9.1.9",
     "@angular/core": "~9.1.9",
+    "@angular/material": "~9.1.9",
+    "@angular/forms": "~9.1.9",
     "@angular/localize": "~9.1.9",
     "lodash": "~4.17.15",
     "rxjs": "~6.5.4",
@@ -16,6 +18,8 @@
   "devDependencies": {
     "@angular/common": "~9.1.9",
     "@angular/core": "~9.1.9",
+    "@angular/material": "~9.1.9",
+    "@angular/forms": "~9.1.9",
     "@angular/localize": "~9.1.9",
     "lodash": "~4.17.15",
     "rxjs": "~6.5.4",

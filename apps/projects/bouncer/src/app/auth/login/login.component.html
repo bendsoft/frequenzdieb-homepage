@@ -1,21 +1,25 @@
 <form class="login-form" (keydown.enter)="login()">
 
   <mat-form-field class="form-item">
-    <mat-label i18n="login page|input label for password field@@PswFieldLabel">Password</mat-label>
-    <input matInput [type]="hide ? 'password' : 'text'" [formControl]="passwordInput">
-    <button mat-icon-button matSuffix (click)="hide = !hide" i18n-aria-label="login page|aria-label for password show or hide button@@PasswordShowHideAriaLabel" aria-label="Hide password" [attr.aria-pressed]="hide">
-      <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-    </button>
-  </mat-form-field>
-
-  <mat-form-field class="form-item">
     <mat-label *ngIf="loadingEvents" i18n="login page|information, that there are events loaded from the backend@@LoadingEventsMsg">Loading Events ...</mat-label>
     <mat-label *ngIf="!loadingEvents" i18n="login page|label for event-select field@@ChooseEventLabel">Choose event</mat-label>
     <mat-select required [formControl]="eventSelect">
       <mat-option *ngFor="let event of events" [value]="event">{{ event.name }}</mat-option>
     </mat-select>
-    <mat-error *ngIf="eventSelect.hasError('required')" i18n="login page|error message if the user did not select an event@@NoEventSelectedError">Please choose an Event</mat-error>
+    <mat-error
+      *ngIf="eventSelect.hasError('required')"
+      i18n="login page|error message if the user did not select an event@@NoEventSelectedError"
+    >Please choose an Event</mat-error>
     <mat-progress-bar *ngIf="loadingEvents" mode="indeterminate"></mat-progress-bar>
+  </mat-form-field>
+
+  <mat-form-field class="form-item">
+    <mat-label i18n="login page|input label for password field@@PswFieldLabel">Password</mat-label>
+    <input matInput [type]="hide ? 'password' : 'text'" [formControl]="passwordInput" [errorStateMatcher]="apiErrorState">
+    <button mat-icon-button matSuffix (click)="hide = !hide" i18n-aria-label="login page|aria-label for password show or hide button@@PasswordShowHideAriaLabel" aria-label="Hide password" [attr.aria-pressed]="hide">
+      <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+    </button>
+    <mat-error *ngIf="passwordInput.hasError('apiError')">{{ apiErrorState.errorMessage }}</mat-error>
   </mat-form-field>
 
   <button

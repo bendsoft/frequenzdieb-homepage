@@ -1,5 +1,6 @@
 package ch.frequenzdieb.security.configuration
 
+import ch.frequenzdieb.common.ErrorCode
 import ch.frequenzdieb.common.Validators.Companion.executeValidation
 import ch.frequenzdieb.security.auth.JwtTokenService
 import ch.frequenzdieb.security.auth.Role
@@ -25,7 +26,7 @@ class BearerAuthenticationFilter(
                 .filter { isClaimValid(it) }
                 .doOnError {
                     executeValidation(
-                        errorCode = "UNAUTHORIZED",
+                        errorCode = ErrorCode.NOT_AUTHORIZED,
                         httpStatus = HttpStatus.UNAUTHORIZED,
                         errorDetails = arrayOf("Reason" to it.localizedMessage)
                     ) { false }

@@ -1,5 +1,6 @@
 package ch.frequenzdieb.security.auth
 
+import ch.frequenzdieb.common.ErrorCode
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
 import ch.frequenzdieb.common.Validators.Companion.validateWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,7 +27,7 @@ class AuthHandler {
             .flatMap { authRequest ->
                 accountRepository.findOneByUsername(authRequest.username)
                     .validateWith(
-                        errorCode = "UNAUTHORIZED",
+                        errorCode = ErrorCode.NOT_AUTHORIZED,
                         httpStatus = HttpStatus.UNAUTHORIZED
                     ) { passwordEncoder.matches(authRequest.password, it.password) }
                     .map { AuthenticationResult(jwtTokenService.generateToken(it)) }

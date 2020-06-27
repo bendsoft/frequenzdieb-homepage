@@ -48,13 +48,11 @@ class SubscriptionRoutes(
         pathMatchers(HttpMethod.DELETE, "$subscriptionRoute/{id}").permitAll()
 
         // Allow deletion only to admin
-        pathMatchers(HttpMethod.DELETE, subscriptionRoute).hasRole(Role.ADMIN.toString())
+        pathMatchers(HttpMethod.DELETE, subscriptionRoute)
+            .hasRole(Role.ADMIN.toString())
 
         // All others must at least be human
-        pathMatchers("$subscriptionRoute/**").hasAnyRole(
-            Role.ADMIN.toString(),
-            Role.USER.toString(),
-            Role.HUMAN.toString()
-        )
+        pathMatchers("$subscriptionRoute/**")
+            .hasAnyRole(Role.ADMIN.toString(), Role.USER.toString(), Role.HUMAN.toString())
     }
 }

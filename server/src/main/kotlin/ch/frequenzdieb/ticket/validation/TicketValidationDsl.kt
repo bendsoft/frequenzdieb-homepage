@@ -1,5 +1,6 @@
 package ch.frequenzdieb.ticket.validation
 
+import ch.frequenzdieb.common.ErrorCode
 import ch.frequenzdieb.common.ValidationError
 import ch.frequenzdieb.ticket.Ticket
 import ch.frequenzdieb.ticket.TicketRepository
@@ -38,7 +39,7 @@ class TicketValidationDsl(
                 ticket.eventId
             )
                 .filter { minus(it) <= 0.toLong() }
-                .map { ValidationError("NO_MORE_TICKETS_AVAILABLE") }
+                .map { ValidationError(ErrorCode.NO_MORE_TICKETS_AVAILABLE) }
 
             validators.add(validator)
             validator.subscribe {
@@ -50,7 +51,7 @@ class TicketValidationDsl(
     private fun handleCollectedValidationErrors() {
         if (collectedErrors.isNotEmpty()) {
             ValidationError(
-                code = "TICKET_VALIDATION_FAILED",
+                code = ErrorCode.TICKET_VALIDATION_FAILED,
                 nested = collectedErrors
             ).throwAsServerResponse()
         }

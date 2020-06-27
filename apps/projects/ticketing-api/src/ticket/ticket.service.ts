@@ -3,18 +3,18 @@ import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
 import { ApiContextService } from '../api-context.service'
 import { Ticket } from '../@types/ticket'
-import { defaultErrorTranslator } from '../common/ErrorMessageHandler'
+import { catchServerError } from '../common/error-message-handler.service'
 
 @Injectable({
   providedIn: 'root'
 })
 export class TicketService {
   private readonly ticketRoute = `${this.apiContext.apiServerUrl}/ticket/`
+  private readonly serverErrorCatcher
 
-  constructor(
-    private httpClient: HttpClient,
-    private apiContext: ApiContextService
-  ) {}
+  constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {
+    this.serverErrorCatcher = catchServerError()
+  }
 
   invalidate(qrCodeValue: string, eventId: string): Observable<Ticket> {
     return this.httpClient
@@ -23,7 +23,7 @@ export class TicketService {
         { qrCodeValue, eventId },
         this.apiContext.createWithAuthorizationHeaders()
       )
-      .pipe(defaultErrorTranslator())
+      .pipe(this.serverErrorCatcher)
   }
 
   createPayment(
@@ -35,6 +35,6 @@ export class TicketService {
   ) {
     return this.httpClient
       .post<Ticket>(`${this.ticketRoute}/${ticketId}/pay`, paymentInformation)
-      .pipe(defaultErrorTranslator())
+      .pipe(this.serverErrorCatcher)
   }
 }

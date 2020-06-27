@@ -82,7 +82,7 @@ class SecurityConfig (
                 .apply {
                     apiAuthorizeExchangeSpecs.forEach { it() }
                 }
-                .pathMatchers("/api/**").permitAll()
+                .pathMatchers("/api/**").denyAll()
             .and().build()
 
     private fun ServerHttpSecurity.disableCorsWhenDevProfileActive(): ServerHttpSecurity =
