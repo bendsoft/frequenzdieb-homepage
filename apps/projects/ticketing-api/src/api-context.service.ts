@@ -1,7 +1,7 @@
 import { Inject, Injectable, InjectionToken, Optional } from '@angular/core'
-import { BehaviorSubject, Observable } from 'rxjs'
-import { HttpHeaders } from '@angular/common/http'
-import { switchMap } from 'rxjs/operators'
+import { BehaviorSubject, Observable, throwError } from 'rxjs'
+import { HttpErrorResponse, HttpHeaders } from '@angular/common/http'
+import { catchError, switchMap } from 'rxjs/operators'
 import { merge } from 'lodash'
 import { ReCaptchaV3Service } from 'ng-recaptcha'
 import { ErrorMessageHandler } from './common/error-message-handler.service'
@@ -81,4 +81,10 @@ export class ApiContextService {
 
     return httpRequestCallback(options)
   }
+}
+
+export function catchServerError(translator = ApiContextService.errorMessageHandlerInstance) {
+  return catchError((response: HttpErrorResponse) =>
+    throwError(translator.getErrorMessageFromResponse(response))
+  )
 }

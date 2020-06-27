@@ -12,8 +12,8 @@ import { ApplicationContextService } from '../../common/service/application-cont
 export class LoginComponent {
   hide = true
 
-  apiErrorState = new ApiErrorStateMatcher()
-  passwordInput = new FormControl('', this.apiErrorState.apiErrorValidator())
+  passwordInput = new FormControl('')
+  apiErrorState = new ApiErrorStateMatcher(true, this.passwordInput)
 
   events: Event[] = []
   loadingEvents = false
@@ -61,10 +61,7 @@ export class LoginComponent {
           this.router.navigateByUrl('/scan')
         },
         (error) => {
-          this.apiErrorState.errorMessage = error.message
-          this.passwordInput.updateValueAndValidity({
-            onlySelf: true
-          })
+          this.apiErrorState.update(error.message)
         }
       )
   }

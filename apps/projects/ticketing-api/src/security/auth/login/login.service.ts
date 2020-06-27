@@ -3,8 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http'
 import { tap } from 'rxjs/operators'
 import { LoginRequest } from '../../../@types/loginRequest'
 import { LoginResponse } from '../../../@types/loginResponse'
-import { catchServerError } from '../../../common/error-message-handler.service'
-import { ApiContextService } from '../../../api-context.service'
+import { ApiContextService, catchServerError } from '../../../api-context.service'
 
 @Injectable({
   providedIn: 'root'

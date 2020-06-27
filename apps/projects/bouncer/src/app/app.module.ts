@@ -31,6 +31,7 @@ import { environment } from '../environments/environment.prod'
 import { AppRoutingModule } from './app-routing.module'
 import { TicketScannerComponent } from './ticket/ticket-scanner/ticket-scanner.component'
 import { BncrComponent } from './bncr.component'
+import { DEFAULT_ERROR_MESSAGES } from '@bendsoft/ticketing-api'
 
 registerLocaleData(localeDeCH, 'de-CH', localeDeCHExtra)
 
@@ -75,7 +76,13 @@ registerLocaleData(localeDeCH, 'de-CH', localeDeCHExtra)
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { appearance: 'fill' }
     },
-    { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { hasBackdrop: false } }
+    { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { hasBackdrop: false } },
+    {
+      provide: DEFAULT_ERROR_MESSAGES,
+      useValue: {
+        NOT_AUTHORIZED: 'Die Anmeldung ist fehlgeschlagen. Bitte überprüfe das Passwort.'
+      }
+    }
   ],
   bootstrap: [BncrComponent]
 })

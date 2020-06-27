@@ -15,7 +15,11 @@
 
   <mat-form-field class="form-item">
     <mat-label i18n="login page|input label for password field@@PswFieldLabel">Password</mat-label>
-    <input matInput [type]="hide ? 'password' : 'text'" [formControl]="passwordInput" [errorStateMatcher]="apiErrorState">
+    <input matInput
+           [type]="hide ? 'password' : 'text'"
+           [formControl]="passwordInput"
+           [errorStateMatcher]="apiErrorState"
+    >
     <button mat-icon-button matSuffix (click)="hide = !hide" i18n-aria-label="login page|aria-label for password show or hide button@@PasswordShowHideAriaLabel" aria-label="Hide password" [attr.aria-pressed]="hide">
       <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
     </button>

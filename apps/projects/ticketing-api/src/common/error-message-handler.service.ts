@@ -1,9 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http'
 import { cloneDeep, concat, toPairs } from 'lodash'
-import { catchError } from 'rxjs/operators'
-import { throwError } from 'rxjs'
-import { Inject, Injectable, InjectionToken } from '@angular/core'
-import { ApiContextService } from '../api-context.service'
+import { Inject, Injectable, InjectionToken, Optional } from '@angular/core'
 
 export interface DefaultErrorMessages {
   INVALID_REQUEST: string
@@ -33,10 +30,21 @@ export interface SubscriptionErrorMessages {
 }
 
 export const DEFAULT_ERROR_MESSAGES = new InjectionToken<DefaultErrorMessages>(
-  'DefaultErrorMessages',
-  {
-    providedIn: 'root',
-    factory: () => ({
+  'DefaultErrorMessages'
+)
+
+export const TICKET_ERROR_MESSAGES = new InjectionToken<TicketErrorMessages>('TicketErrorMessages')
+
+export const SUBSCRIPTION_ERROR_MESSAGES = new InjectionToken<SubscriptionErrorMessages>(
+  'SubscriptionErrorMessages'
+)
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ErrorMessageHandler {
+  private errorMessages = new Map<string, string>(
+    toPairs({
       INVALID_REQUEST: 'Something went wrong with the Request.',
       UNKNOWN_ERROR: 'An unknown Error has happened.',
       SERVER_ERROR: 'An Error happened on the server-side.',
@@ -45,48 +53,23 @@ export const DEFAULT_ERROR_MESSAGES = new InjectionToken<DefaultErrorMessages>(
       SIGNATURE_INVALID: '',
       VALIDATION_ERROR: '',
       ENTITY_INVALID: '',
-      EMAIL_INVALID: ''
-    })
-  }
-)
-
-export const TICKET_ERROR_MESSAGES = new InjectionToken<TicketErrorMessages>(
-  'TicketErrorMessages',
-  {
-    providedIn: 'root',
-    factory: () => ({
+      EMAIL_INVALID: '',
       TICKET_MISSING_SUBSCRIPTION: '',
       TICKET_ID_INVALID: '',
       TICKET_ALREADY_USED: '',
       TICKET_FOR_ANOTHER_EVENT: '',
       TICKET_NOT_PAID: '',
-      TICKET_DUPLICATE_TEMPLATE_TAG: ''
-    })
-  }
-)
-
-export const SUBSCRIPTION_ERROR_MESSAGES = new InjectionToken<SubscriptionErrorMessages>(
-  'SubscriptionErrorMessages',
-  {
-    providedIn: 'root',
-    factory: () => ({
+      TICKET_DUPLICATE_TEMPLATE_TAG: '',
       SUBSCRIPTION_INVALID_ID: '',
       SUBSCRIPTION_NOT_EXISTS: '',
       SUBSCRIPTION_ALREADY_CONFIRMED: ''
     })
-  }
-)
-
-@Injectable({
-  providedIn: 'root'
-})
-export class ErrorMessageHandler {
-  private errorMessages = new Map<string, string>()
+  )
 
   constructor(
-    @Inject(DEFAULT_ERROR_MESSAGES) private defaultErrorMessages,
-    @Inject(TICKET_ERROR_MESSAGES) private ticketErrorMessages,
-    @Inject(SUBSCRIPTION_ERROR_MESSAGES) private subscriptionErrorMessages
+    @Optional() @Inject(DEFAULT_ERROR_MESSAGES) private defaultErrorMessages,
+    @Optional() @Inject(TICKET_ERROR_MESSAGES) private ticketErrorMessages,
+    @Optional() @Inject(SUBSCRIPTION_ERROR_MESSAGES) private subscriptionErrorMessages
   ) {
     concat(
       toPairs(defaultErrorMessages),
@@ -127,10 +110,4 @@ export class ErrorMessageHandler {
   static hasServerError(response: HttpErrorResponse) {
     return response.status / 100 >= 5
   }
-}
-
-export function catchServerError(translator = ApiContextService.errorMessageHandlerInstance) {
-  return catchError((response: HttpErrorResponse) =>
-    throwError(translator.getErrorMessageFromResponse(response))
-  )
 }

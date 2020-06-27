@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { ApiContextService } from '../api-context.service'
+import { ApiContextService, catchServerError } from '../api-context.service'
 import { Subscription } from '../@types/subscription'
-import { catchServerError } from '../common/error-message-handler.service'
 
 @Injectable({
   providedIn: 'root'
