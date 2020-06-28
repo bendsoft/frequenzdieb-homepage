@@ -90,62 +90,56 @@ class TicketService(
 		eventRepository.findById(ticket.eventId)
 			.zipToPairWhen { locationRepository.findById(it.locationId) }
 			.map { (event, location) ->
-				val markupReplacements = mapOf(
+				mapOf(
 					"TICKET_TITLE" to create.h1 { +event.name },
 					"TICKET_EVENT_INFO" to create.span {
 						style = "margin-top: -20px;"
 						br { +"Wo: ${location.name}" }
 						br { +"Wann: ${event.date.format(DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.GERMAN))}" }
-					}
-				)
-
-				event.terms?.let {
-					markupReplacements.plus(
-						"TICKET_FOOTER" to create.p {
-							style = "font-size: 9px;"
-							+it
-						}
-					)
-				}
-
-				when (event) {
-					is Concert -> {
-						markupReplacements.plus(
+					},
+					"TICKET_FOOTER" to create.p {
+						style = "font-size: 9px;"
+						+event.terms.orEmpty()
+					},
+					when (event) {
+						is Concert -> {
 							"TICKET_SECONDARY_TITLE" to create.span {
 								strong { +"Live Acts: " }
 								ul {
 									event.liveActs.forEach { li { +it } }
 								}
 							}
-						)
+						}
+						else -> {
+							"TICKET_SECONDARY_TITLE" to create.span {
+								+""
+							}
+						}
 					}
-				}
-
-				markupReplacements
+				)
 			}
 
 	private fun Document.addTypeTags(ticket: Ticket): Mono<Map<String, Element>> =
 		ticketTypeRepository.findById(ticket.typeId)
 			.zipToPairWhen { ticketAttributeRepository.findAllById(it.attributeIds).collectList() }
 			.map { (type, attributes) ->
-				val markupReplacements = mapOf("TICKET_TYPE" to create.p {
-					+"Tickettyp: ${type.name}"
-				})
-
 				attributes
 					.filter { !it.tag.isNullOrEmpty() }
-					.forEach { attribute ->
-						attribute.executeValidation(
+					.apply {
+						executeValidation(
 							errorCode = ErrorCode.TICKET_DUPLICATE_TEMPLATE_TAG,
-							errorDetails = arrayOf("reason" to "The tag \"${attribute.tag}\" has already been used")
-						) { !markupReplacements.containsKey(it.tag) }
-
-						markupReplacements.plus(attribute.tag!! to create.p {
-							+"${attribute.key}: ${attribute.value}"
-						})
+							errorDetails = arrayOf("reason" to "Duplicate Tags found in TicketType-Attributes")
+						) { distinctBy { it.tag }.size == size }
 					}
-
-				markupReplacements
+					.map {
+						it.tag!! to create.p {
+							+"${it.text}: ${it.value}"
+						}
+					}
+					.toMap()
+					.plus(mapOf("TICKET_TYPE" to create.p {
+						+"Tickettyp: ${type.name}"
+					}))
 			}
 
 	private fun Document.addSubscriptionTags(ticket: Ticket): Mono<Map<String, Element>> =

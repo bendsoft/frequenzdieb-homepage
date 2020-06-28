@@ -53,11 +53,11 @@ class TicketingRoutes(
 		pathMatchers("$ticketRoute/type/**")
 			.hasRole(Role.ADMIN.toString())
 
+		pathMatchers(HttpMethod.GET, "$ticketRoute/*/*").permitAll()
 		pathMatchers(HttpMethod.GET, ticketRoute).hasRole(Role.ADMIN.toString())
 		pathMatchers(HttpMethod.PUT, "$ticketRoute/invalidate")
 			.hasRole(Role.ADMIN.toString())
 		pathMatchers(HttpMethod.POST, "$ticketRoute/")
 			.hasAnyRole(Role.ADMIN.toString(), Role.USER.toString())
-		pathMatchers(HttpMethod.POST, "$ticketRoute/*/pay").permitAll()
 	}
 }
