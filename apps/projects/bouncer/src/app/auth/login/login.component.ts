@@ -2,6 +2,7 @@ import { Component } from '@angular/core'
 import { FormControl, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { ApiErrorStateMatcher, Event, EventService, LoginService } from '@bendsoft/ticketing-api'
+import { HttpErrorResponse } from '@angular/common/http'
 import { ApplicationContextService } from '../../common/service/application-context.service'
 
 @Component({
@@ -60,9 +61,7 @@ export class LoginComponent {
           this.applicationContext.setEvent(this.eventSelect.value)
           this.router.navigateByUrl('/scan')
         },
-        (error) => {
-          this.apiErrorState.update(error.message)
-        }
+        (response: HttpErrorResponse) => this.apiErrorState.update(response.error)
       )
   }
 }

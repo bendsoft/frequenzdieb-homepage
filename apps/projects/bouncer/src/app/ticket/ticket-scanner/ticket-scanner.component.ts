@@ -2,9 +2,10 @@ import { AfterViewInit, Component } from '@angular/core'
 import { Router } from '@angular/router'
 import { MatDialog } from '@angular/material/dialog'
 import { Event, TicketService } from '@bendsoft/ticketing-api'
+import { isEmpty } from 'lodash'
+import { of } from 'rxjs'
 import { TicketScannerPopupComponent } from '../ticket-scanner-popup/ticket-scanner-popup.component'
 import { ApplicationContextService } from '../../common/service/application-context.service'
-import { environment } from '../../../environments/environment'
 
 @Component({
   selector: 'bncr-ticket-scanner',
@@ -24,11 +25,9 @@ export class TicketScannerComponent implements AfterViewInit {
     private dialog: MatDialog,
     private applicationContext: ApplicationContextService
   ) {
-    applicationContext.apiContext.isAuthenticated.subscribe(
-      (isAuthenticated) => {
-        this.isAuthenticationValid = isAuthenticated
-      }
-    )
+    applicationContext.apiContext.isAuthenticated.subscribe((isAuthenticated) => {
+      this.isAuthenticationValid = isAuthenticated
+    })
 
     this.eventToCheckTicketsFor = applicationContext.getEvent()
   }
@@ -47,13 +46,13 @@ export class TicketScannerComponent implements AfterViewInit {
     if (!this.isScanningEnabled) {
       return
     }
+    this.isScanningEnabled = false
 
     const ticketInvalidationProcess = this.ticketingService.invalidate(
       scannedValue,
       this.eventToCheckTicketsFor.id
     )
 
-    this.isScanningEnabled = false
     this.dialog
       .open(TicketScannerPopupComponent, {
         width: '300px',
@@ -63,15 +62,19 @@ export class TicketScannerComponent implements AfterViewInit {
       })
       .afterClosed()
       .subscribe((checkResult) => {
-        this.isScanningEnabled = true
-        this.applicationContext.addScannedTicketLog(
-          checkResult.ticket || { id: atob(scannedValue) },
-          checkResult.ticketCheckResult
+        const ticket$ = isEmpty(checkResult.ticket)
+          ? this.ticketingService.get(atob(scannedValue))
+          : of(checkResult.ticket)
+
+        ticket$.subscribe(
+          (ticket) => {
+            this.applicationContext.addScannedTicketLog(ticket, checkResult.ticketCheckResult)
+          },
+          (error) => console.log(error),
+          () => {
+            this.isScanningEnabled = true
+          }
         )
       })
-  }
-
-  showTestButton() {
-    return this.isScannerReady && !environment.production
   }
 }

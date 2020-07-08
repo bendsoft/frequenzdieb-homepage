@@ -5,12 +5,4 @@
   ></zxing-scanner>
 
   <mat-spinner *ngIf="!isReady()"></mat-spinner>
-
-  <div *ngIf="showTestButton()">
-    <button mat-raised-button color="accent" (click)="scanSuccessHandler('5e94cb5a63f0ff677e51234')">Test Valid Ticket</button>
-  </div>
-
-  <div *ngIf="showTestButton()">
-    <button mat-raised-button color="accent" (click)="scanSuccessHandler('5e94cb5a63f0ff677e5a1234')">Test Invalid Ticket</button>
-  </div>
 </div>

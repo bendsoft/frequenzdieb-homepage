@@ -42,7 +42,7 @@
               <span i18n="scanned tickets log|details of a log entry@@LogDetailsCustomerName">Customer Name</span>: {{ getLogEntryDetailProperty(logEntry,'subscription.surname') }} {{ getLogEntryDetailProperty(logEntry,'subscription.name') }}
             </mat-list-item>
             <mat-list-item>
-              <span i18n="scanned tickets log|details of a log entry@@LogDetailsBuyDate">Buy Date</span>: {{ formatDateByCurrentLocale(getLogEntryDetailProperty(logEntry,'logEntry.ticket.createdDate')) }}
+              <span i18n="scanned tickets log|details of a log entry@@LogDetailsBuyDate">Buy Date</span>: {{ formatDateByCurrentLocale(getLogEntryProperty(logEntry,'ticket.createdDate')) }}
             </mat-list-item>
             <mat-list-item>
               <span i18n="scanned tickets log|details of a log entry@@LogDetailsStatus">Status</span>: {{ getTicketStatus(logEntry) }}

@@ -22,6 +22,7 @@ import { ServiceWorkerModule } from '@angular/service-worker'
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 import { MatSelectModule } from '@angular/material/select'
 import { MatProgressBarModule } from '@angular/material/progress-bar'
+import { DEFAULT_ERROR_MESSAGES } from '@bendsoft/ticketing-api'
 import { SyncComponent } from './ticket/sync/sync.component'
 import { ScannerLogComponent } from './ticket/scanner-log/scanner-log.component'
 import { LogoutComponent } from './auth/logout/logout.component'
@@ -31,7 +32,6 @@ import { environment } from '../environments/environment.prod'
 import { AppRoutingModule } from './app-routing.module'
 import { TicketScannerComponent } from './ticket/ticket-scanner/ticket-scanner.component'
 import { BncrComponent } from './bncr.component'
-import { DEFAULT_ERROR_MESSAGES } from '@bendsoft/ticketing-api'
 
 registerLocaleData(localeDeCH, 'de-CH', localeDeCHExtra)
 

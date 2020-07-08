@@ -18,6 +18,7 @@ const val ticketRoute = "/api/ticket"
 @Configuration
 class TicketingRoutes(
 	private val ticketingHandler: TicketHandler,
+	private val ticketRepository: TicketRepository,
 	private val ticketTypeHandler: TicketTypeHandler,
 	private val ticketAttributeRepository: TicketAttributeRepository,
 	private val ticketTypeRepository: TicketTypeRepository
@@ -26,6 +27,7 @@ class TicketingRoutes(
 	fun ticketingRouter() = router {
 		ticketRoute.nest {
 			accept(APPLICATION_JSON).nest {
+				GET("/{id}") { ticketRepository.getById(it) }
 				GET("/", ticketingHandler::findAllBySubscriptionIdAndEventId)
 				POST("/", ticketingHandler::create)
 				POST("/{id}/pay", ticketingHandler::createPaymentForTicket)
@@ -55,9 +57,10 @@ class TicketingRoutes(
 
 		pathMatchers(HttpMethod.GET, "$ticketRoute/*/*").permitAll()
 		pathMatchers(HttpMethod.GET, ticketRoute).hasRole(Role.ADMIN.toString())
+		pathMatchers(HttpMethod.GET, "$ticketRoute/*").hasRole(Role.ADMIN.toString())
 		pathMatchers(HttpMethod.PUT, "$ticketRoute/invalidate")
 			.hasRole(Role.ADMIN.toString())
-		pathMatchers(HttpMethod.POST, "$ticketRoute/")
+		pathMatchers(HttpMethod.POST, ticketRoute)
 			.hasAnyRole(Role.ADMIN.toString(), Role.USER.toString())
 	}
 }

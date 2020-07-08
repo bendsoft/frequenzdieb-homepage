@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http'
-import { cloneDeep, concat, toPairs } from 'lodash'
+import { concat, toPairs } from 'lodash'
 import { Inject, Injectable, InjectionToken, Optional } from '@angular/core'
 
 export interface DefaultErrorMessages {
@@ -56,9 +56,9 @@ export class ErrorMessageHandler {
       EMAIL_INVALID: '',
       TICKET_MISSING_SUBSCRIPTION: '',
       TICKET_ID_INVALID: '',
-      TICKET_ALREADY_USED: '',
+      TICKET_ALREADY_USED: 'Ticket has already been used',
       TICKET_FOR_ANOTHER_EVENT: '',
-      TICKET_NOT_PAID: '',
+      TICKET_NOT_PAID: 'No payment found for given ticket',
       TICKET_DUPLICATE_TEMPLATE_TAG: '',
       SUBSCRIPTION_INVALID_ID: '',
       SUBSCRIPTION_NOT_EXISTS: '',
@@ -80,29 +80,55 @@ export class ErrorMessageHandler {
     })
   }
 
-  getErrorMessageFromResponse(response: HttpErrorResponse) {
-    const mappedResponse = cloneDeep(response)
+  private static createHttpErrorResponseWithMessage(
+    originalResponse: HttpErrorResponse,
+    error: string
+  ) {
+    return new HttpErrorResponse({
+      error,
+      headers: originalResponse.headers,
+      status: originalResponse.status,
+      statusText: originalResponse.statusText,
+      url: originalResponse.url
+    })
+  }
 
-    if (this.errorMessages.has(response.message)) {
-      return this.errorMessages.get(response.message)
+  getErrorMessageFromResponse(response: HttpErrorResponse) {
+    const serializedErrorMessage = JSON.parse(response.error.message)
+    if (this.errorMessages.has(serializedErrorMessage.code)) {
+      return ErrorMessageHandler.createHttpErrorResponseWithMessage(
+        response,
+        this.errorMessages.get(serializedErrorMessage.code)
+      )
     }
 
     switch (response.status) {
       case 404:
-        mappedResponse.message = this.defaultErrorMessages.NOT_FOUND
-        return mappedResponse
+        return ErrorMessageHandler.createHttpErrorResponseWithMessage(
+          response,
+          this.defaultErrorMessages.NOT_FOUND
+        )
       case 401:
-        mappedResponse.message = this.defaultErrorMessages.NOT_AUTHORIZED
-        return mappedResponse
+        return ErrorMessageHandler.createHttpErrorResponseWithMessage(
+          response,
+          this.defaultErrorMessages.NOT_AUTHORIZED
+        )
       case 403:
-        mappedResponse.message = this.defaultErrorMessages.INVALID_REQUEST
-        return mappedResponse
+        return ErrorMessageHandler.createHttpErrorResponseWithMessage(
+          response,
+          this.defaultErrorMessages.INVALID_REQUEST
+        )
       default: {
         if (ErrorMessageHandler.hasServerError(response)) {
-          mappedResponse.message = this.defaultErrorMessages.SERVER_ERROR
+          return ErrorMessageHandler.createHttpErrorResponseWithMessage(
+            response,
+            this.defaultErrorMessages.SERVER_ERROR
+          )
         }
-        mappedResponse.message = this.defaultErrorMessages.UNKNOWN_ERROR
-        return mappedResponse
+        return ErrorMessageHandler.createHttpErrorResponseWithMessage(
+          response,
+          this.defaultErrorMessages.UNKNOWN_ERROR
+        )
       }
     }
   }

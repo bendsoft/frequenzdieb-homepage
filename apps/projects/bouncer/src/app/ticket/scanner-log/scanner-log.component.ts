@@ -1,19 +1,14 @@
 import { Component, Inject, LOCALE_ID, OnDestroy } from '@angular/core'
 import { animate, state, style, transition, trigger } from '@angular/animations'
-import { forkJoin, Subscription as RxSubscription } from 'rxjs'
+import { forkJoin, Observable, of, Subscription as RxSubscription } from 'rxjs'
 import { get, isEmpty } from 'lodash'
 import { formatDate } from '@angular/common'
-import {
-  Event,
-  EventService,
-  Subscription,
-  SubscriptionService
-} from '@bendsoft/ticketing-api'
+import { Event, EventService, Subscription, SubscriptionService } from '@bendsoft/ticketing-api'
 import { ApplicationContextService } from '../../common/service/application-context.service'
 import { ScannedTicketLogEntry } from '../../common/service/ScannedTicketLogEntry'
 import { LogUtil } from '../../common/service/LogUtil'
 
-enum LogEntryDetailsState {
+enum LogEntryRowState {
   COLLAPSED = 'collapsed',
   EXPANDED = 'expanded'
 }
@@ -21,8 +16,11 @@ enum LogEntryDetailsState {
 interface LogEntryDetails {
   subscription?: Subscription
   event?: Event
+}
+
+interface LogEntryDetailsState {
   isLoading: boolean
-  animationState: LogEntryDetailsState
+  animationState: LogEntryRowState
   detailsLoadingSubscription: RxSubscription
 }
 
@@ -32,15 +30,9 @@ interface LogEntryDetails {
   styleUrls: ['./scanner-log.component.scss'],
   animations: [
     trigger('detailExpand', [
-      state(
-        LogEntryDetailsState.COLLAPSED,
-        style({ height: '0px', minHeight: '0' })
-      ),
-      state(LogEntryDetailsState.EXPANDED, style({ height: '*' })),
-      transition(
-        'expanded <=> collapsed',
-        animate('500ms cubic-bezier(0.4, 0.0, 0.2, 1)')
-      )
+      state(LogEntryRowState.COLLAPSED, style({ height: '0px', minHeight: '0' })),
+      state(LogEntryRowState.EXPANDED, style({ height: '*' })),
+      transition('expanded <=> collapsed', animate('500ms cubic-bezier(0.4, 0.0, 0.2, 1)'))
     ])
   ]
 })
@@ -54,7 +46,7 @@ export class ScannerLogComponent implements OnDestroy {
 
   loadedDetailsForLogEntry = new WeakMap<
     ScannedTicketLogEntry,
-    LogEntryDetails
+    LogEntryDetailsState & LogEntryDetails
   >()
 
   getAnimationState(logEntry: ScannedTicketLogEntry) {
@@ -63,7 +55,7 @@ export class ScannerLogComponent implements OnDestroy {
       return loadedDetails.animationState
     }
 
-    return LogEntryDetailsState.COLLAPSED
+    return LogEntryRowState.COLLAPSED
   }
 
   isLoadingDetails(logEntry: ScannedTicketLogEntry) {
@@ -86,10 +78,7 @@ export class ScannerLogComponent implements OnDestroy {
 
     this.logsSubscription = this.applicationContextService.scannedTicketsLog$.subscribe(
       (logEntry) => {
-        this.scannedTicketsLog = LogUtil.addLogEntry(
-          this.scannedTicketsLog,
-          logEntry
-        )
+        this.scannedTicketsLog = LogUtil.addLogEntry(this.scannedTicketsLog, logEntry)
       }
     )
   }
@@ -104,59 +93,68 @@ export class ScannerLogComponent implements OnDestroy {
   }
 
   onLogEntryClicked(logEntry: ScannedTicketLogEntry) {
-    if (
-      isEmpty(logEntry.ticket.eventId) ||
-      isEmpty(logEntry.ticket.subscriptionId)
-    ) {
-      return
-    }
-
     if (this.loadedDetailsForLogEntry.has(logEntry)) {
       if (
-        this.loadedDetailsForLogEntry.get(logEntry).animationState ===
-        LogEntryDetailsState.EXPANDED
+        this.loadedDetailsForLogEntry.get(logEntry).animationState === LogEntryRowState.EXPANDED
       ) {
         this.onCloseLogEntryDetails(logEntry)
       } else {
         this.onFinishedLoading(logEntry)
       }
     } else {
-      const detailsLoadingSubscription = this.loadDetails(logEntry).subscribe(
-        (result: { subscription: Subscription; event: Event }) => {
-          const logEntryDetails = this.loadedDetailsForLogEntry.get(logEntry)
-          logEntryDetails.subscription = result.subscription
-          logEntryDetails.event = result.event
-        },
+      this.loadedDetailsForLogEntry.set(logEntry, {
+        isLoading: true,
+        animationState: LogEntryRowState.COLLAPSED,
+        detailsLoadingSubscription: RxSubscription.EMPTY,
+        event: null,
+        subscription: null
+      })
+
+      this.loadedDetailsForLogEntry.get(logEntry).detailsLoadingSubscription = this.loadDetails(
+        logEntry
+      ).subscribe(
+        (result: LogEntryDetails) => this.updateLogEntryWithDetails(logEntry, result),
         (error) => console.log(error),
         () => this.onFinishedLoading(logEntry)
       )
-
-      this.loadedDetailsForLogEntry.set(logEntry, {
-        isLoading: true,
-        animationState: LogEntryDetailsState.COLLAPSED,
-        detailsLoadingSubscription
-      })
     }
   }
 
-  private loadDetails(logEntry: ScannedTicketLogEntry) {
-    return forkJoin({
-      subscription: this.subscriptionService.get(
-        logEntry.ticket.subscriptionId
-      ),
-      event: this.eventService.get(logEntry.ticket.eventId)
-    })
+  private updateLogEntryWithDetails(logEntry: ScannedTicketLogEntry, details: LogEntryDetails) {
+    const entry = this.loadedDetailsForLogEntry.get(logEntry)
+    entry.event = details.event
+    entry.subscription = details.subscription
+  }
+
+  private loadDetails(logEntry: ScannedTicketLogEntry): Observable<LogEntryDetails> {
+    if (
+      isEmpty(logEntry.ticket.id) ||
+      (isEmpty(logEntry.ticket.subscriptionId) && isEmpty(logEntry.ticket.eventId))
+    ) {
+      return of({})
+    }
+    const sources: Partial<{
+      event: Observable<Event>
+      subscription: Observable<Subscription>
+    }> = {}
+
+    if (!isEmpty(logEntry.ticket.eventId)) {
+      sources.event = this.eventService.get(logEntry.ticket.eventId)
+    }
+    if (!isEmpty(logEntry.ticket.subscriptionId)) {
+      sources.subscription = this.subscriptionService.get(logEntry.ticket.subscriptionId)
+    }
+
+    return forkJoin(sources)
   }
 
   private onFinishedLoading(logEntry: ScannedTicketLogEntry) {
     this.cancelPendingRequest(logEntry)
-    this.loadedDetailsForLogEntry.get(logEntry).animationState =
-      LogEntryDetailsState.EXPANDED
+    this.loadedDetailsForLogEntry.get(logEntry).animationState = LogEntryRowState.EXPANDED
   }
 
   private onCloseLogEntryDetails(logEntry: ScannedTicketLogEntry) {
-    this.loadedDetailsForLogEntry.get(logEntry).animationState =
-      LogEntryDetailsState.COLLAPSED
+    this.loadedDetailsForLogEntry.get(logEntry).animationState = LogEntryRowState.COLLAPSED
   }
 
   private cancelPendingRequest(logEntry: ScannedTicketLogEntry) {
@@ -169,13 +167,17 @@ export class ScannerLogComponent implements OnDestroy {
     return get(this.loadedDetailsForLogEntry.get(logEntry), property, '')
   }
 
+  getLogEntryProperty(logEntry: ScannedTicketLogEntry, property: string) {
+    return get(logEntry, property, '')
+  }
+
   getTicketStatus(logEntry: ScannedTicketLogEntry) {
     return this.getLogEntryDetailProperty(logEntry, 'logEntry.ticket.isValid')
       ? $localize`:@@ScannedTicketValidationStatusUnused:Unused`
       : $localize`:@@ScannedTicketValidationStatusVoid:Void`
   }
 
-  formatDateByCurrentLocale(value: string | number | Date): string {
+  formatDateByCurrentLocale(value: string): string {
     if (isEmpty(value)) {
       return ''
     }

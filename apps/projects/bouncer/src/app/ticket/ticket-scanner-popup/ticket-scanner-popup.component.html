@@ -17,14 +17,34 @@
       </svg>
 
     </div>
-    <div class="message" *ngIf="!isFinished" i18n="ticket scanner popup|show a message while waiting for the check-result@@WaitForTicketCheckResultMsg">Checking Ticket ...</div>
-    <div class="message" *ngIf="isTicketCheckSuccessful" i18n="ticket scanner popup|successful ticket check message@@SuccessfulTicketCheckMessage">The Ticket is valid.</div>
-    <div class="message" *ngIf="!isTicketCheckSuccessful">
-      <span i18n="ticket scanner popup|failed ticket check message@@FailedTicketCheckMessage">The Ticket is not valid.</span><br />
-      <span i18n="ticket scanner popup|failed ticket check reason@@FailedTicketCheckReasonLabel">The reason is:</span> {{ invalidTicketReason }}
+
+    <div class="message"
+         *ngIf="isFinished === false"
+         i18n="ticket scanner popup|show a message while waiting for the check-result@@WaitForTicketCheckResultMsg"
+    >Checking Ticket ...</div>
+
+    <div class="message"
+         *ngIf="isFinished === true && isTicketCheckSuccessful === true"
+         i18n="ticket scanner popup|successful ticket check message@@SuccessfulTicketCheckMessage"
+    >The Ticket is valid.</div>
+
+    <div class="message" *ngIf="isFinished === true && isTicketCheckSuccessful === false">
+      <span
+        i18n="ticket scanner popup|failed ticket check message@@FailedTicketCheckMessage"
+      >The Ticket is not valid.</span><br />
+
+      <span
+        i18n="ticket scanner popup|failed ticket check reason@@FailedTicketCheckReasonLabel"
+      >The reason is:</span> {{ invalidTicketReason }}
     </div>
+
   </div>
-  <div mat-dialog-actions>
-    <button mat-raised-button (click)="closePopup()" color="accent" cdkFocusInitial i18n="ticket scanner popup|close button for the popup@@TicketCheckPopupCloseButton">Close</button>
+
+  <div *ngIf="isFinished === true" mat-dialog-actions>
+    <button mat-raised-button cdkFocusInitial
+            (click)="closePopup()"
+            color="accent"
+            i18n="ticket scanner popup|close button for the popup@@TicketCheckPopupCloseButton"
+    >Close</button>
   </div>
 </div>

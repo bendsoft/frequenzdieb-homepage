@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { ApiContextService, catchServerError } from '../api-context.service'
 import { Subscription } from '../@types/subscription'
+import { Observable } from 'rxjs'
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class SubscriptionService {
     this.subscriptionRoute = `${apiContext.apiServerUrl}/subscription`
   }
 
-  get(subscriptionId: string) {
+  get(subscriptionId: string): Observable<Subscription> {
     return this.httpClient
       .get<Subscription>(
         `${this.subscriptionRoute}/${subscriptionId}`,
@@ -24,7 +25,7 @@ export class SubscriptionService {
       .pipe(this.serverErrorCatcher)
   }
 
-  getByEmail(email: string) {
+  getByEmail(email: string): Observable<Subscription> {
     return this.apiContext.enrichApiRequestWithRecaptcha(
       '',
       (httpOptions) =>
@@ -37,7 +38,7 @@ export class SubscriptionService {
     )
   }
 
-  update(updatedSubscription: Subscription) {
+  update(updatedSubscription: Subscription): Observable<Subscription> {
     return this.apiContext.enrichApiRequestWithRecaptcha('requestSubscriptionDeletion', () =>
       this.httpClient.put(this.subscriptionRoute, updatedSubscription).pipe(this.serverErrorCatcher)
     )
@@ -59,7 +60,7 @@ export class SubscriptionService {
       .pipe(this.serverErrorCatcher)
   }
 
-  create(newSubscription: Subscription) {
+  create(newSubscription: Subscription): Observable<Subscription> {
     return this.apiContext.enrichApiRequestWithRecaptcha('createSubscription', (httpOptions) =>
       this.httpClient
         .post(`${this.subscriptionRoute}`, newSubscription, httpOptions)

@@ -22,22 +22,21 @@ export class TicketScannerPopupComponent {
   ) {
     ticketInvalidationProcess.subscribe(
       (ticket) => this.onTicketValid(ticket),
-      (response: HttpErrorResponse) => this.onTicketInvalid(response),
-      () => {
-        this.isFinished = true
-      }
+      (response: HttpErrorResponse) => this.onTicketInvalid(response)
     )
   }
 
   private onTicketValid(ticket: Ticket) {
     this.scannedTicket = ticket
     this.isTicketCheckSuccessful = true
+    this.isFinished = true
   }
 
-  private onTicketInvalid(response: HttpErrorResponse, ticket?) {
+  private onTicketInvalid(response: HttpErrorResponse, ticket?: Ticket) {
     this.scannedTicket = ticket
     this.isTicketCheckSuccessful = false
-    this.invalidTicketReason = response.message
+    this.invalidTicketReason = response.error
+    this.isFinished = true
   }
 
   closePopup() {

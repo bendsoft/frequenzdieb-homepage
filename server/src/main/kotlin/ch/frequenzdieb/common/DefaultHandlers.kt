@@ -27,8 +27,7 @@ object DefaultHandlers {
     inline fun <reified T : BaseEntity> ReactiveMongoRepository<T, String>.getById(
         request: ServerRequest
     ) =
-        findAllById { request.pathVariable("id") }
-            .collectList()
+        findById(request.pathVariable("id"))
             .flatMap { ok().bodyValue(it) }
             .switchIfEmpty(notFound().build())
 

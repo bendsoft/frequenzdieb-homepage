@@ -8,11 +8,17 @@ import { Ticket } from '../@types/ticket'
   providedIn: 'root'
 })
 export class TicketService {
-  private readonly ticketRoute = `${this.apiContext.apiServerUrl}/ticket/`
+  private readonly ticketRoute = `${this.apiContext.apiServerUrl}/ticket`
   private readonly serverErrorCatcher
 
   constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {
     this.serverErrorCatcher = catchServerError()
+  }
+
+  get(id: string): Observable<Ticket> {
+    return this.httpClient
+      .get<Ticket>(`${this.ticketRoute}/${id}`, this.apiContext.createWithAuthorizationHeaders())
+      .pipe(this.serverErrorCatcher)
   }
 
   invalidate(qrCodeValue: string, eventId: string): Observable<Ticket> {

@@ -809,6 +809,32 @@ paths:
                 typeId:
                   type: string
                   example: '345678'
+  '/ticket/{id}':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - ticket
+      summary: gets a ticket
+      description: finds a ticket
+      parameters:
+        - in: path
+          name: id
+          description: the id of the ticket
+          required: true
+          schema:
+            type: string
+            minimum: 5
+            maximum: 50
+      responses:
+        '200':
+          description: the ticket has been found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '404':
+          description: not found
   '/ticket/invalidate':
     put:
       security:
