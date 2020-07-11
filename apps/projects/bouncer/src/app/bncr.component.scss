@@ -17,19 +17,19 @@ svg.material-icons {
   bottom: 0;
   left: 0;
   right: 0;
-}
 
-.container::after {
-  background: url("projects/bouncer/src/assets/bouncer_background.svg") no-repeat;
-  background-size: 150%;
-  content: "";
-  opacity: 0.1;
-  top: 25%;
-  left: 25%;
-  bottom: 0;
-  right: 0;
-  position: absolute;
-  z-index: -1;
+  &::after {
+    background: url("../assets/bouncer_background.svg") no-repeat;
+    background-size: 150%;
+    content: "";
+    opacity: 0.1;
+    top: 25%;
+    left: 25%;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    z-index: -1;
+  }
 }
 
 .toolbar {

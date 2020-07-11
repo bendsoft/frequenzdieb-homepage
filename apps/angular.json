@@ -44,7 +44,10 @@
       "i18n": {
         "sourceLocale": "en-US",
         "locales": {
-          "de-CH": "projects/bouncer/src/locale/messages.de-ch.xlf"
+          "de-CH": {
+            "baseHref": "/",
+            "translation": "projects/bouncer/src/locale/messages.de-ch.xlf"
+          }
         }
       },
       "architect": {
@@ -58,9 +61,7 @@
             "tsConfig": "projects/bouncer/tsconfig.app.json",
             "aot": true,
             "assets": [
-              "projects/bouncer/src/favicon.ico",
-              "projects/bouncer/src/assets",
-              "projects/bouncer/src/site.webmanifest"
+              "projects/bouncer/src/assets"
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
@@ -103,7 +104,7 @@
             "de-CH": {
               "localize": ["de-CH"],
               "aot": true,
-              "outputPath": "dist/bouncer/ch-de/",
+              "outputPath": "dist/bouncer/de-CH/",
               "i18nFile": "projects/bouncer/src/locale/messages.de-ch.xlf",
               "i18nFormat": "xlf",
               "i18nLocale": "de-CH",
