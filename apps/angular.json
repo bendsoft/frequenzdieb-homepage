@@ -45,7 +45,6 @@
         "sourceLocale": "en-US",
         "locales": {
           "de-CH": {
-            "baseHref": "/de-CH",
             "translation": "projects/bouncer/src/locale/messages.de-ch.xlf"
           }
         }
