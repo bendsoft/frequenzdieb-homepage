@@ -1,28 +1,26 @@
 {
   "name": "@bendsoft/ticketing-api",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/bendsoft/frequenzdieb-homepage.git"
   },
   "peerDependencies": {
-    "@angular/common": "~9.1.9",
-    "@angular/core": "~9.1.9",
-    "@angular/material": "~9.1.9",
-    "@angular/forms": "~9.1.9",
-    "@angular/localize": "~9.1.9",
-    "lodash": "~4.17.15",
-    "rxjs": "~6.5.4",
+    "@angular/common": "~10.0.3",
+    "@angular/core": "~10.0.3",
+    "@angular/material": "~10.0.3",
+    "@angular/forms": "~10.0.3",
+    "lodash": "~4.17.19",
+    "rxjs": "~6.6.0",
     "ng-recaptcha": "~5.0.0"
   },
   "devDependencies": {
-    "@angular/common": "~9.1.9",
-    "@angular/core": "~9.1.9",
-    "@angular/material": "~9.1.9",
-    "@angular/forms": "~9.1.9",
-    "@angular/localize": "~9.1.9",
-    "lodash": "~4.17.15",
-    "rxjs": "~6.5.4",
+    "@angular/common": "~10.0.3",
+    "@angular/core": "~10.0.3",
+    "@angular/material": "~10.0.1",
+    "@angular/forms": "~10.0.3",
+    "lodash": "~4.17.19",
+    "rxjs": "~6.6.0",
     "ng-recaptcha": "~5.0.0"
   }
 }
