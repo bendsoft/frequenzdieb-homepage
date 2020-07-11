@@ -9,7 +9,7 @@
     "start:ticketing-api": "ng build --project=ticketing-api --watch",
     "start:ui": "ng serve --project=ui --port 4201",
     "start:bouncer": "ng serve --project=bouncer --port 4202 --configuration=de-CH",
-    "start:bouncer-prod": "ng build --project=bouncer --prod --localize && http-server -p 8086 -c-1 dist/bouncer/de-CH",
+    "start:bouncer-prod": "ng build --project=bouncer --prod --localize && http-server -p 8086 -c-1 dist/bouncer",
     "build": "ng build",
     "build:ticketing-api": "ng build --project=ticketing-api",
     "publish:ticketing-api": "npm publish dist/ticketing-api",
