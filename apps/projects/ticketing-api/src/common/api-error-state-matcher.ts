@@ -10,24 +10,26 @@ import {
 
 export class ApiErrorStateMatcher implements ErrorStateMatcher {
   errorMessage
-  private validateControls: Set<AbstractControl>
 
-  constructor(setValidator: boolean, ...controls: AbstractControl[]) {
-    this.validateControls = new Set(controls)
-    this.validateControls.forEach((control) => control.setValidators(this.apiErrorValidator()))
+  constructor(
+    private afterSubmit = true,
+    private control: AbstractControl,
+    ...validators: ValidatorFn[]
+  ) {
+    validators.push(this.apiErrorValidator())
+    control.setValidators(validators)
+    this.update()
   }
 
   apiErrorValidator(): ValidatorFn {
     return () => this.hasApiError()
   }
 
-  update(errorMessage: string) {
+  update(errorMessage?: string) {
     this.errorMessage = errorMessage
-    this.validateControls.forEach((control) =>
-      control.updateValueAndValidity({
-        onlySelf: true
-      })
-    )
+    this.control.updateValueAndValidity({
+      onlySelf: true
+    })
   }
 
   hasApiError(): ValidationErrors | null {
@@ -37,6 +39,6 @@ export class ApiErrorStateMatcher implements ErrorStateMatcher {
   isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
     const isSubmitted = form && form.submitted
     const isControlInvalid = control && control.invalid
-    return !!(isControlInvalid && isSubmitted)
+    return !!(isControlInvalid && (this.afterSubmit === false ? true : isSubmitted))
   }
 }

@@ -94,40 +94,44 @@ export class ErrorMessageHandler {
   }
 
   getErrorMessageFromResponse(response: HttpErrorResponse) {
-    const serializedErrorMessage = JSON.parse(response.error.message)
-    if (this.errorMessages.has(serializedErrorMessage.code)) {
-      return ErrorMessageHandler.createHttpErrorResponseWithMessage(
-        response,
-        this.errorMessages.get(serializedErrorMessage.code)
-      )
+    try {
+      const serializedErrorMessage = JSON.parse(response.error.message)
+      if (this.errorMessages.has(serializedErrorMessage.code)) {
+        return ErrorMessageHandler.createHttpErrorResponseWithMessage(
+          response,
+          this.errorMessages.get(serializedErrorMessage.code)
+        )
+      }
+    } catch (e) {
+      console.log(e)
     }
 
     switch (response.status) {
       case 404:
         return ErrorMessageHandler.createHttpErrorResponseWithMessage(
           response,
-          this.defaultErrorMessages.NOT_FOUND
+          this.errorMessages.get('NOT_FOUND')
         )
       case 401:
         return ErrorMessageHandler.createHttpErrorResponseWithMessage(
           response,
-          this.defaultErrorMessages.NOT_AUTHORIZED
+          this.errorMessages.get('NOT_AUTHORIZED')
         )
       case 403:
         return ErrorMessageHandler.createHttpErrorResponseWithMessage(
           response,
-          this.defaultErrorMessages.INVALID_REQUEST
+          this.errorMessages.get('INVALID_REQUEST')
         )
       default: {
         if (ErrorMessageHandler.hasServerError(response)) {
           return ErrorMessageHandler.createHttpErrorResponseWithMessage(
             response,
-            this.defaultErrorMessages.SERVER_ERROR
+            this.errorMessages.get('SERVER_ERROR')
           )
         }
         return ErrorMessageHandler.createHttpErrorResponseWithMessage(
           response,
-          this.defaultErrorMessages.UNKNOWN_ERROR
+          this.errorMessages.get('UNKNOWN_ERROR')
         )
       }
     }
