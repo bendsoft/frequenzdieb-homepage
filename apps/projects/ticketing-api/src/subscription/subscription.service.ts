@@ -13,7 +13,7 @@ export class SubscriptionService {
 
   constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {
     this.serverErrorCatcher = catchServerError()
-    this.subscriptionRoute = `${apiContext.apiServerUrl}/subscription`
+    this.subscriptionRoute = `${apiContext.apiServerHost}/subscription`
   }
 
   get(subscriptionId: string): Observable<Subscription> {

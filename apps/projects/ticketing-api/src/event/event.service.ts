@@ -13,7 +13,7 @@ export class EventService {
   private readonly serverErrorCatcher
 
   constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {
-    this.getEventsApiUrl = `${apiContext.apiServerUrl}/event`
+    this.getEventsApiUrl = `${apiContext.apiServerHost}/event`
     this.serverErrorCatcher = catchServerError()
   }
 

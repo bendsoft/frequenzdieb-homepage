@@ -11,19 +11,22 @@ export const BROWSER_STORAGE = new InjectionToken<Storage>('Browser Storage', {
   factory: () => localStorage
 })
 
+export const API_SERVER_URL = new InjectionToken<string>('Api Server Url', {
+  providedIn: 'root',
+  factory: () => 'http://localhost:8085/api'
+})
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApiContextService {
   static errorMessageHandlerInstance
 
-  // apiServerUrl = 'https://dev-api.frequenzdieb.ch'
-  apiServerUrl = 'http://localhost:8085/api'
-
   isAuthenticated = new BehaviorSubject(false)
 
   constructor(
     @Inject(BROWSER_STORAGE) public db: Storage,
+    @Inject(API_SERVER_URL) public apiServerHost: string,
     @Inject(ErrorMessageHandler) messageHandler,
     @Optional() private recaptcha: ReCaptchaV3Service
   ) {

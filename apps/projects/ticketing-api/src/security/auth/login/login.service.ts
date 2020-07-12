@@ -12,7 +12,7 @@ export class LoginService {
   private readonly loginApiUrl
 
   constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {
-    this.loginApiUrl = `${apiContext.apiServerUrl}/security/auth/login`
+    this.loginApiUrl = `${apiContext.apiServerHost}/security/auth/login`
   }
 
   login(loginRequest: LoginRequest, params?: HttpParams) {
