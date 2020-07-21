@@ -1,0 +1,13 @@
+<form class="settings-form">
+  <mat-form-field class="form-item">
+    <mat-label i18n="api server host|dropdown to select the url of the api-server@@ApiServerUrl">Select API Server Host</mat-label>
+    <mat-select
+      [value]="selectedHost"
+      (selectionChange)="onChangeHost($event)"
+    >
+      <mat-option *ngFor="let host of applicationContext.apiContext.apiServerHosts" [value]="host">
+        {{ host }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</form>

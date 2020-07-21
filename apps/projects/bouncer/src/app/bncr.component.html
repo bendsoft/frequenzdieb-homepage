@@ -9,17 +9,24 @@
       <mat-sidenav [mode]="'over'" [fixedInViewport]="true" fixedTopGap="54">
 
         <mat-nav-list>
-          <a mat-list-item routerLink="{{ NavRoute.LOGOUT }}" [class.disabled]="isNavLogoutDisabled">
+          <a mat-list-item routerLink="{{ NavRoute.LOGOUT }}" [class.disabled]="isNavLogoutDisabled" *ngIf="isAuthenticationValid">
             <mat-icon>account_circle</mat-icon><span i18n="main navigation|logout button@@NavBtnLogout">Logout</span>
+          </a>
+          <a mat-list-item routerLink="{{ NavRoute.LOGIN }}" [class.disabled]="isNavLoginDisabled" *ngIf="!isAuthenticationValid">
+            <mat-icon>account_circle</mat-icon><span i18n="main navigation|login button@@NavBtnLogin">Login</span>
           </a>
           <a mat-list-item routerLink="{{ NavRoute.SCAN }}" [class.disabled]="isNavScannerDisabled">
             <mat-icon>control_camera</mat-icon><span i18n="main navigation|scan tickets button@@NavBtnScanTickets">Scan Tickets</span>
           </a>
-          <a mat-list-item routerLink="{{ NavRoute.SYNC }}" [class.disabled]="isNavSyncDisabled">
+          <a mat-list-item routerLink="{{ NavRoute.SYNC }}" [class.disabled]="isNavSyncDisabled" *ngIf="false">
             <mat-icon>sync</mat-icon><span i18n="main navigation|synchronize data button@@NavBtnSyncData">Synchronize Data</span>
           </a>
           <a mat-list-item routerLink="{{ NavRoute.LOGS }}" [class.disabled]="isNavLogsDisabled">
             <mat-icon>history</mat-icon><span i18n="main navigation|scanned tickets log button@@NavBtnScannedTicketsLog">Ticket Scan Log</span>
+          </a>
+          <mat-divider></mat-divider>
+          <a mat-list-item routerLink="{{ NavRoute.SETTINGS }}" [class.disabled]="isNavSettingsDisabled">
+            <mat-icon>settings</mat-icon><span i18n="main navigation|settings button@@NavBtnSettings">Settings</span>
           </a>
         </mat-nav-list>
 

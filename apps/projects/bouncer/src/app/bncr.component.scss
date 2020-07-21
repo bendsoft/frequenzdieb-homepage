@@ -43,6 +43,9 @@ h1.app-name {
 
 mat-sidenav-container {
   flex: 1 0 auto;
+  mat-nav-list > a mat-icon {
+    margin-right: 5px;
+  }
 }
 
 .mat-drawer-container {

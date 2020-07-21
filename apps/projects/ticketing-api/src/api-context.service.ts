@@ -2,7 +2,7 @@ import { Inject, Injectable, InjectionToken, Optional } from '@angular/core'
 import { BehaviorSubject, Observable, throwError } from 'rxjs'
 import { HttpErrorResponse, HttpHeaders } from '@angular/common/http'
 import { catchError, switchMap } from 'rxjs/operators'
-import { merge } from 'lodash'
+import { isEmpty, merge } from 'lodash'
 import { ReCaptchaV3Service } from 'ng-recaptcha'
 import { ErrorMessageHandler } from './common/error-message-handler.service'
 
@@ -11,10 +11,7 @@ export const BROWSER_STORAGE = new InjectionToken<Storage>('Browser Storage', {
   factory: () => localStorage
 })
 
-export const API_SERVER_URL = new InjectionToken<string>('Api Server Url', {
-  providedIn: 'root',
-  factory: () => 'http://localhost:8085/api'
-})
+export const API_SERVER_URLS = new InjectionToken<string[]>('Api Server Url')
 
 @Injectable({
   providedIn: 'root'
@@ -26,11 +23,23 @@ export class ApiContextService {
 
   constructor(
     @Inject(BROWSER_STORAGE) public db: Storage,
-    @Inject(API_SERVER_URL) public apiServerHost: string,
+    @Inject(API_SERVER_URLS) public apiServerHosts: string[],
     @Inject(ErrorMessageHandler) messageHandler,
     @Optional() private recaptcha: ReCaptchaV3Service
   ) {
     ApiContextService.errorMessageHandlerInstance = messageHandler
+
+    if (isEmpty(this.getApiServer())) {
+      this.setApiServer(this.apiServerHosts[0])
+    }
+  }
+
+  setApiServer(url: string) {
+    this.db.setItem('apiServerHost', url)
+  }
+
+  getApiServer() {
+    return this.db.getItem('apiServerHost')
   }
 
   login(token) {

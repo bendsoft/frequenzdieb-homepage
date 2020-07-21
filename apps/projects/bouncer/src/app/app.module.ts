@@ -22,7 +22,7 @@ import { ServiceWorkerModule } from '@angular/service-worker'
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 import { MatSelectModule } from '@angular/material/select'
 import { MatProgressBarModule } from '@angular/material/progress-bar'
-import { API_SERVER_URL, DEFAULT_ERROR_MESSAGES } from '@bendsoft/ticketing-api'
+import { API_SERVER_URLS, DEFAULT_ERROR_MESSAGES } from '@bendsoft/ticketing-api'
 import { SyncComponent } from './ticket/sync/sync.component'
 import { ScannerLogComponent } from './ticket/scanner-log/scanner-log.component'
 import { LogoutComponent } from './auth/logout/logout.component'
@@ -32,6 +32,7 @@ import { environment } from '../environments/environment.prod'
 import { AppRoutingModule } from './app-routing.module'
 import { TicketScannerComponent } from './ticket/ticket-scanner/ticket-scanner.component'
 import { BncrComponent } from './bncr.component'
+import { SettingsComponent } from './settings/settings.component'
 
 registerLocaleData(localeDeCH, 'de-CH', localeDeCHExtra)
 
@@ -43,7 +44,8 @@ registerLocaleData(localeDeCH, 'de-CH', localeDeCHExtra)
     TicketScannerComponent,
     TicketScannerPopupComponent,
     ScannerLogComponent,
-    SyncComponent
+    SyncComponent,
+    SettingsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
@@ -84,10 +86,12 @@ registerLocaleData(localeDeCH, 'de-CH', localeDeCHExtra)
       }
     },
     {
-      provide: API_SERVER_URL,
-      useValue: environment.production
-        ? 'https://api.frequenzdieb.ch'
-        : 'https://dev-api.frequenzdieb.ch'
+      provide: API_SERVER_URLS,
+      useValue: [
+        'http://localhost:8085/api',
+        'https://dev-api.frequenzdieb.ch',
+        'https://api.frequenzdieb.ch'
+      ]
     }
   ],
   bootstrap: [BncrComponent]

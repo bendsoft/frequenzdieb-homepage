@@ -8,7 +8,9 @@ import { Ticket } from '../@types/ticket'
   providedIn: 'root'
 })
 export class TicketService {
-  private readonly ticketRoute = `${this.apiContext.apiServerHost}/ticket`
+  private get ticketRoute() {
+    return `${this.apiContext.getApiServer()}/ticket`
+  }
   private readonly serverErrorCatcher
 
   constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {

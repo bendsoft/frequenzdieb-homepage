@@ -1,19 +1,20 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
+import { Observable } from 'rxjs'
 import { ApiContextService, catchServerError } from '../api-context.service'
 import { Subscription } from '../@types/subscription'
-import { Observable } from 'rxjs'
 
 @Injectable({
   providedIn: 'root'
 })
 export class SubscriptionService {
-  private readonly subscriptionRoute: string
+  private get subscriptionRoute() {
+    return `${this.apiContext.getApiServer()}/subscription`
+  }
   private readonly serverErrorCatcher
 
   constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {
     this.serverErrorCatcher = catchServerError()
-    this.subscriptionRoute = `${apiContext.apiServerHost}/subscription`
   }
 
   get(subscriptionId: string): Observable<Subscription> {

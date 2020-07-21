@@ -17,31 +17,27 @@ export class BncrComponent {
   isAuthenticationValid = false
 
   isNavLogoutDisabled = true
+  isNavLoginDisabled = true
   isNavScannerDisabled = true
   isNavSyncDisabled = true
   isNavLogsDisabled = true
+  isNavSettingsDisabled = false
 
   @ViewChild(MatSidenav) sideNavComponent
 
   NavRoute = NavRoute
 
-  constructor(
-    private applicationContext: ApplicationContextService,
-    private router: Router
-  ) {
-    applicationContext.apiContext.isAuthenticated.subscribe(
-      (isAuthenticated) => {
-        this.isAuthenticationValid = isAuthenticated
-      }
-    )
+  constructor(private applicationContext: ApplicationContextService, private router: Router) {
+    applicationContext.apiContext.isAuthenticated.subscribe((isAuthenticated) => {
+      this.isAuthenticationValid = isAuthenticated
+    })
 
     router.events
-      .pipe(filter((event) => event instanceof NavigationStart))
+      .pipe(filter(BncrComponent.beforeNavigateHandler))
       .subscribe((event: NavigationStart) => {
         if (event.url !== NavRoute.LOGIN) {
           if (
-            applicationContext.apiContext.isAuthenticated.getValue() ===
-              false ||
+            applicationContext.apiContext.isAuthenticated.getValue() === false ||
             !applicationContext.getEvent()
           ) {
             router.navigateByUrl(NavRoute.LOGIN)
@@ -50,31 +46,30 @@ export class BncrComponent {
       })
 
     router.events
-      .pipe(
-        filter(
-          (event: NavigationEnd) =>
-            event instanceof NavigationEnd &&
-            getAllNavRoutes().includes(event.url)
-        )
-      )
+      .pipe(filter(BncrComponent.afterNavigateHandler))
       .subscribe((navEvent: NavigationEnd) => {
         this.sideNavComponent.close()
 
-        this.isNavLogoutDisabled =
-          !this.isAuthenticationValid ||
-          navEvent.url === NavRoute.LOGIN ||
-          navEvent.url === NavRoute.LOGOUT
+        this.isNavLogoutDisabled = !this.isAuthenticationValid || navEvent.url === NavRoute.LOGOUT
+
+        this.isNavLoginDisabled = this.isAuthenticationValid || navEvent.url === NavRoute.LOGIN
 
         this.isNavSyncDisabled =
-          !this.isAuthenticationValid ||
-          navEvent.url === NavRoute.SYNC ||
-          !this.isInSync
+          !this.isAuthenticationValid || navEvent.url === NavRoute.SYNC || !this.isInSync
 
-        this.isNavScannerDisabled =
-          !this.isAuthenticationValid || navEvent.url === NavRoute.SCAN
+        this.isNavScannerDisabled = !this.isAuthenticationValid || navEvent.url === NavRoute.SCAN
 
-        this.isNavLogsDisabled =
-          !this.isAuthenticationValid || navEvent.url === NavRoute.LOGS
+        this.isNavLogsDisabled = !this.isAuthenticationValid || navEvent.url === NavRoute.LOGS
+
+        this.isNavSettingsDisabled = navEvent.url === NavRoute.SETTINGS
       })
+  }
+
+  private static beforeNavigateHandler(event: NavigationStart) {
+    return event instanceof NavigationStart && event.url !== NavRoute.SETTINGS
+  }
+
+  private static afterNavigateHandler(event: NavigationEnd) {
+    return event instanceof NavigationEnd && getAllNavRoutes().includes(event.url)
   }
 }

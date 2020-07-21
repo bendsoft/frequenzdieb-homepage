@@ -9,27 +9,29 @@ import { Concert } from '../@types/concert'
   providedIn: 'root'
 })
 export class EventService {
-  private readonly getEventsApiUrl
+  private get eventsRoute() {
+    return `${this.apiContext.getApiServer()}/event`
+  }
+
   private readonly serverErrorCatcher
 
   constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {
-    this.getEventsApiUrl = `${apiContext.apiServerHost}/event`
     this.serverErrorCatcher = catchServerError()
   }
 
   getAll() {
-    return this.httpClient.get<Event[]>(this.getEventsApiUrl).pipe(this.serverErrorCatcher)
+    return this.httpClient.get<Event[]>(this.eventsRoute).pipe(this.serverErrorCatcher)
   }
 
   get(eventId: string): Observable<Event> {
     return this.httpClient
-      .get<Event>(`${this.getEventsApiUrl}/${eventId}`)
+      .get<Event>(`${this.eventsRoute}/${eventId}`)
       .pipe(this.serverErrorCatcher)
   }
 
   getConcert(concertId: string): Observable<Concert> {
     return this.httpClient
-      .get<Concert>(`${this.getEventsApiUrl}/concert/${concertId}`)
+      .get<Concert>(`${this.eventsRoute}/concert/${concertId}`)
       .pipe(this.serverErrorCatcher)
   }
 }

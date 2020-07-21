@@ -9,14 +9,14 @@ import { ApiContextService, catchServerError } from '../../../api-context.servic
   providedIn: 'root'
 })
 export class LoginService {
-  private readonly loginApiUrl
-
-  constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {
-    this.loginApiUrl = `${apiContext.apiServerHost}/security/auth/login`
+  private get loginRoute() {
+    return `${this.apiContext.getApiServer()}/security/auth/login`
   }
 
+  constructor(private httpClient: HttpClient, private apiContext: ApiContextService) {}
+
   login(loginRequest: LoginRequest, params?: HttpParams) {
-    return this.httpClient.post(this.loginApiUrl, loginRequest, { params }).pipe(
+    return this.httpClient.post(this.loginRoute, loginRequest, { params }).pipe(
       tap(
         (response: LoginResponse) => {
           this.apiContext.login(response.token)

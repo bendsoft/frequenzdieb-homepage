@@ -3,7 +3,8 @@ export enum NavRoute {
   LOGOUT = '/logout',
   SCAN = '/scan',
   SYNC = '/sync',
-  LOGS = '/logs'
+  LOGS = '/logs',
+  SETTINGS = '/settings'
 }
 
 export function getAllNavRoutes(): string[] {

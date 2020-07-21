@@ -39,6 +39,6 @@ export class ApiErrorStateMatcher implements ErrorStateMatcher {
   isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
     const isSubmitted = form && form.submitted
     const isControlInvalid = control && control.invalid
-    return !!(isControlInvalid && (this.afterSubmit === false ? true : isSubmitted))
+    return !!(isControlInvalid && (this.afterSubmit === false ? control.touched : isSubmitted))
   }
 }

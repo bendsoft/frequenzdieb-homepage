@@ -5,6 +5,7 @@ import { TicketScannerComponent } from './ticket/ticket-scanner/ticket-scanner.c
 import { SyncComponent } from './ticket/sync/sync.component'
 import { LogoutComponent } from './auth/logout/logout.component'
 import { ScannerLogComponent } from './ticket/scanner-log/scanner-log.component'
+import { SettingsComponent } from './settings/settings.component'
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -12,7 +13,7 @@ const routes: Routes = [
   { path: 'scan', component: TicketScannerComponent },
   { path: 'sync', component: SyncComponent },
   { path: 'logs', component: ScannerLogComponent },
-  { path: '**', redirectTo: '/scan' }
+  { path: 'settings', component: SettingsComponent }
 ]
 
 @NgModule({
