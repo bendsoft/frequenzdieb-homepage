@@ -2,7 +2,7 @@ import { Inject, Injectable, InjectionToken, Optional } from '@angular/core'
 import { BehaviorSubject, Observable, throwError } from 'rxjs'
 import { HttpErrorResponse, HttpHeaders } from '@angular/common/http'
 import { catchError, switchMap } from 'rxjs/operators'
-import { isEmpty, merge } from 'lodash'
+import { isEmpty, merge } from 'lodash-es'
 import { ReCaptchaV3Service } from 'ng-recaptcha'
 import { ErrorMessageHandler } from './common/error-message-handler.service'
 

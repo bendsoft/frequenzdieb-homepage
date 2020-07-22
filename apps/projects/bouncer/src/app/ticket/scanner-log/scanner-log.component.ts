@@ -1,7 +1,7 @@
 import { Component, Inject, LOCALE_ID, OnDestroy } from '@angular/core'
 import { animate, state, style, transition, trigger } from '@angular/animations'
 import { forkJoin, Observable, of, Subscription as RxSubscription } from 'rxjs'
-import { get, isEmpty } from 'lodash'
+import { get, isEmpty } from 'lodash-es'
 import { formatDate } from '@angular/common'
 import { Event, EventService, Subscription, SubscriptionService } from '@bendsoft/ticketing-api'
 import { ApplicationContextService } from '../../common/service/application-context.service'

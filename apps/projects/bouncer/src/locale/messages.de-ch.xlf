@@ -12,12 +12,22 @@
         <note priority="1" from="description">logout button</note>
         <note priority="1" from="meaning">main navigation</note>
       </trans-unit>
+      <trans-unit id="NavBtnLogin" datatype="html">
+        <source>Login</source>
+        <target>Anmelden</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/bncr.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <note priority="1" from="description">login button</note>
+        <note priority="1" from="meaning">main navigation</note>
+      </trans-unit>
       <trans-unit id="NavBtnScanTickets" datatype="html">
         <source>Scan Tickets</source>
         <target>Tickets Einlesen</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/bncr.component.html</context>
-          <context context-type="linenumber">16</context>
+          <context context-type="linenumber">19</context>
         </context-group>
         <note priority="1" from="description">scan tickets button</note>
         <note priority="1" from="meaning">main navigation</note>
@@ -27,7 +37,7 @@
         <target>Daten synchronisieren</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/bncr.component.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <note priority="1" from="description">synchronize data button</note>
         <note priority="1" from="meaning">main navigation</note>
@@ -37,9 +47,19 @@
         <target>Ticket-Scan-Protokoll</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/bncr.component.html</context>
-          <context context-type="linenumber">22</context>
+          <context context-type="linenumber">25</context>
         </context-group>
         <note priority="1" from="description">scanned tickets log button</note>
+        <note priority="1" from="meaning">main navigation</note>
+      </trans-unit>
+      <trans-unit id="NavBtnSettings" datatype="html">
+        <source>Settings</source>
+        <target>Einstellungen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/bncr.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <note priority="1" from="description">settings button</note>
         <note priority="1" from="meaning">main navigation</note>
       </trans-unit>
       <trans-unit id="PswFieldLabel" datatype="html">
@@ -269,6 +289,16 @@
         </context-group>
         <note priority="1" from="description">button to delete all entries in the list</note>
         <note priority="1" from="meaning">scanned tickets log</note>
+      </trans-unit>
+      <trans-unit id="ApiServerUrl" datatype="html">
+        <source>Select API Server Host</source>
+        <target>API Server auswählen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/settings/settings.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+        <note priority="1" from="description">dropdown to select the url of the api-server</note>
+        <note priority="1" from="meaning">api server host</note>
       </trans-unit>
       <trans-unit id="CheckedDateScannerLogTableColumn" datatype="html">
         <source>Checked-date</source>

@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http'
-import { cloneDeep } from 'lodash'
+import { cloneDeep } from 'lodash-es'
 
 export abstract class LocalizedErrorMessage {
   public static INVALID_REQUEST = $localize`:@@InvalidRequestErrorMsg:Something went wrong with the Request.`

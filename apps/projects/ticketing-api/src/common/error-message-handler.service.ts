@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http'
-import { concat, toPairs } from 'lodash'
+import { concat, toPairs } from 'lodash-es'
 import { Inject, Injectable, InjectionToken, Optional } from '@angular/core'
 
 export interface DefaultErrorMessages {
@@ -45,24 +45,24 @@ export const SUBSCRIPTION_ERROR_MESSAGES = new InjectionToken<SubscriptionErrorM
 export class ErrorMessageHandler {
   private errorMessages = new Map<string, string>(
     toPairs({
-      INVALID_REQUEST: 'Something went wrong with the Request.',
-      UNKNOWN_ERROR: 'An unknown Error has happened.',
-      SERVER_ERROR: 'An Error happened on the server-side.',
-      NOT_FOUND: 'Not found.',
-      NOT_AUTHORIZED: 'Not Authorized or Access-Token missing or invalid.',
-      SIGNATURE_INVALID: '',
-      VALIDATION_ERROR: '',
-      ENTITY_INVALID: '',
-      EMAIL_INVALID: '',
-      TICKET_MISSING_SUBSCRIPTION: '',
-      TICKET_ID_INVALID: '',
+      INVALID_REQUEST: 'Something went wrong with the request',
+      UNKNOWN_ERROR: 'An unknown error has happened',
+      SERVER_ERROR: 'An error happened on the server-side',
+      NOT_FOUND: 'Not found',
+      NOT_AUTHORIZED: 'Not authorized or access-token missing or invalid',
+      SIGNATURE_INVALID: 'The signature is invalid',
+      VALIDATION_ERROR: 'A validation error has occurred',
+      ENTITY_INVALID: 'Entity is invalid',
+      EMAIL_INVALID: 'E-mail is invalid',
+      TICKET_MISSING_SUBSCRIPTION: 'The subscription for the ticket could not be found',
+      TICKET_ID_INVALID: 'Ticket-ID is invalid',
       TICKET_ALREADY_USED: 'Ticket has already been used',
-      TICKET_FOR_ANOTHER_EVENT: '',
+      TICKET_FOR_ANOTHER_EVENT: 'Ticket is for another event',
       TICKET_NOT_PAID: 'No payment found for given ticket',
-      TICKET_DUPLICATE_TEMPLATE_TAG: '',
-      SUBSCRIPTION_INVALID_ID: '',
-      SUBSCRIPTION_NOT_EXISTS: '',
-      SUBSCRIPTION_ALREADY_CONFIRMED: ''
+      TICKET_DUPLICATE_TEMPLATE_TAG: 'The same tag cannot be used twice',
+      SUBSCRIPTION_INVALID_ID: 'Subscription is invalid',
+      SUBSCRIPTION_NOT_EXISTS: 'Subscription not found',
+      SUBSCRIPTION_ALREADY_CONFIRMED: 'Subscription is already confirmed'
     })
   )
 

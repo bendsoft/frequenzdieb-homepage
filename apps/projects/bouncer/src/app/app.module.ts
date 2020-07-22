@@ -82,16 +82,31 @@ registerLocaleData(localeDeCH, 'de-CH', localeDeCHExtra)
     {
       provide: DEFAULT_ERROR_MESSAGES,
       useValue: {
-        NOT_AUTHORIZED: 'Die Anmeldung ist fehlgeschlagen. Bitte überprüfe das Passwort.'
+        NOT_AUTHORIZED: 'Die Anmeldung ist fehlgeschlagen. Bitte überprüfe das Passwort',
+        INVALID_REQUEST: 'Mit der Anfrage stimmt etwas nicht',
+        UNKNOWN_ERROR: 'Ein unbekannter Fehler ist aufgetreten',
+        SERVER_ERROR: 'Ein Fehler ist auf den Server aufgetreten',
+        NOT_FOUND: 'Nicht gefunden',
+        SIGNATURE_INVALID: 'Signatur ist ungültig',
+        VALIDATION_ERROR: 'Die Validierung ist fehlgeschlagen',
+        ENTITY_INVALID: 'Der gelieferte Datensatz ist ungültig',
+        EMAIL_INVALID: 'Die E-Mail Adresse ist ungültig',
+        TICKET_MISSING_SUBSCRIPTION:
+          'Die zum Ticket gehörige Subscription konnte nicht ermittelt werden',
+        TICKET_ID_INVALID: 'Ungültige Ticket-ID',
+        TICKET_ALREADY_USED: 'Das Ticket wurde bereits benutzt',
+        TICKET_FOR_ANOTHER_EVENT: 'Das Ticket ist für einen anderen Event',
+        TICKET_NOT_PAID: 'Es konnte keine passende Zahlung für das Ticket gefunden werden',
+        SUBSCRIPTION_INVALID_ID: 'Ungültige Subscription-ID',
+        SUBSCRIPTION_NOT_EXISTS: 'Diese Subscription konnte nicht gefunden werden'
       }
     },
     {
       provide: API_SERVER_URLS,
-      useValue: [
-        'http://localhost:8085/api',
-        'https://dev-api.frequenzdieb.ch',
-        'https://api.frequenzdieb.ch'
-      ]
+      useValue: (environment.production
+        ? ['https://dev-api.frequenzdieb.ch', 'https://api.frequenzdieb.ch']
+        : ['https://api.frequenzdieb.ch', 'https://dev-api.frequenzdieb.ch']
+      ).concat('http://localhost:8085/api')
     }
   ],
   bootstrap: [BncrComponent]

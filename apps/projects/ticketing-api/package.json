@@ -1,6 +1,6 @@
 {
   "name": "@bendsoft/ticketing-api",
-  "version": "0.0.7",
+  "version": "0.0.10",
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/bendsoft/frequenzdieb-homepage.git"
@@ -10,7 +10,7 @@
     "@angular/core": "~10.0.4",
     "@angular/material": "~10.1.0",
     "@angular/forms": "~10.0.4",
-    "lodash": "~4.17.19",
+    "lodash-es": "~4.17.15",
     "rxjs": "~6.6.0",
     "ng-recaptcha": "~5.0.0"
   },
@@ -19,7 +19,7 @@
     "@angular/core": "~10.0.4",
     "@angular/material": "~10.1.0",
     "@angular/forms": "~10.0.4",
-    "lodash": "~4.17.19",
+    "lodash-es": "~4.17.15",
     "rxjs": "~6.6.0",
     "ng-recaptcha": "~5.0.0"
   }

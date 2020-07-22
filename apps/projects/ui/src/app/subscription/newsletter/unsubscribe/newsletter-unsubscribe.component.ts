@@ -1,7 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 
-import { clone } from 'lodash'
+import { clone } from 'lodash-es'
 import { SubscriptionService } from '@bendsoft/ticketing-api'
 import { ApiService } from '../../../common/api/api.service'
 
