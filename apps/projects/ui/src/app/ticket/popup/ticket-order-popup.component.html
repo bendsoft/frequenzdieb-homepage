@@ -51,7 +51,7 @@
       <p class="ticket-overview" *ngIf="concert">
         <b class="name">{{ concert.name }}</b
         ><br />
-        {{ concert.date | date: 'dd.MM.yy' }} @ {{ concert.location }}
+        {{ concert.date | date: 'dd.MM.yy' }} @ {{ concert.locationId }}
       </p>
       <div class="ticket-cart">
         <div class="cart-item">
@@ -157,11 +157,11 @@
         einem Link zum Bestätigen finden.
       </p>
       <p>
-        <a href="" (click)="resendConfirmationMail()"
+        <a href="" (click)="resendConfirmationMail(userId)"
           >Bestätigungsmail erneut senden</a
         >
       </p>
-      <div class="button" (click)="checkEmailConfirmation(userId)">
+      <div class="button" (click)="checkEmailConfirmation()">
         Verifizieren
       </div>
     </div>
@@ -177,13 +177,6 @@
       <form id="paymentForm">
         <button id="paymentButton" (click)="startPayment()">Pay</button>
       </form>
-      <!-- <button id="paymentButton" (click)="startPayment()">Pay</button> -->
-      <!-- <script type="text/javascript">
-        document.getElementById('paymentButton').onclick = function () {
-          console.log('hi')
-          Datatrans.startPayment({ form: '#paymentForm' })
-        }
-      </script> -->
     </div>
     <div
       class="stage"

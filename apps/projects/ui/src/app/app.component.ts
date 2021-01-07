@@ -1,5 +1,4 @@
 import { Component } from '@angular/core'
-import { ApiService } from './common/api/api.service'
 
 @Component({
   selector: 'app-root',
@@ -8,6 +7,4 @@ import { ApiService } from './common/api/api.service'
 })
 export class AppComponent {
   title = 'frequenzdieb-ui'
-
-  constructor(private api: ApiService) {}
 }

@@ -76,7 +76,7 @@ export class ApiContextService {
       httpOptions: (T & { params: { recaptcha: string } }) | T
     ) => Observable<R>,
     options?: T
-  ): Observable<R> {
+  ) {
     if (this.recaptcha !== null) {
       return this.recaptcha.execute(actionName).pipe(
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore

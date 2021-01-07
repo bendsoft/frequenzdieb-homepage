@@ -45,6 +45,7 @@
     "@angular/service-worker": "~10.0.4",
     "@bendsoft/ticketing-api": "~0.0.10",
     "@zxing/ngx-scanner": "~3.0.0",
+    "glob": "^7.1.2",
     "lodash-es": "~4.17.15",
     "ng-recaptcha": "~5.0.0",
     "rxjs": "~6.6.0",
