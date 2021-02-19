@@ -3,10 +3,8 @@ package ch.frequenzdieb.ticket
 import ch.frequenzdieb.common.ErrorCode
 import ch.frequenzdieb.common.TemplateParser
 import ch.frequenzdieb.common.Validators.Companion.executeValidation
-import ch.frequenzdieb.common.zipToPairWhen
 import ch.frequenzdieb.event.EventRepository
 import ch.frequenzdieb.event.concert.Concert
-import ch.frequenzdieb.event.location.LocationRepository
 import ch.frequenzdieb.subscription.SubscriptionRepository
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import kotlinx.html.br
@@ -37,9 +35,6 @@ import java.util.Locale
 class TicketService(
 	private val resourceLoader: ResourceLoader,
 	private val eventRepository: EventRepository,
-	private val locationRepository: LocationRepository,
-	private val ticketTypeRepository: TicketTypeRepository,
-	private val ticketAttributeRepository: TicketAttributeRepository,
 	private val subscriptionRepository: SubscriptionRepository,
 	private val templateParser: TemplateParser
 ) {
@@ -62,15 +57,16 @@ class TicketService(
 		).run {
 			listOf(
 				addSubscriptionTags(ticket),
-				addTypeTags(ticket),
 				addEventTags(ticket)
 			).zip {
-				it.fold(mapOf(
-					"TICKET_QR_CODE" to
-						create.img {
-							src = "data:image/png;base64,${createQRCode(ticket)}"
-						}
-				)) { acc, curr -> acc.plus(curr) }
+				it
+					.plus(addTypeTags(ticket))
+					.fold(mapOf(
+						"TICKET_QR_CODE" to
+							create.img {
+								src = "data:image/png;base64,${createQRCode(ticket)}"
+							}
+					)) { acc, curr -> acc.plus(curr) }
 			}.map {
 				templateParser.replaceMarkups(this, it)
 			}.map { htmlTemplate ->
@@ -88,13 +84,12 @@ class TicketService(
 
 	private fun Document.addEventTags(ticket: Ticket): Mono<Map<String, Element>> =
 		eventRepository.findById(ticket.eventId)
-			.zipToPairWhen { locationRepository.findById(it.locationId) }
-			.map { (event, location) ->
+			.map { event ->
 				mapOf(
 					"TICKET_TITLE" to create.h1 { +event.name },
 					"TICKET_EVENT_INFO" to create.span {
 						style = "margin-top: -20px;"
-						br { +"Wo: ${location.name}" }
+						br { +"Wo: ${event.location?.name}" }
 						br { +"Wann: ${event.date.format(DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.GERMAN))}" }
 					},
 					"TICKET_FOOTER" to create.p {
@@ -102,45 +97,42 @@ class TicketService(
 						+event.terms.orEmpty()
 					},
 					when (event) {
-						is Concert -> {
+						is Concert ->
 							"TICKET_SECONDARY_TITLE" to create.span {
 								strong { +"Live Acts: " }
 								ul {
 									event.liveActs.forEach { li { +it } }
 								}
 							}
-						}
-						else -> {
+						else ->
 							"TICKET_SECONDARY_TITLE" to create.span {
 								+""
 							}
-						}
 					}
 				)
 			}
 
-	private fun Document.addTypeTags(ticket: Ticket): Mono<Map<String, Element>> =
-		ticketTypeRepository.findById(ticket.typeId)
-			.zipToPairWhen { ticketAttributeRepository.findAllById(it.attributeIds).collectList() }
-			.map { (type, attributes) ->
+	private fun Document.addTypeTags(ticket: Ticket) =
+		ticket.type?.let { type ->
+			type.attributes?.let { attributes ->
+
+				attributes.executeValidation(
+					errorCode = ErrorCode.TICKET_TYPE_DUPLICATE_TEMPLATE_TAG,
+					errorDetails = arrayOf("reason" to "Duplicate Tags found in TicketType-Attributes")
+				) { attributes.distinctBy { it.tag }.size == attributes.size }
+
 				attributes
-					.filter { !it.tag.isNullOrEmpty() }
-					.apply {
-						executeValidation(
-							errorCode = ErrorCode.TICKET_DUPLICATE_TEMPLATE_TAG,
-							errorDetails = arrayOf("reason" to "Duplicate Tags found in TicketType-Attributes")
-						) { distinctBy { it.tag }.size == size }
-					}
 					.map {
 						it.tag!! to create.p {
-							+"${it.text}: ${it.value}"
+							+"${it.key}: ${it.text}"
 						}
 					}
-					.toMap()
-					.plus(mapOf("TICKET_TYPE" to create.p {
+					.plus("TICKET_TYPE" to create.p {
 						+"Tickettyp: ${type.name}"
-					}))
+					})
+					.toMap()
 			}
+		}.orEmpty()
 
 	private fun Document.addSubscriptionTags(ticket: Ticket): Mono<Map<String, Element>> =
 		subscriptionRepository.findById(ticket.subscriptionId)

@@ -1,6 +1,6 @@
 package ch.frequenzdieb.subscription
 
-import ch.frequenzdieb.common.BaseEntity
+import ch.frequenzdieb.common.MutableEntity
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
@@ -26,4 +26,4 @@ data class Subscription(
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     var isConfirmed: Boolean = false
-) : BaseEntity()
+) : MutableEntity()

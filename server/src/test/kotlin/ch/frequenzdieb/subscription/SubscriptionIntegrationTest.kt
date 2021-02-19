@@ -1,18 +1,23 @@
 package ch.frequenzdieb.subscription
 
+import ch.frequenzdieb.common.BaseHelper.Dsl.createRandomString
+import ch.frequenzdieb.common.BaseHelper.Dsl.resetCollection
 import ch.frequenzdieb.common.BaseIntegrationTest
 import ch.frequenzdieb.security.SecurityHelper
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
 
-internal class SubscriptionIntegrationTest(
-    @Autowired private val subscriptionHelper: SubscriptionHelper,
-    @Autowired private val securityHelper: SecurityHelper
-) : BaseIntegrationTest({
+internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
+    @Autowired lateinit var subscriptionHelper: SubscriptionHelper
+    @Autowired lateinit var securityHelper: SecurityHelper
 
-    val restClient = securityHelper.initAccountsForRestClient()
+    private lateinit var restClient: SecurityHelper.AuthenticatedRestClient
 
     fun createMaxImal(): WebTestClient.ResponseSpec {
         return securityHelper.getRestClientUnauthenticated()
@@ -26,88 +31,96 @@ internal class SubscriptionIntegrationTest(
             .exchange()
     }
 
-    describe("get subscription by email of hans muster") {
-        val subscriberName = subscriptionHelper.createRandomString(5)
-
-        subscriptionHelper.resetCollection()
+    @ExperimentalCoroutinesApi
+    @BeforeAll
+    fun setup() = runBlockingTest {
+        // get subscription by email of hans muster
+        val subscriberName = createRandomString(5)
+        resetCollection(Subscription::class.java)
         subscriptionHelper.createSubscriptionForHans(subscriberName)
-
-        it("should not allow unauthenticated requests") {
-            securityHelper.getRestClientUnauthenticated()
-                .get().uri("/api/subscription?email=hans.muster@example.com")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isUnauthorized
-        }
-
-        it("should have Hans as surname") {
-            restClient.getAuthenticatedAsAdmin()
-                .get().uri("/api/subscription?email=hans.muster@example.com")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk
-                .expectBody(Subscription::class.java)
-                .returnResult()
-                .apply { responseBody?.surname shouldBe "Hans" }
-        }
-
-        it("should return 404 if not found") {
-            restClient.getAuthenticatedAsAdmin()
-                .get().uri("/api/subscription?email=han.solo@example.com")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound
-        }
-
-        it("should be a bad-request if no email given") {
-            restClient.getAuthenticatedAsAdmin()
-                .get().uri("/api/subscription")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isBadRequest
-                .expectBody(String::class.java)
-                .returnResult()
-                .apply { responseBody shouldBe "Please provide an email" }
-        }
-
-        it("should delete a request by email given") {
-            securityHelper.getRestClientUnauthenticated()
-                .delete().uri("/api/subscription?email=hans.muster@example.com")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNoContent
-                .apply {
-                    restClient.getAuthenticatedAsAdmin()
-                        .get().uri("/api/subscription?email=hans.muster@example.com")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .exchange()
-                        .expectStatus().isNotFound
-                }
-        }
-
-        describe("creating a new subscription") {
-            it("should contain the subscription") {
-                createMaxImal()
-                    .expectStatus().isCreated
-                    .apply {
-                        restClient.getAuthenticatedAsAdmin()
-                            .get().uri("/api/subscription?email=max.imal@example.com")
-                            .accept(MediaType.APPLICATION_JSON)
-                            .exchange()
-                            .expectStatus().isOk
-                            .expectBody(Subscription::class.java)
-                            .returnResult()
-                            .apply { responseBody?.surname shouldBe "Imal" }
-                    }
-            }
-
-            it("should not allow duplicates") {
-                createMaxImal()
-                    .expectStatus().isBadRequest
-                    .expectBody(String::class.java)
-                    .returnResult()
-                    .apply { responseBody shouldBe "E-Mail has already subscribed" }
-            }
-        }
+        restClient = securityHelper.initAccountsForRestClient()
     }
-})
+
+    @Test
+    fun `should not allow unauthenticated requests`() {
+        securityHelper.getRestClientUnauthenticated()
+            .get().uri("/api/subscription?email=hans.muster@example.com")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `should have Hans as surname`() {
+        restClient.getAuthenticatedAsAdmin()
+            .get().uri("/api/subscription?email=hans.muster@example.com")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(Subscription::class.java)
+            .returnResult()
+            .apply { responseBody?.surname shouldBe "Hans" }
+    }
+
+    @Test
+    fun `should return 404 if not found`() {
+        restClient.getAuthenticatedAsAdmin()
+            .get().uri("/api/subscription?email=han.solo@example.com")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `should be a bad-request if no email given`() {
+        restClient.getAuthenticatedAsAdmin()
+            .get().uri("/api/subscription")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isBadRequest
+            .expectBody(String::class.java)
+            .returnResult()
+            .apply { responseBody shouldBe "Please provide an email" }
+    }
+
+    @Test
+    fun `should delete a request by email given`() {
+        securityHelper.getRestClientUnauthenticated()
+            .delete().uri("/api/subscription?email=hans.muster@example.com")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isNoContent
+            .apply {
+                restClient.getAuthenticatedAsAdmin()
+                    .get().uri("/api/subscription?email=hans.muster@example.com")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isNotFound
+            }
+    }
+
+    @Test
+    fun `creating a new subscription should contain the subscription`() {
+        createMaxImal()
+            .expectStatus().isCreated
+            .apply {
+                restClient.getAuthenticatedAsAdmin()
+                    .get().uri("/api/subscription?email=max.imal@example.com")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk
+                    .expectBody(Subscription::class.java)
+                    .returnResult()
+                    .apply { responseBody?.surname shouldBe "Imal" }
+            }
+    }
+
+    @Test
+    fun `creating a new subscription should not allow duplicates`() {
+        createMaxImal()
+            .expectStatus().isBadRequest
+            .expectBody(String::class.java)
+            .returnResult()
+            .apply { responseBody shouldBe "E-Mail has already subscribed" }
+    }
+}

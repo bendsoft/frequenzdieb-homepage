@@ -1,10 +1,7 @@
 package ch.frequenzdieb.event.signup
 
-import ch.frequenzdieb.common.BaseEntity
-import ch.frequenzdieb.event.Event
-import ch.frequenzdieb.subscription.Subscription
+import ch.frequenzdieb.common.ImmutableEntity
 import org.springframework.data.annotation.TypeAlias
-import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 import javax.validation.constraints.AssertTrue
 import javax.validation.constraints.Size
@@ -21,4 +18,4 @@ data class SignUp(
 
     @field:AssertTrue
     val acceptedConditions: Boolean = false
-) : BaseEntity()
+) : ImmutableEntity()

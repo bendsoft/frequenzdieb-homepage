@@ -1,37 +1,38 @@
 package ch.frequenzdieb.common
 
-import org.springframework.data.mongodb.core.MongoTemplate
+import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 
-abstract class BaseHelper(
-    protected val mongoTemplate: MongoTemplate,
-    private val entityClass: Class<*>
-) {
-    init {
-        Dsl.mongoTemplate = mongoTemplate
-    }
-
+class BaseHelper {
     companion object Dsl {
         @DslMarker
         annotation class HelperDsl
 
-        lateinit var mongoTemplate: MongoTemplate
+        lateinit var mongoReactiveTemplate: ReactiveMongoTemplate
 
         @HelperDsl
-        fun <T : BaseEntity> T.insert(): T =
-            mongoTemplate.insert(this)
+        suspend fun <T : ImmutableEntity> T.insert(): T =
+            mongoReactiveTemplate.insert(this)
+                .awaitFirst()
 
         @HelperDsl
-        fun <T : BaseEntity> List<T>.insert(): List<T> =
-            this.map { it.insert() }
-    }
+        suspend fun <T : ImmutableEntity> List<T>.insert(): List<T> =
+            mongoReactiveTemplate.insertAll(this)
+                .collectList()
+                .awaitFirst()
 
-    fun resetCollection() {
-        mongoTemplate.dropCollection(entityClass)
-    }
+        private val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        @HelperDsl
+        fun createRandomString(stringLength: Int) = (1..stringLength)
+            .map { kotlin.random.Random.nextInt(0, charPool.size) }
+            .map(charPool::get)
+            .joinToString("")
 
-    private val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-    fun createRandomString(stringLength: Int) = (1..stringLength)
-        .map { kotlin.random.Random.nextInt(0, charPool.size) }
-        .map(charPool::get)
-        .joinToString("")
+        @HelperDsl
+        suspend fun resetCollection(entityClass: Class<*>) =
+            mongoReactiveTemplate
+                .dropCollection(entityClass)
+                .awaitFirstOrNull()
+    }
 }

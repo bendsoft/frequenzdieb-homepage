@@ -1,3 +1,3 @@
 package ch.frequenzdieb.payment
 
-interface Payment
+interface Payment : Amount

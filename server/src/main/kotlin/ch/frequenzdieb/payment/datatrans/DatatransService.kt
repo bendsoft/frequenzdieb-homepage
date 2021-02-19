@@ -1,5 +1,6 @@
 package ch.frequenzdieb.payment.datatrans
 
+import ch.frequenzdieb.payment.Payment
 import ch.frequenzdieb.payment.PaymentService
 import ch.frequenzdieb.security.SignatureFactory
 import generated.UppTransactionService
@@ -22,7 +23,7 @@ class DatatransService(
 					merchantId = datatransMerchantId
 					signature = signatureFactory.createPaymentSignature(
 						datatransMerchantId,
-						it.amount,
+						it.amount.toString(),
 						it.currency,
 						it.reference!!
 					)
@@ -30,9 +31,21 @@ class DatatransService(
 			}
 
 	override fun hasValidPayment(reference: String) =
+		loadValidTransaction(reference)
+			.hasElement()
+
+	override fun loadValidPayment(reference: String): Mono<Payment> =
+		loadValidTransaction(reference)
+			.map {
+				object : Payment {
+					override val amount = it.amount.toInt()
+					override val currency = it.currency
+				}
+			}
+
+	private fun loadValidTransaction(reference: String) =
 		transactionRepository.findTopByRefno(reference)
 			.filter { isTransactionSuccessful(it) }
-			.hasElement()
 
 	private fun isTransactionSuccessful(transaction: UppTransactionService.Body.Transaction) =
 		transaction.success?.responseCode == "01"

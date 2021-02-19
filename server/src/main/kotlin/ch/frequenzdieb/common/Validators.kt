@@ -41,7 +41,7 @@ class Validators (
                 }
             }
 
-        fun <T : BaseEntity> Mono<T>.checkSignature(
+        fun <T : ImmutableEntity> Mono<T>.checkSignature(
             signature: String,
             vararg additionalValuesInSignature: String
         ) =

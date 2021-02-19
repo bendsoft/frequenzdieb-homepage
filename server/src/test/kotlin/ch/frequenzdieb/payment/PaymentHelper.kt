@@ -1,25 +1,21 @@
 package ch.frequenzdieb.payment
 
-import ch.frequenzdieb.common.BaseHelper
 import ch.frequenzdieb.payment.datatrans.paymentRoute
 import ch.frequenzdieb.security.SignatureFactory
-import generated.UppTransactionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo
-import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @Component
 @AutoConfigureDataMongo
-internal class PaymentHelper (
-    mongoTemplate: MongoTemplate,
-    @Value("\${payment.datatrans.merchantId}") private val datatransMerchantId: String,
-    @Autowired private val signatureFactory: SignatureFactory,
-    private val restClient: WebTestClient
-) : BaseHelper(mongoTemplate, UppTransactionService::class.java) {
+internal class PaymentHelper {
+    @Value("\${payment.datatrans.merchantId}") lateinit var datatransMerchantId: String
+    @Autowired lateinit var signatureFactory: SignatureFactory
+    @Autowired lateinit var restClient: WebTestClient
+
     fun createXMLForSuccessfulTransaction(
         reference: String,
         amount: Int = 10,

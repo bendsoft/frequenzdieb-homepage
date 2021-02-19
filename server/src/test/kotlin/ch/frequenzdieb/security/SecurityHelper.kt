@@ -1,6 +1,6 @@
 package ch.frequenzdieb.security
 
-import ch.frequenzdieb.common.BaseHelper
+import ch.frequenzdieb.common.BaseHelper.Dsl.insert
 import ch.frequenzdieb.security.auth.Account
 import ch.frequenzdieb.security.auth.AuthenticationRequest
 import ch.frequenzdieb.security.auth.AuthenticationResult
@@ -9,20 +9,18 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.introspect.Annotated
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
 import io.kotest.matchers.shouldNotBe
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo
-import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Component
 import org.springframework.test.web.reactive.server.WebTestClient
 
-
 @Component
 @AutoConfigureDataMongo
-internal class SecurityHelper (
-    mongoTemplate: MongoTemplate,
-    private val restClient: WebTestClient
-) : BaseHelper(mongoTemplate, Account::class.java) {
+internal class SecurityHelper {
+    @Autowired lateinit var restClient: WebTestClient
+
     private val encoder = BCryptPasswordEncoder()
 
     fun createAccount(
@@ -70,17 +68,19 @@ internal class SecurityHelper (
             }
     }
 
-    fun initAccountsForRestClient(): AuthenticatedRestClient {
+    suspend fun initAccountsForRestClient(): AuthenticatedRestClient {
         createAccount(
             username = "fakeUser",
             password = "password",
             roles = listOf(Role.USER)
         ).insert()
+
         createAccount(
             username = "fakeAdmin",
             password = "password",
             roles = listOf(Role.ADMIN)
         ).insert()
+
         createAccount(
             username = "fakeHuman",
             password = "password",

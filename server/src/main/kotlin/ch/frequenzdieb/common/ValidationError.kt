@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class ValidationError (
+data class ValidationError(
     val code: ErrorCode = ErrorCode.VALIDATION_ERROR,
     val details: Map<String, Any>? = null,
     val value: Any? = null,

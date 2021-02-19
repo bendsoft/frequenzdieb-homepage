@@ -1,6 +1,9 @@
 package ch.frequenzdieb.event
 
-import ch.frequenzdieb.common.BaseEntity
+import ch.frequenzdieb.common.MutableEntity
+import ch.frequenzdieb.event.location.Location
+import com.fasterxml.jackson.annotation.JsonProperty
+import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 import javax.validation.constraints.Future
@@ -14,9 +17,14 @@ open class Event(
     @Future
     val date: LocalDateTime,
 
-    val locationId: String,
+    val terms: String?,
 
-    val ticketTypeIds: List<String>,
+    val validationRules: List<String> = emptyList(),
 
-    val terms: String?
-) : BaseEntity()
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    var location: Location? = null,
+
+    @Transient
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    var locationId: String? = null
+) : MutableEntity()

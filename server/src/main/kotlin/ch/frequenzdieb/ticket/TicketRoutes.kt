@@ -1,9 +1,10 @@
 package ch.frequenzdieb.ticket
 
-import ch.frequenzdieb.common.DefaultHandlers.createDefaultRoutes
+import ch.frequenzdieb.common.DefaultHandlers.create
 import ch.frequenzdieb.common.DefaultHandlers.delete
 import ch.frequenzdieb.common.DefaultHandlers.getAll
 import ch.frequenzdieb.common.DefaultHandlers.getById
+import ch.frequenzdieb.common.DefaultHandlers.returnList
 import ch.frequenzdieb.common.DefaultHandlers.update
 import ch.frequenzdieb.security.auth.Role
 import org.springframework.context.annotation.Bean
@@ -18,7 +19,6 @@ const val ticketRoute = "/api/ticket"
 @Configuration
 class TicketingRoutes(
 	private val ticketingHandler: TicketHandler,
-	private val ticketRepository: TicketRepository,
 	private val ticketTypeHandler: TicketTypeHandler,
 	private val ticketAttributeRepository: TicketAttributeRepository,
 	private val ticketTypeRepository: TicketTypeRepository
@@ -27,7 +27,7 @@ class TicketingRoutes(
 	fun ticketingRouter() = router {
 		ticketRoute.nest {
 			accept(APPLICATION_JSON).nest {
-				GET("/{id}") { ticketRepository.getById(it) }
+				GET("/{id}", ticketingHandler::getById)
 				GET("/", ticketingHandler::findAllBySubscriptionIdAndEventId)
 				POST("/", ticketingHandler::create)
 				POST("/{id}/pay", ticketingHandler::createPaymentForTicket)
@@ -41,7 +41,14 @@ class TicketingRoutes(
 					PUT("/{id}") { ticketTypeRepository.update(it) }
 					DELETE("/{id}") { ticketTypeRepository.delete(it) }
 					"attribute".nest {
-						createDefaultRoutes(ticketAttributeRepository)
+						GET("/{id}") { ticketAttributeRepository.getById(it) }
+						POST("/") { ticketAttributeRepository.create(it) }
+						GET("/") { request ->
+							request.queryParam("key")
+								.map { ticketAttributeRepository.getAllByKey(it).returnList() }
+								.orElse(ticketAttributeRepository.getAll())
+						}
+						PUT("/{id}/archive") { ticketAttributeRepository.update(it) }
 					}
 				}
 			}
@@ -50,17 +57,21 @@ class TicketingRoutes(
 
 	@Bean
 	fun ticketingMatchers(): ServerHttpSecurity.AuthorizeExchangeSpec.() -> Unit = {
-		pathMatchers(HttpMethod.GET, "$ticketRoute/type").permitAll()
-		pathMatchers(HttpMethod.GET, "$ticketRoute/type/**").permitAll()
-		pathMatchers("$ticketRoute/type/**")
-			.hasRole(Role.ADMIN.toString())
-
-		pathMatchers(HttpMethod.GET, "$ticketRoute/*/*").permitAll()
-		pathMatchers(HttpMethod.GET, ticketRoute).hasRole(Role.ADMIN.toString())
-		pathMatchers(HttpMethod.GET, "$ticketRoute/*").hasRole(Role.ADMIN.toString())
-		pathMatchers(HttpMethod.PUT, "$ticketRoute/invalidate")
-			.hasRole(Role.ADMIN.toString())
+		// user or admin
+		pathMatchers(HttpMethod.GET, "$ticketRoute/*/download")
+			.hasAnyRole(Role.ADMIN.toString(), Role.USER.toString())
+		pathMatchers(HttpMethod.GET, "$ticketRoute/*/send")
+			.hasAnyRole(Role.ADMIN.toString(), Role.USER.toString())
+		pathMatchers(HttpMethod.POST, "$ticketRoute/*/pay")
+			.hasAnyRole(Role.ADMIN.toString(), Role.USER.toString())
 		pathMatchers(HttpMethod.POST, ticketRoute)
 			.hasAnyRole(Role.ADMIN.toString(), Role.USER.toString())
+
+		// only admin
+		pathMatchers(HttpMethod.PUT, "$ticketRoute/invalidate")
+			.hasAnyRole(Role.ADMIN.toString())
+
+		pathMatchers("$ticketRoute/type/**")
+			.hasRole(Role.ADMIN.toString())
 	}
 }

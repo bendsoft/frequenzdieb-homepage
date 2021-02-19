@@ -20,7 +20,8 @@ export interface TicketErrorMessages {
   TICKET_ALREADY_USED: string
   TICKET_FOR_ANOTHER_EVENT: string
   TICKET_NOT_PAID: string
-  TICKET_DUPLICATE_TEMPLATE_TAG: string
+  TICKET_TYPE_DUPLICATE_TEMPLATE_TAG: string
+  TICKET_TYPE_DUPLICATE_ATTRIBUTE_KEY: string
 }
 
 export interface SubscriptionErrorMessages {
@@ -59,7 +60,9 @@ export class ErrorMessageHandler {
       TICKET_ALREADY_USED: 'Ticket has already been used',
       TICKET_FOR_ANOTHER_EVENT: 'Ticket is for another event',
       TICKET_NOT_PAID: 'No payment found for given ticket',
-      TICKET_DUPLICATE_TEMPLATE_TAG: 'The same tag cannot be used twice',
+      TICKET_TYPE_DUPLICATE_TEMPLATE_TAG: 'The same tag cannot be used twice',
+      TICKET_TYPE_DUPLICATE_ATTRIBUTE_KEY:
+        'Multiple attributes with the same key cannot be used twice for a ticket-type',
       SUBSCRIPTION_INVALID_ID: 'Subscription is invalid',
       SUBSCRIPTION_NOT_EXISTS: 'Subscription not found',
       SUBSCRIPTION_ALREADY_CONFIRMED: 'Subscription is already confirmed'

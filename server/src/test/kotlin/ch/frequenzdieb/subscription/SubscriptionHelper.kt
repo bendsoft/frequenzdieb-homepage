@@ -1,15 +1,17 @@
 package ch.frequenzdieb.subscription
 
-import ch.frequenzdieb.common.BaseHelper
-import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo
-import org.springframework.data.mongodb.core.MongoTemplate
+import ch.frequenzdieb.common.BaseHelper.Dsl.createRandomString
+import kotlinx.coroutines.reactive.awaitFirst
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.stereotype.Component
 
 @Component
-@AutoConfigureDataMongo
-internal class SubscriptionHelper(
-    mongoTemplate: MongoTemplate
-) : BaseHelper(mongoTemplate, Subscription::class.java) {
+@DataMongoTest
+internal class SubscriptionHelper {
+    @Autowired lateinit var reactiveMongoTemplate: ReactiveMongoTemplate
+
     fun createSubscriptionForHans(subscriberName: String): Subscription =
         Subscription(
             name = subscriberName,
@@ -19,6 +21,8 @@ internal class SubscriptionHelper(
             isConfirmed = true
         )
 
-    fun getAllSubscriptions(): MutableList<Subscription> =
-        mongoTemplate.findAll(Subscription::class.java)
+    suspend fun getAllSubscriptions(): List<Subscription> =
+        reactiveMongoTemplate.findAll(Subscription::class.java)
+            .collectList()
+            .awaitFirst()
 }

@@ -1,29 +1,29 @@
 package ch.frequenzdieb.ticket
 
-import ch.frequenzdieb.common.BaseHelper
+import ch.frequenzdieb.common.BaseHelper.Dsl.createRandomString
+import ch.frequenzdieb.common.BaseHelper.Dsl.insert
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo
-import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Component
 
 @Component
 @AutoConfigureDataMongo
-internal class TicketTypeHelper(
-    mongoTemplate: MongoTemplate,
-    private val ticketAttributeHelper: TicketAttributeHelper
-) : BaseHelper(mongoTemplate, TicketType::class.java) {
-    fun createTicketType(
+internal class TicketTypeHelper {
+    @Autowired lateinit var ticketAttributeHelper: TicketAttributeHelper
+
+    suspend fun createTicketType(
         name: String = createRandomString(5),
-        attributes: List<TicketAttribute> = ticketAttributeHelper.createFakeAttribute(2).insert(),
-        validationRules: List<String> = emptyList()
+        attributes: List<TicketAttribute>? = null,
+        validationRules: MutableList<String> = mutableListOf()
     ) = TicketType(
         name = name,
-        attributeIds = attributes.map { it.id!! },
+        attributeIds = (ticketAttributeHelper.createFakeAttribute(2).insert()).map { it.id!! },
         validationRules = validationRules
     )
 
-    fun createTicketType(
+    suspend fun createTicketType(
         amount: Int,
-        typeProducer: TicketTypeHelper.() -> TicketType = { createTicketType() }
+        typeProducer: suspend TicketTypeHelper.() -> TicketType = { createTicketType() }
     ) =
         (1..amount).map {
             typeProducer()

@@ -11,10 +11,10 @@ data class DatatransPayment(
     var merchantId: String?,
 
     @field:Min(0, message = "INVALID_AMOUNT")
-    val amount: String,
+    override val amount: Int,
 
     @field:Size(min = 2, max = 3, message = "INVALID_CURRENCY")
-    val currency: String,
+    override val currency: String,
 
     @Indexed
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

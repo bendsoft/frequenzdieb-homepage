@@ -1,26 +1,33 @@
 package ch.frequenzdieb.subscription
 
-import io.kotest.core.spec.style.DescribeSpec
+import ch.frequenzdieb.common.BaseHelper.Dsl.resetCollection
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.context.annotation.ComponentScan
 
 @DataMongoTest
 @ComponentScan(basePackages = ["ch.frequenzdieb.common.subscription"])
-internal class SubscriptionDBTest : DescribeSpec() {
+@ExperimentalCoroutinesApi
+internal class SubscriptionDBTest {
     @Autowired
     lateinit var subscriptionHelper: SubscriptionHelper
 
-    init {
-        describe("get subscription by email of hans muster") {
-            subscriptionHelper.resetCollection()
-            subscriptionHelper.createSubscriptionForHans("Muster")
+    @BeforeAll
+    fun setup() = runBlockingTest {
+        //get subscription by email of hans muster
+        resetCollection(Subscription::class.java)
+        subscriptionHelper.createSubscriptionForHans("Muster")
+    }
 
-            it("should have inserted the email") {
-                subscriptionHelper.getAllSubscriptions().forOne { it.email shouldBe "hans.muster@example.com" }
-            }
-        }
+    @Test
+    fun `should have inserted the email`() = runBlockingTest {
+        subscriptionHelper.getAllSubscriptions().forOne {
+            subscription -> subscription.email shouldBe "hans.muster@example.com" }
     }
 }
