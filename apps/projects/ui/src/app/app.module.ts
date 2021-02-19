@@ -27,6 +27,8 @@ import { DataProcessingAgreementComponent } from './footer/data-processing-agree
 import { DeleteSubscriptionComponent } from './subscription/delete/delete-subscription.component'
 import { DeleteSubscriptionConfirmationComponent } from './subscription/deletion-confirmation/delete-subscription-confirmation.component'
 import { MessageComponent } from './common/popup/message/message.component'
+import { API_SERVER_URLS } from '@bendsoft/ticketing-api'
+import { environment } from '../../../bouncer/src/environments/environment.prod'
 
 @NgModule({
   declarations: [
@@ -62,6 +64,13 @@ import { MessageComponent } from './common/popup/message/message.component'
     {
       provide: RECAPTCHA_V3_SITE_KEY,
       useValue: '6LdTI_oUAAAAABff9icvv42UOsy8p0RW65V4o6Ks'
+    },
+    {
+      provide: API_SERVER_URLS,
+      useValue: (environment.production
+        ? ['https://dev-api.frequenzdieb.ch', 'https://api.frequenzdieb.ch']
+        : ['https://api.frequenzdieb.ch', 'https://dev-api.frequenzdieb.ch']
+      ).concat('http://localhost:8085/api')
     }
   ],
   bootstrap: [AppComponent]
