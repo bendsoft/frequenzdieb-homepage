@@ -12,7 +12,7 @@ declare var $: any
 export class HeaderComponent implements OnInit {
   mobileNavigationOpen: Boolean = false
 
-  constructor(private popups: OpenPopupsService) {}
+  constructor(public popups: OpenPopupsService) {}
 
   ngOnInit() {}
 

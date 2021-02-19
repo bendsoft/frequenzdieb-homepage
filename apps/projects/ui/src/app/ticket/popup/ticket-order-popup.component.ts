@@ -12,6 +12,9 @@ import {
 } from '@bendsoft/ticketing-api'
 import { OpenPopupsService } from '../../common/popup/open-popups.service'
 
+// Datatrans is somehow not recognized, bad temporary fix, hopefully :D
+declare var Datatrans: any
+
 @Component({
   selector: 'app-ticket-order-popup',
   templateUrl: './ticket-order-popup.component.html',
@@ -73,11 +76,9 @@ export class TicketOrderPopupComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.popups.addPopup(this.popupName, this)
-    this.eventService
-      .getConcert('5e94cb5a63f0ff677e5a2691')
-      .subscribe((data: Concert) => {
-        this.concert = data
-      })
+    this.eventService.getConcert('5e94cb5a63f0ff677e5a2691').subscribe((data: Concert) => {
+      this.concert = data
+    })
   }
 
   ngAfterViewInit() {
@@ -128,10 +129,7 @@ export class TicketOrderPopupComponent implements OnInit, AfterViewInit {
 
   closePopup() {
     this.popups.setPopupOpen('tickets', false)
-    if (
-      this.isOpen === false &&
-      this.route.url === this.directNewsletterSubscriptionUrl
-    ) {
+    if (this.isOpen === false && this.route.url === this.directNewsletterSubscriptionUrl) {
       this.route.navigateByUrl('/home')
     }
     // this.ticketForm.reset()
@@ -195,8 +193,8 @@ export class TicketOrderPopupComponent implements OnInit, AfterViewInit {
       })
   }
 
-  resendConfirmationMail(id) {
-    return this.subscriptionService.requestEmailConfirmation(id)
+  resendConfirmationMail(userId) {
+    return this.subscriptionService.requestEmailConfirmation(userId)
   }
 
   checkContactInfo() {
