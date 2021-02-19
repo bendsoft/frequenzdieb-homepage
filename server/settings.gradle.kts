@@ -1,1 +1,1 @@
-rootProject.name = "frequenzdieb.rest-api"
+rootProject.name = "frequenzdieb.server"
