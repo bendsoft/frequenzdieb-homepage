@@ -1,20 +1,20 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
-val kotlinVersion = "1.3.72"
-val kotestVersion = "4.0.6"
+val kotlinVersion = "1.4.21"
+val kotestVersion = "4.3.2"
 
 plugins {
 	java
 	idea
 	id("com.palantir.docker") version "0.25.0"
-	id("org.springframework.boot") version "2.3.0.RELEASE"
-	id("io.spring.dependency-management") version "1.0.9.RELEASE"
-	id("org.unbroken-dome.xjc") version "1.4.3"
-	id("org.openapi.generator") version "4.3.1"
-	kotlin("jvm") version "1.3.72"
-	kotlin("plugin.spring") version "1.3.72"
-	kotlin("kapt") version "1.3.72"
+	id("org.springframework.boot") version "2.4.1"
+	id("io.spring.dependency-management") version "1.0.10.RELEASE"
+	id("org.unbroken-dome.xjc") version "2.0.0"
+	id("org.openapi.generator") version "5.0.0"
+	kotlin("jvm") version "1.4.21"
+	kotlin("plugin.spring") version "1.4.21"
+	kotlin("kapt") version "1.4.21"
 }
 
 group = "ch.frequenzdieb"
@@ -28,21 +28,10 @@ idea {
 	}
 }
 
-xjc {
-	includeInMainCompilation = false
-}
-
 val compileKotlin: KotlinCompile by tasks
 val xjcGenerate: org.unbrokendome.gradle.plugins.xjc.XjcGenerate by tasks
-
-xjcGenerate.source = fileTree("src/main/resources") { include("*.xsd") }
 compileKotlin.dependsOn(xjcGenerate)
-
 compileKotlin.dependsOn("openApiGenerate")
-
-sourceSets {
-	main { java { srcDir(xjcGenerate.outputDirectory) } }
-}
 
 repositories {
 	jcenter()
@@ -57,14 +46,13 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-mail")
 	compileOnly("org.springdoc:springdoc-openapi-webflux-ui:1.4.0")
 	compileOnly("org.springdoc:springdoc-openapi-kotlin:1.4.0")
-	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.+")
+	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
-	implementation("commons-codec:commons-codec:1.14")
-	implementation("javax.xml.bind:jaxb-api:2.3.1")
-	implementation("com.sun.xml.bind:jaxb-core:2.3.0.1")
-	implementation("com.sun.xml.bind:jaxb-impl:2.3.2")
-	implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.1")
+	implementation("javax.xml.bind:jaxb-api:2.3.0")
+	implementation("commons-codec:commons-codec:1.15")
+	implementation("com.sun.xml.bind:jaxb-core:3.0.0")
+	implementation("com.sun.xml.bind:jaxb-impl:3.0.0")
+	implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.2")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -78,18 +66,13 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt:0.9.1")
 	kapt("org.springframework.boot:spring-boot-configuration-processor")
 	runtimeOnly("org.springframework.boot:spring-boot-devtools")
-	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-	testImplementation("org.junit.jupiter:junit-jupiter-api")
-	testImplementation("org.springframework.boot:spring-boot-starter-test") {
-		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-	}
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.springframework.security:spring-security-test")
-	testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotestVersion")
-	testImplementation("io.kotest:kotest-assertions-core-jvm:$kotestVersion")
-	testImplementation("io.kotest:kotest-property-jvm:$kotestVersion")
-	testImplementation("io.kotest:kotest-extensions-spring-jvm:$kotestVersion")
+	testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+	testImplementation("io.kotest:kotest-property:$kotestVersion")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.2")
 }
 
 tasks {
@@ -99,10 +82,12 @@ tasks {
 		generatorName.set("typescript-angular")
 		inputSpec.set("$projectDir/rest-api.yaml")
 		outputDir.set(pathToGeneratedAngular)
-		configOptions.putAll(mutableMapOf(
-			"legacyDiscriminatorBehavior" to "false",
-			"supportsES6" to "true"
-		))
+		configOptions.putAll(
+			mutableMapOf(
+				"legacyDiscriminatorBehavior" to "false",
+				"supportsES6" to "true"
+			)
+		)
 	}
 
 	register("generateModelsForTicketingApi", Copy::class) {
