@@ -4,9 +4,7 @@ import ch.frequenzdieb.common.Validators.Companion.validateEntity
 import ch.frequenzdieb.event.EventRepository
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse.created
-import org.springframework.web.reactive.function.server.ServerResponse.notFound
-import org.springframework.web.reactive.function.server.ServerResponse.ok
+import org.springframework.web.reactive.function.server.ServerResponse.*
 import java.net.URI
 
 @Configuration

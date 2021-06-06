@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 import org.springframework.validation.BeanPropertyBindingResult
 import org.springframework.validation.Validator
 import reactor.core.publisher.Mono
-import java.util.Optional
+import java.util.*
 import javax.mail.internet.AddressException
 import javax.mail.internet.InternetAddress
 
@@ -30,7 +30,7 @@ class Validators (
                     webFluxValidator.validate(entity!!, errors)
 
                     if (errors.hasErrors()) {
-                        ValidationError (
+                        ValidationFailure (
                             value = entity,
                             code = ErrorCode.ENTITY_INVALID,
                             details = mapOf(
@@ -46,8 +46,8 @@ class Validators (
             vararg additionalValuesInSignature: String
         ) =
             validateWith(ErrorCode.SIGNATURE_INVALID) {
-                !it.id.isNullOrEmpty()
-                    && signatureFactory.createSignature(it.id!!, *additionalValuesInSignature) != signature
+                it.id.isNotEmpty()
+                    && signatureFactory.createSignature(it.id, *additionalValuesInSignature) != signature
             }
 
         fun <T> Mono<T>.validateAsyncWith(
@@ -65,12 +65,12 @@ class Validators (
                     predicate = { checkResult }
                 )
 
-                Mono.just(entity)
+                Mono.justOrEmpty(entity)
             }
 
         fun <T> Mono<T>.validateWith(
             errorCode: ErrorCode = ErrorCode.VALIDATION_ERROR,
-            validationError: ValidationError? = null,
+            validationError: ValidationFailure? = null,
             httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
             vararg errorDetails: Pair<String, Any>,
             predicate: (param: T) -> Boolean
@@ -89,12 +89,12 @@ class Validators (
             errorCode: ErrorCode = ErrorCode.VALIDATION_ERROR,
             httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
             errorDetails: Array<out Pair<String, Any>> = emptyArray(),
-            validationError: ValidationError? = null,
+            validationError: ValidationFailure? = null,
             predicate: (param: T) -> Boolean
         ) {
             if (!predicate(this)) {
                 Optional.ofNullable(validationError)
-                    .orElse(ValidationError(
+                    .orElse(ValidationFailure(
                         code = errorCode,
                         details = errorDetails
                             .takeIf { it.isNotEmpty() }
@@ -111,7 +111,7 @@ class Validators (
                         validate()
                     }
                 } catch (addressException: AddressException) {
-                    ValidationError(
+                    ValidationFailure(
                         ErrorCode.EMAIL_INVALID,
                         mapOf("reason" to addressException.localizedMessage)
                     ).throwAsServerResponse()

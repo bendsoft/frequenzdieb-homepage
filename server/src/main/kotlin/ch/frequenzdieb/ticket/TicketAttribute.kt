@@ -9,10 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 @TypeAlias("model.ticketAttribute")
 data class TicketAttribute (
     val name: String,
-    val key: String,
-    val text: String,
-    val tag: String? = null,
-    val isoLanguage: String = "de-CH",
-    override val validationRules: MutableList<String> = mutableListOf(),
-    val data: MutableMap<String, Any> = mutableMapOf()
+    val tag: TicketAttributeTag? = null,
+    val data: Map<String, Any> = mapOf(),
+    override val validationRules: List<String> = listOf()
 ) : ImmutableEntity(), Validateable

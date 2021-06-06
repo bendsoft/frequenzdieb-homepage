@@ -8,13 +8,17 @@ import org.springframework.stereotype.Component
 @AutoConfigureDataMongo
 internal class TicketAttributeHelper {
     fun createFakeAttribute(
-        validationRules: MutableList<String> = mutableListOf(),
-        data: MutableMap<String, Any> = mutableMapOf()
+        name: String = createRandomString(5),
+        data: Map<String, Any> = mapOf(),
+        validationRules: List<String> = listOf(),
+        tag: TicketAttributeTag = TicketAttributeTag(
+            name = createRandomString(5),
+            text = createRandomString(5),
+            key = createRandomString(5)
+        )
     ) = TicketAttribute(
-        key = createRandomString(5),
-        name = createRandomString(5),
-        tag = createRandomString(5),
-        text = createRandomString(5),
+        name = name,
+        tag = tag,
         validationRules = validationRules,
         data = data
     )

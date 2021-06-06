@@ -1,10 +1,10 @@
 package ch.frequenzdieb.ticket
 
 import ch.frequenzdieb.common.ImmutableEntity
-import ch.frequenzdieb.ticket.validation.Validateable
+import ch.frequenzdieb.event.Event
+import ch.frequenzdieb.subscription.Subscription
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.springframework.data.annotation.Transient
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
@@ -17,16 +17,10 @@ import org.springframework.data.mongodb.core.mapping.Document
 )
 @JsonIgnoreProperties(value = ["createdDate"])
 data class Ticket(
-	val subscriptionId: String,
+	val subscription: Subscription,
 
-	val eventId: String,
-
-	override val validationRules: MutableList<String> = mutableListOf(),
+	val event: Event,
 
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
-	var type: TicketType? = null,
-
-	@Transient
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	var typeId: String? = null
-) : ImmutableEntity(), Validateable
+	val type: TicketType
+) : ImmutableEntity()

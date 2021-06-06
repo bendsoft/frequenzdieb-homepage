@@ -19,7 +19,7 @@ import javax.xml.transform.stream.StreamResult
 
 @Service
 class TemplateParser {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java.name)
 
     fun parseHTMLTemplate(
         template: InputStream

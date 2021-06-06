@@ -4,9 +4,9 @@ import ch.frequenzdieb.common.ImmutableEntity
 import ch.frequenzdieb.common.LANGUAGE
 import ch.frequenzdieb.ticket.validation.Validateable
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.springframework.data.annotation.Transient
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
+import javax.validation.constraints.NotEmpty
 
 @Document(collection = "ticketTypes")
 @TypeAlias("model.ticketType")
@@ -15,12 +15,9 @@ data class TicketType(
 
     val isoLanguage: LANGUAGE = LANGUAGE.DE_CH,
 
-    override val validationRules: MutableList<String> = mutableListOf(),
+    override val validationRules: List<String> = listOf(),
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    var attributes: List<TicketAttribute>? = null,
-
-    @Transient
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    var attributeIds: List<String>? = null
+    @NotEmpty
+    var attributes: List<TicketAttribute> = listOf(),
 ) : ImmutableEntity(), Validateable

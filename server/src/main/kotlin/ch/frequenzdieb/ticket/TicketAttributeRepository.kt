@@ -6,6 +6,6 @@ import reactor.core.publisher.Flux
 
 @Repository
 interface TicketAttributeRepository : ReactiveMongoRepository<TicketAttribute, String> {
-    fun getAllByKey(key: String): Flux<TicketAttribute>
+    fun getAllByName(name: String): Flux<TicketAttribute>
     fun findAllByIdIn(attributeIds: List<String>): Flux<TicketAttribute>
 }

@@ -1,5 +1,5 @@
 package ch.frequenzdieb.ticket
 
-data class TicketCreateResponse (
+data class TicketQrCode (
     val qrCode: String
 )

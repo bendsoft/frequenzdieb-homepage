@@ -7,10 +7,7 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.RouterFunctionDsl
 import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse.created
-import org.springframework.web.reactive.function.server.ServerResponse.noContent
-import org.springframework.web.reactive.function.server.ServerResponse.notFound
-import org.springframework.web.reactive.function.server.ServerResponse.ok
+import org.springframework.web.reactive.function.server.ServerResponse.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.net.URI
@@ -44,27 +41,29 @@ object DefaultHandlers {
 
     inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.create(
         request: ServerRequest
-    ) =
-        request.bodyToMono(T::class.java).validateEntity()
-            .flatMap { insert(it) }
-            .flatMap {
-                created(URI.create("${request.path()}/${it.id}"))
-                    .bodyValue(it)
-            }
+    ) = request.bodyToMono(T::class.java).validateEntity()
+        .flatMap { create(request.path(), it) }
+
+    inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.create(
+        requestPath: String,
+        entity: T
+    ) = insert(entity)
+        .flatMap {
+            created(URI.create("${requestPath}/${it.id}"))
+                .bodyValue(it)
+        }
 
     inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.update(
         request: ServerRequest
-    ) =
-        request.bodyToMono(T::class.java).validateEntity()
-            .validateWith { !it.id.isNullOrEmpty() }
-            .validateAsyncWith(
-                httpStatus = HttpStatus.NOT_FOUND
-            ) { existsById(request.pathVariable("id")) }
-            .flatMap { save(it) }
-            .flatMap { ok().bodyValue(it) }
+    ) = request.bodyToMono(T::class.java).validateEntity()
+        .validateWith { !it.id.isNullOrEmpty() }
+        .validateAsyncWith(
+            httpStatus = HttpStatus.NOT_FOUND
+        ) { existsById(request.pathVariable("id")) }
+        .flatMap { save(it) }
+        .flatMap { ok().bodyValue(it) }
 
     inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.delete(
         request: ServerRequest
-    ) =
-        noContent().build(deleteById(request.pathVariable("id")))
+    ) = noContent().build(deleteById(request.pathVariable("id")))
 }

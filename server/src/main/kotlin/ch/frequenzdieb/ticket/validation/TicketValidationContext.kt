@@ -2,84 +2,125 @@ package ch.frequenzdieb.ticket.validation
 
 import ch.frequenzdieb.payment.Payment
 import ch.frequenzdieb.payment.PaymentService
-import ch.frequenzdieb.ticket.Ticket
-import ch.frequenzdieb.ticket.TicketAttribute
-import ch.frequenzdieb.ticket.TicketRepository
-import ch.frequenzdieb.ticket.TicketType
-import kotlinx.coroutines.reactive.awaitFirst
+import ch.frequenzdieb.ticket.*
+import kotlinx.coroutines.reactive.awaitFirstOrDefault
 import kotlinx.coroutines.reactive.awaitFirstOrElse
-import kotlinx.coroutines.runBlocking
-import kotlin.reflect.KClass
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+
+@ValidationDslMarker
+fun Ticket.validate(
+    ticketRepository: TicketRepository,
+    ticketTypeRepository: TicketTypeRepository,
+    paymentService: PaymentService<*>,
+    additionalRules: TicketValidationContext.() -> Unit = {}
+) = TicketValidationContext(
+    this,
+    ticketRepository,
+    ticketTypeRepository,
+    paymentService
+).apply {
+    additionalRules()
+}
+typealias Validator = suspend (Pair<Ticket, TicketType>) -> Unit
 
 class TicketValidationContext(
+    private val ticket: Ticket,
     private val ticketRepository: TicketRepository,
-    private val paymentService: PaymentService<*>,
-    val entity: Ticket,
-) : AbstractValidationDsl() {
-    override val validationRules: Map<Validateable, List<String>> =
-        mapOf(
-            entity to entity.validationRules,
-            entity.type!! to entity.type!!.validationRules,
-            *entity.type!!.attributes!!.map {
-                it to it.validationRules
-            }.toTypedArray()
-        )
+    private val ticketTypeRepository: TicketTypeRepository,
+    private val paymentService: PaymentService<*>
+) : ValidationContext() {
+    private val rulesOnOrder: MutableList<Validator> = mutableListOf()
+    private val rulesOnInvalidation: MutableList<Validator> = mutableListOf()
 
-    @ValidationDslMarker
-    lateinit var Ticket: Ticket
+    init {
+        val validationRulesScript = ticket.type.validationRules.joinToString("\n")
 
-    @ValidationDslMarker
-    var TicketType: TicketType? = null
-
-    @ValidationDslMarker
-    var TicketAttribute: TicketAttribute? = null
-
-    override fun Validateable.onValidationHook() {
-        TicketType = null
-        TicketAttribute = null
-
-        when (this) {
-            is Ticket -> Ticket = this
-            is TicketType -> TicketType = this
-            is TicketAttribute -> TicketAttribute = this
+        if (validationRulesScript.isNotBlank()) {
+            executeScript(this, ticket.type.validationRules.joinToString("\n"))
         }
     }
 
     @ValidationDslMarker
-    inline infix fun <reified T: Any> String.getDataPropertyAs(clazz: KClass<T>): T =
-        if (TicketAttribute!!.data[this] is Comparable<*>)
-            TicketAttribute!!.data[this] as T
-        else throw IllegalArgumentException("The data-property named $this is of another type. Please use the correct type.")
-
-    @ValidationDslMarker
-    infix fun Ticket.getAttribute(name: String): TicketAttribute {
-        val value = type?.attributes?.first { it.name == name }
-
-        if (value != null)
-            return value
-        else throw IllegalArgumentException("Could not find an attrbute named $name.")
+    fun onOrder(validator: Validator) {
+        rulesOnOrder.add(validator)
     }
 
     @ValidationDslMarker
-    infix fun On.countSoldTicketsOf(ticket: Ticket): Int =
-        runBlocking {
-            ticketRepository.countTicketsByType_NameAndEventId(
-                ticket.type!!.name,
-                entity.eventId
-            )
-                .awaitFirst()
-                .toInt()
-        }
+    fun onInvalidation(validator: Validator) {
+        rulesOnInvalidation.add(validator)
+    }
 
     @ValidationDslMarker
-    infix fun On.getLastPaymentOf(ticket: Ticket): Payment =
-        runBlocking {
-            paymentService.loadValidPayment(ticket.id!!)
-                .awaitFirstOrElse {
-                    object : Payment {
-                        override val amount = 0
-                        override val currency = "None"
-                    }
-                }
-        }
+    suspend fun executeOnOrder(): TicketValidationContext {
+        rulesOnOrder
+            .forEach { it(Pair(ticket, getTicketType())) }
+
+        throwCollectedErrors()
+
+        return this
+    }
+
+
+    @ValidationDslMarker
+    suspend fun executeOnInvalidation(): TicketValidationContext {
+        rulesOnInvalidation
+            .forEach { it(Pair(ticket, getTicketType())) }
+
+        throwCollectedErrors()
+
+        return this
+    }
+
+    private suspend fun getTicketType() = ticketTypeRepository
+        .findById(ticket.type.id)
+        .awaitFirstOrElse { throw IllegalArgumentException("Could not find a ticket type with id ${ticket.type.id}. Please provide a ticket-type that exists.") }
+
+    @ValidationDslMarker
+    inline fun <reified T> TicketAttribute.get(property: String): T {
+        val attributeValue = data[property]
+        if (attributeValue is T)
+            return attributeValue
+        else throw IllegalArgumentException("The data-property named $property is of type ${attributeValue?.javaClass?.canonicalName}. Please use the correct type.")
+    }
+
+    @ValidationDslMarker
+    infix fun Ticket.getAttribute(name: String): TicketAttribute =
+        type.attributes.first { it.name == name }
+
+    @ValidationDslMarker
+    fun TicketType.getAttribute(name: String): TicketAttribute =
+        attributes.first { it.name == name }
+
+    @ValidationDslMarker
+    fun <R> TicketType.getAttribute(name: String, action: (TicketAttribute) -> R): R =
+        attributes
+            .first { it.name == name }
+            .let { action(it) }
+
+    @ValidationDslMarker
+    suspend fun <R> Ticket.countSold(action: (Long) -> R): R =
+        ticketRepository
+            .countTicketsByType_NameAndEvent_Id(type.name, event.id)
+            .awaitFirstOrDefault(0)
+            .let { action(it) }
+
+    @ValidationDslMarker
+    suspend fun Ticket.getSoldForSubscription(): List<Ticket>? =
+        ticketRepository.findAllBySubscription_IdAndEvent_Id(subscription.id, event.id)
+            .collectList()
+            .awaitFirstOrNull()
+
+    @ValidationDslMarker
+    suspend fun <R> Ticket.getSoldForSubscription(attribute: TicketAttribute, action: (List<Ticket>) -> R): R? =
+        getSoldForSubscription()
+            ?.filterByAttribute(attribute)
+            ?.let { action(it) }
+
+    @ValidationDslMarker
+    fun List<Ticket>.filterByAttribute(attribute: TicketAttribute) =
+        filter { soldTicket -> soldTicket.type.attributes.any { it == attribute } }
+
+    @ValidationDslMarker
+    suspend fun <R> Ticket.getLastPayment(action: (Payment) -> R): R =
+        action(paymentService.loadValidPayment(id))
 }

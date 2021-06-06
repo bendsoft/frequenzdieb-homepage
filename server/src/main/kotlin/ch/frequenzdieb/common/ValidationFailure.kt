@@ -6,11 +6,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class ValidationError(
+data class ValidationFailure(
     val code: ErrorCode = ErrorCode.VALIDATION_ERROR,
     val details: Map<String, Any>? = null,
     val value: Any? = null,
-    val nested: List<ValidationError>? = null
+    val nested: List<ValidationFailure>? = null
 ) {
     fun throwAsServerResponse(httpStatus: HttpStatus = HttpStatus.BAD_REQUEST) {
         throw ResponseStatusException(

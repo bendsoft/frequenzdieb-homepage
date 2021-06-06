@@ -10,5 +10,5 @@ import java.time.Instant
 @TypeAlias("model.ticketArchive")
 data class ArchivedTicket (
     val ticket: Ticket,
-    val invalidatedAt: Instant? = null
+    val invalidatedAt: Instant
 ) : ImmutableEntity()

@@ -2,6 +2,7 @@ package ch.frequenzdieb.event.concert
 
 import ch.frequenzdieb.event.Event
 import ch.frequenzdieb.event.location.Location
+import ch.frequenzdieb.ticket.TicketType
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
@@ -15,10 +16,12 @@ class Concert(
     name: String,
     date: LocalDateTime,
     location: Location,
-    terms: String?
+    terms: String,
+    ticketTypes: List<TicketType>
 ) : Event(
     name = name,
     date = date,
     terms = terms,
-    location = location
+    location = location,
+    ticketTypes = ticketTypes
 )

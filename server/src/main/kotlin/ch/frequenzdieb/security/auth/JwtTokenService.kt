@@ -5,8 +5,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.util.Date
-import java.util.HashMap
+import java.util.*
 
 @Component
 class JwtTokenService {

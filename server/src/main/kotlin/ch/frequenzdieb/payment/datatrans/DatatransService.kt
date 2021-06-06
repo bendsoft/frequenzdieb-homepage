@@ -1,13 +1,16 @@
 package ch.frequenzdieb.payment.datatrans
 
+import ch.frequenzdieb.common.ErrorCode
+import ch.frequenzdieb.common.ValidationFailure
 import ch.frequenzdieb.payment.Payment
 import ch.frequenzdieb.payment.PaymentService
+import ch.frequenzdieb.payment.SimplePayment
 import ch.frequenzdieb.security.SignatureFactory
 import generated.UppTransactionService
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
 
 @Service
 class DatatransService(
@@ -16,9 +19,18 @@ class DatatransService(
 	@Autowired private val signatureFactory: SignatureFactory
 ) : PaymentService<DatatransPayment> {
 	override fun initiatePayment(payment: DatatransPayment) =
-		Mono.justOrEmpty(payment)
-			.filter { !it.reference.isNullOrEmpty() }
-			.map {
+		payment
+			.apply {
+				if (reference.isNullOrEmpty())
+					ValidationFailure (
+						value = payment,
+						code = ErrorCode.PAYMENT_INVALID,
+						details = mapOf(
+							"reason" to "missing reference"
+						)
+					).throwAsServerResponse()
+			}
+			.let {
 				it.copy().apply {
 					merchantId = datatransMerchantId
 					signature = signatureFactory.createPaymentSignature(
@@ -30,18 +42,18 @@ class DatatransService(
 				}
 			}
 
-	override fun hasValidPayment(reference: String) =
-		loadValidTransaction(reference)
-			.hasElement()
+	override suspend fun hasValidPayment(reference: String) =
+		loadValidPayment(reference) != SimplePayment()
 
-	override fun loadValidPayment(reference: String): Mono<Payment> =
-		loadValidTransaction(reference)
-			.map {
-				object : Payment {
-					override val amount = it.amount.toInt()
-					override val currency = it.currency
-				}
-			}
+	override suspend fun loadValidPayment(reference: String): Payment {
+		val transaction = loadValidTransaction(reference).awaitFirstOrNull()
+		return if (transaction != null) {
+			SimplePayment(
+				transaction.amount.toInt(),
+				transaction.currency
+			)
+		} else SimplePayment()
+	}
 
 	private fun loadValidTransaction(reference: String) =
 		transactionRepository.findTopByRefno(reference)

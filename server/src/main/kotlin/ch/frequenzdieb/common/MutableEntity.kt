@@ -9,5 +9,5 @@ abstract class MutableEntity(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @LastModifiedDate
-    var lastModifiedDate: Instant? = Instant.now()
+    var lastModifiedDate: Instant = Instant.now()
 ) : ImmutableEntity()

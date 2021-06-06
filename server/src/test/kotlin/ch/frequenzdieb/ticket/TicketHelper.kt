@@ -9,39 +9,42 @@ import ch.frequenzdieb.subscription.SubscriptionHelper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 @AutoConfigureDataMongo
-internal class TicketingHelper {
-    @Autowired lateinit var concertHelper: ConcertHelper
+internal class TicketHelper {
     @Autowired lateinit var subscriptionHelper: SubscriptionHelper
     @Autowired lateinit var ticketTypeHelper: TicketTypeHelper
     @Autowired lateinit var ticketAttributeHelper: TicketAttributeHelper
+    @Autowired lateinit var concertHelper: ConcertHelper
 
     suspend fun createFakeTicket(
         subscription: Subscription? = null,
         event: Event? = null,
         type: TicketType? = null
-    ) = Ticket(
-        subscriptionId = createSubscriptionId(),
-        eventId = createEventId(event),
-        type = createTicketType(type)
-    )
+    ): Ticket {
+        val fakeTicketType = type ?: ticketTypeHelper.createTicketType()
 
-    private suspend fun createTicketType(type: TicketType?) =
-        type ?: ticketTypeHelper.createTicketType().insert()
-
-    private suspend fun createEventId(event: Event?) =
-        (event ?: concertHelper.createConcert().insert()).id!!
-
-    private suspend fun createSubscriptionId() =
-        (subscriptionHelper.createSubscriptionForHans(createRandomString(5)).insert()).id!!
+        return Ticket(
+            subscription = subscriptionHelper.createSubscriptionForHans(createRandomString(5)).insert(),
+            type = fakeTicketType,
+            event = event ?: concertHelper.createConcert().insert(),
+        )
+    }
 
     suspend fun createFakeTickets(
         amount: Int,
-        ticketProducer: suspend TicketingHelper.() -> Ticket = { createFakeTicket() }
+        ticketProducer: suspend TicketHelper.() -> Ticket = { createFakeTicket() }
     ): List<Ticket> =
         (1..amount).map {
             ticketProducer()
+        }
+
+    fun createNewFakeTicketFrom(fakeTickets: List<Ticket>) = fakeTickets
+        .first()
+        .copy()
+        .apply {
+            id = UUID.randomUUID().toString()
         }
 }

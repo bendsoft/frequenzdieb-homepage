@@ -1,20 +1,20 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
-val kotlinVersion = "1.4.21"
-val kotestVersion = "4.3.2"
+val kotlinVersion = "1.5.0"
+val kotestVersion = "4.6.0"
 
 plugins {
 	java
 	idea
 	id("com.palantir.docker") version "0.25.0"
-	id("org.springframework.boot") version "2.4.1"
-	id("io.spring.dependency-management") version "1.0.10.RELEASE"
+	id("org.springframework.boot") version "2.5.0"
+	id("io.spring.dependency-management") version "1.0.11.RELEASE"
 	id("org.unbroken-dome.xjc") version "2.0.0"
-	id("org.openapi.generator") version "5.0.0"
-	kotlin("jvm") version "1.4.21"
-	kotlin("plugin.spring") version "1.4.21"
-	kotlin("kapt") version "1.4.21"
+	id("org.openapi.generator") version "5.1.1"
+	kotlin("jvm") version "1.5.0"
+	kotlin("plugin.spring") version "1.5.0"
+	kotlin("kapt") version "1.5.0"
 }
 
 group = "ch.frequenzdieb"
@@ -34,7 +34,6 @@ compileKotlin.dependsOn(xjcGenerate)
 compileKotlin.dependsOn("openApiGenerate")
 
 repositories {
-	jcenter()
 	maven(url = "https://jitpack.io")
 	mavenCentral()
 }
@@ -44,15 +43,15 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
-	compileOnly("org.springdoc:springdoc-openapi-webflux-ui:1.4.0")
-	compileOnly("org.springdoc:springdoc-openapi-kotlin:1.4.0")
+	compileOnly("org.springdoc:springdoc-openapi-webflux-ui:1.5.9")
+	compileOnly("org.springdoc:springdoc-openapi-kotlin:1.5.9")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("javax.xml.bind:jaxb-api:2.3.0")
 	implementation("commons-codec:commons-codec:1.15")
 	implementation("com.sun.xml.bind:jaxb-core:3.0.0")
 	implementation("com.sun.xml.bind:jaxb-impl:3.0.0")
-	implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.2")
+	implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -72,7 +71,7 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
 	testImplementation("io.kotest:kotest-property:$kotestVersion")
-	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.2")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0")
 }
 
 tasks {

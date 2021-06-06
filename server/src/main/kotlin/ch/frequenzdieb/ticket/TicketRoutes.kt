@@ -18,7 +18,7 @@ const val ticketRoute = "/api/ticket"
 
 @Configuration
 class TicketingRoutes(
-	private val ticketingHandler: TicketHandler,
+	private val ticketHandler: TicketHandler,
 	private val ticketTypeHandler: TicketTypeHandler,
 	private val ticketAttributeRepository: TicketAttributeRepository,
 	private val ticketTypeRepository: TicketTypeRepository
@@ -27,13 +27,13 @@ class TicketingRoutes(
 	fun ticketingRouter() = router {
 		ticketRoute.nest {
 			accept(APPLICATION_JSON).nest {
-				GET("/{id}", ticketingHandler::getById)
-				GET("/", ticketingHandler::findAllBySubscriptionIdAndEventId)
-				POST("/", ticketingHandler::create)
-				POST("/{id}/pay", ticketingHandler::createPaymentForTicket)
-				PUT("/invalidate", ticketingHandler::invalidate)
-				GET("/{id}/download", ticketingHandler::downloadTicket)
-				GET("/{id}/send", ticketingHandler::sendTicket)
+				GET("/{id}", ticketHandler::getById)
+				GET("/", ticketHandler::findAllBySubscriptionIdAndEventId)
+				POST("/", ticketHandler::create)
+				POST("/{id}/pay", ticketHandler::createPaymentForTicket)
+				PUT("/invalidate", ticketHandler::invalidate)
+				GET("/{id}/download", ticketHandler::downloadTicket)
+				GET("/{id}/send", ticketHandler::sendTicket)
 				"type".nest {
 					GET("/") { ticketTypeRepository.getAll() }
 					GET("/{id}") { ticketTypeRepository.getById(it) }
@@ -45,7 +45,7 @@ class TicketingRoutes(
 						POST("/") { ticketAttributeRepository.create(it) }
 						GET("/") { request ->
 							request.queryParam("key")
-								.map { ticketAttributeRepository.getAllByKey(it).returnList() }
+								.map { ticketAttributeRepository.getAllByName(it).returnList() }
 								.orElse(ticketAttributeRepository.getAll())
 						}
 						PUT("/{id}/archive") { ticketAttributeRepository.update(it) }

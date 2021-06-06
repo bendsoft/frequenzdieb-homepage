@@ -5,8 +5,10 @@ import ch.frequenzdieb.common.BaseHelper.Dsl.resetCollection
 import ch.frequenzdieb.common.BaseIntegrationTest
 import ch.frequenzdieb.event.location.LocationHelper
 import ch.frequenzdieb.security.SecurityHelper
+import ch.frequenzdieb.ticket.TicketTypeHelper
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -19,6 +21,7 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
     @Autowired lateinit var concertHelper: ConcertHelper
     @Autowired lateinit var locationHelper: LocationHelper
     @Autowired lateinit var securityHelper: SecurityHelper
+    @Autowired lateinit var ticketTypeHelper: TicketTypeHelper
 
     private val randomConcertName = createRandomString(10)
     private val randomLocation = locationHelper.createLocation()
@@ -88,10 +91,9 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
             }
     }
 
-
     //creating a new concert
     @Test
-    fun `should not allow unauthenticated creation`() {
+    fun `should not allow unauthenticated creation`(): Unit = runBlocking {
         securityHelper.getRestClientUnauthenticated()
             .post().uri("/api/concert")
             .bodyValue(Concert(
@@ -99,7 +101,8 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
                 location = randomLocation,
                 date = LocalDateTime.of(2099, 5, 2, 0, 0),
                 liveActs = randomLiveActs,
-                terms = randomTerms
+                terms = randomTerms,
+                ticketTypes = listOf(ticketTypeHelper.createTicketType())
             ))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
@@ -107,7 +110,7 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
-    fun `should contain the concert`() {
+    fun `should contain the concert`(): Unit = runBlocking {
         val authenticatedRestClient = restClient.getAuthenticatedAsAdmin()
 
         authenticatedRestClient
@@ -117,7 +120,8 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
                 location = randomLocation,
                 date = LocalDateTime.of(2099, 5, 2, 0, 0),
                 liveActs = randomLiveActs,
-                terms = randomTerms
+                terms = randomTerms,
+                ticketTypes = listOf(ticketTypeHelper.createTicketType())
             ))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()

@@ -1,13 +1,13 @@
 package ch.frequenzdieb.ticket
 
+import ch.frequenzdieb.common.DefaultHandlers.create
 import ch.frequenzdieb.common.ErrorCode
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
 import ch.frequenzdieb.common.Validators.Companion.validateWith
 import ch.frequenzdieb.common.zipToPairWhen
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse
-import java.net.URI
+import reactor.core.publisher.Mono
 
 @Configuration
 class TicketTypeHandler(
@@ -16,26 +16,26 @@ class TicketTypeHandler(
 ) {
     fun create(req: ServerRequest) =
         req.bodyToMono(TicketType::class.java).validateEntity()
-            .validateWith(ErrorCode.TICKET_TYPE_MISSING_ATTRIBUTES) {
-                it.attributeIds != null
-            }
-            .validateWith(ErrorCode.TICKET_TYPE_DUPLICATE_ATTRIBUTE_IDS) {
-                it.attributeIds!!.run { distinct().size == size }
-            }
-            .zipToPairWhen {
-                ticketAttributeRepository.findAllByIdIn(it.attributeIds!!)
-                    .collectList()
-            }
-            .validateWith(ErrorCode.TICKET_TYPE_MISSING_ATTRIBUTES) {
-                (_, attributes) -> attributes.size > 0
-            }
-            .validateWith(ErrorCode.TICKET_TYPE_DUPLICATE_TEMPLATE_TAG) {
-                (_, attributes) -> attributes.distinctBy { it.tag }.size == attributes.size
-            }
-            .doOnNext { (type, attributes) -> type.attributes = attributes }
-            .flatMap { (type, _) -> ticketTypeRepository.insert(type) }
-            .flatMap {
-                ServerResponse.created(URI.create("${req.path()}/${it.id}"))
-                    .bodyValue(it)
-            }
+            .flattenTicketType(ticketAttributeRepository)
+            .flatMap { ticketTypeRepository.create(req.path(), it) }
+
+    //TODO: Add update
 }
+
+fun Mono<TicketType>.flattenTicketType(ticketAttributeRepository: TicketAttributeRepository) =
+    validateWith(ErrorCode.TICKET_TYPE_DUPLICATE_ATTRIBUTE_IDS) { ticketType ->
+        ticketType.attributes.map { it.id }.run { distinct().size == size }
+    }
+    .zipToPairWhen { ticketType ->
+        ticketAttributeRepository.findAllByIdIn(ticketType.attributes.map { it.id })
+            .collectList()
+    }
+    .doOnNext { (ticketType, attributes) -> ticketType.attributes = attributes }
+    .validateWith(ErrorCode.TICKET_TYPE_DUPLICATE_TEMPLATE_TAG) { (_, attributes) ->
+        attributes
+            .filter { it.tag != null }
+            .run {
+                distinctBy { it.tag }.size == size
+            }
+    }
+    .map { (ticketType, _) -> ticketType}
