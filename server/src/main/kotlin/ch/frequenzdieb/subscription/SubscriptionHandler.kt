@@ -1,18 +1,21 @@
 package ch.frequenzdieb.subscription
 
+import ch.frequenzdieb.common.DefaultHandlers.asServerResponse
 import ch.frequenzdieb.common.ErrorCode
-import ch.frequenzdieb.common.RequestParamReader.readQueryParamAsync
+import ch.frequenzdieb.common.RequestParamReader.readQueryParam
 import ch.frequenzdieb.common.Validators.Companion.checkSignature
 import ch.frequenzdieb.common.Validators.Companion.validateEMail
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
 import ch.frequenzdieb.common.Validators.Companion.validateWith
 import ch.frequenzdieb.email.EmailService
 import ch.frequenzdieb.security.SignatureFactory
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
-import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.*
 import org.springframework.web.reactive.function.server.ServerResponse.*
 import java.net.URI
 
@@ -23,64 +26,65 @@ class SubscriptionHandler(
     private val emailService: EmailService,
     private val signatureFactory: SignatureFactory
 ) {
-    fun findFirstByEmail(req: ServerRequest) =
-        req.readQueryParamAsync("email")
-            .validateEMail()
-            .flatMap {
-                subscriptionRepository.findFirstByEmail(it)
-                    .flatMap { subscription -> ok().bodyValue(subscription) }
-                    .switchIfEmpty(notFound().build())
-            }
-
     private val emailVerificationTitle = "E-Mail Verifizierung für Frequenzdieb.ch"
 
-    fun create(req: ServerRequest) =
-        req.bodyToMono(Subscription::class.java).validateEntity()
-            .flatMap { newSubscription ->
+    suspend fun findFirstByEmail(req: ServerRequest): ServerResponse =
+        req.readQueryParam("email")
+            .validateEMail()
+            .let {
+                subscriptionRepository.findFirstByEmail(it)
+                    .awaitSingleOrNull()
+                    .asServerResponse()
+            }
+
+    suspend fun create(req: ServerRequest): ServerResponse =
+        req.awaitBody(Subscription::class)
+            .validateEntity()
+            .let { newSubscription ->
                 subscriptionRepository.insert(newSubscription)
-                    .doOnSuccess {
+                    .awaitSingle()
+                    .let {
                         emailService.sendEmail(
                             emailAddress = it.email,
                             subject = emailVerificationTitle,
                             message = createSubscriptionConfirmationMessage(it.id)
                         )
-                    }
-                    .flatMap {
                         created(URI.create("/subscription/${it.id}"))
-                            .bodyValue(it)
+                            .bodyValueAndAwait(it)
                     }
             }
 
-    fun resendConfirmation(req: ServerRequest) =
+    suspend fun resendConfirmation(req: ServerRequest): ServerResponse =
         subscriptionRepository.findById(req.pathVariable("id"))
-            .doOnSuccess {
+            .awaitSingleOrNull()
+            ?.let {
                 emailService.sendEmail(
                     emailAddress = it.email,
                     subject = emailVerificationTitle,
                     message = createSubscriptionConfirmationMessage(it.id)
                 )
             }
-            .flatMap { ok().build() }
-            .switchIfEmpty(notFound().build())
+            .asServerResponse()
 
-    fun update(req: ServerRequest) =
-        req.bodyToMono(Subscription::class.java).validateEntity()
-            .validateWith (ErrorCode.SUBSCRIPTION_INVALID_ID) { it.id.isNotEmpty() }
-            .zipWhen { subscriptionRepository.findById(it.id) }
-            .validateWith(ErrorCode.SUBSCRIPTION_NOT_EXISTS) { it.t2.id.isNotEmpty() }
-            .doOnNext {
-                if (it.t1.email != it.t2.email) {
-                    it.t2.isConfirmed = false
-                    emailService.sendEmail(
-                        emailAddress = it.t2.email,
-                        subject = emailVerificationTitle,
-                        message = createSubscriptionConfirmationMessage(it.t2.id)
-                    )
-                }
-            }
-           .flatMap {
-                subscriptionRepository.save(it.t2)
-                    .flatMap { savedSubscription -> ok().bodyValue(savedSubscription) }
+    suspend fun update(req: ServerRequest): ServerResponse =
+        req.awaitBody(Subscription::class)
+            .validateEntity()
+            .let { subscriptionToUpdate ->
+                subscriptionRepository.findById(subscriptionToUpdate.id)
+                    .awaitSingleOrNull()
+                    ?.let {
+                        if (subscriptionToUpdate.email != it.email) {
+                            it.isConfirmed = false
+                            emailService.sendEmail(
+                                emailAddress = it.email,
+                                subject = emailVerificationTitle,
+                                message = createSubscriptionConfirmationMessage(it.id)
+                            )
+                        }
+                        subscriptionRepository.save(it)
+                            .awaitSingle()
+                    }
+                    .asServerResponse()
             }
 
     private fun createSubscriptionConfirmationMessage(subscriptionId: String) = createHTML().
@@ -95,54 +99,65 @@ class SubscriptionHandler(
             }
         }
 
-    fun deleteAllByEmail(req: ServerRequest) =
-        req.readQueryParamAsync("email")
+    suspend fun deleteAllByEmail(req: ServerRequest): ServerResponse =
+        req.readQueryParam("email")
             .validateEMail()
-            .flatMap {
+            .let {
                 subscriptionRepository.deleteAllByEmail(it)
-                    .filter { deleteCount -> deleteCount > 0 }
-                    .flatMap { noContent().build() }
-                    .switchIfEmpty(notFound().build())
+                    .awaitSingle()
+                    .let { deleteCount ->
+                        if (deleteCount > 0)
+                            noContent().buildAndAwait()
+                        else notFound().buildAndAwait()
+                    }
             }
 
-    fun sendSubscriptionDeletionEMail(req: ServerRequest) =
-        req.readQueryParamAsync("email")
+    suspend fun sendSubscriptionDeletionEMail(req: ServerRequest): ServerResponse =
+        req.readQueryParam("email")
             .validateEMail()
-            .flatMap {
-                subscriptionRepository.findFirstByEmail(it)
-                    .flatMap { subscription ->
+            .let { email ->
+                subscriptionRepository.findFirstByEmail(email)
+                    .awaitSingleOrNull()
+                    ?.let {
                         emailService.sendEmail(
-                            emailAddress = subscription.email,
+                            emailAddress = it.email,
                             subject = "Bitte verifiziere die Löschung deiner e-Mail von der Frequenzdieb-Homepage",
-                            message = createSubscriptionDeletionMessage(subscription.id)
+                            message = createSubscriptionDeletionMessage(it.id)
                         )
-                        ok().build()
                     }
+                    .asServerResponse(emptyBody = true)
             }
 
-    fun confirmWithSignature(req: ServerRequest) =
-        req.readQueryParamAsync("signature")
-            .flatMap { signature ->
+    suspend fun confirmWithSignature(req: ServerRequest): ServerResponse =
+        req.readQueryParam("signature")
+            .let { signature ->
                 subscriptionRepository.findById(req.pathVariable("id"))
-                    .checkSignature(signature)
-                    .validateWith(ErrorCode.SUBSCRIPTION_ALREADY_CONFIRMED) { it.isConfirmed }
-                    .flatMap {
-                        it.isConfirmed = true
-                        subscriptionRepository.save(it)
-                            .flatMap { updatedSubscription -> ok().bodyValue(updatedSubscription) }
+                    .awaitSingleOrNull()
+                    ?.let { subscription ->
+                        subscription.apply {
+                            checkSignature(signature)
+                            validateWith(ErrorCode.SUBSCRIPTION_ALREADY_CONFIRMED) { it.isConfirmed }
+                            isConfirmed = true
+                            subscriptionRepository
+                                .save(subscription)
+                                .awaitSingle()
+                        }
                     }
-                    .switchIfEmpty(notFound().build())
+                    .asServerResponse()
             }
 
-    fun deleteWithSignature(req: ServerRequest) =
-        req.readQueryParamAsync("signature")
-            .flatMap { signature ->
+    suspend fun deleteWithSignature(req: ServerRequest): ServerResponse =
+        req.readQueryParam("signature")
+            .let { signature ->
                 subscriptionRepository.findById(req.pathVariable("id"))
-                    .checkSignature(signature)
-                    .flatMap {
-                        noContent().build(subscriptionRepository.deleteById(it.id))
-                    }
-                    .switchIfEmpty(notFound().build())
+                    .awaitSingleOrNull()
+                    ?.let { subscription ->
+                            subscription.checkSignature(signature)
+                            subscriptionRepository
+                                .deleteById(subscription.id)
+                                .awaitSingle()
+                            noContent().buildAndAwait()
+                    } ?: notFound().buildAndAwait()
             }
 
     private fun createSubscriptionDeletionMessage(subscriptionId: String) = createHTML().

@@ -3,9 +3,11 @@ package ch.frequenzdieb.ticket.validation
 import ch.frequenzdieb.payment.Payment
 import ch.frequenzdieb.payment.PaymentService
 import ch.frequenzdieb.ticket.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrDefault
 import kotlinx.coroutines.reactive.awaitFirstOrElse
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 @ValidationDslMarker
 fun Ticket.validate(
@@ -60,7 +62,6 @@ class TicketValidationContext(
         return this
     }
 
-
     @ValidationDslMarker
     suspend fun executeOnInvalidation(): TicketValidationContext {
         rulesOnInvalidation
@@ -84,10 +85,6 @@ class TicketValidationContext(
     }
 
     @ValidationDslMarker
-    infix fun Ticket.getAttribute(name: String): TicketAttribute =
-        type.attributes.first { it.name == name }
-
-    @ValidationDslMarker
     fun TicketType.getAttribute(name: String): TicketAttribute =
         attributes.first { it.name == name }
 
@@ -105,19 +102,22 @@ class TicketValidationContext(
             .let { action(it) }
 
     @ValidationDslMarker
-    suspend fun Ticket.getSoldForSubscription(): List<Ticket>? =
-        ticketRepository.findAllBySubscription_IdAndEvent_Id(subscription.id, event.id)
-            .collectList()
-            .awaitFirstOrNull()
+    fun Ticket.getSoldForSubscription(): Flow<Ticket> =
+        ticketRepository
+            .findAllBySubscription_IdAndEvent_Id(subscription.id, event.id)
+            .asFlow()
 
     @ValidationDslMarker
-    suspend fun <R> Ticket.getSoldForSubscription(attribute: TicketAttribute, action: (List<Ticket>) -> R): R? =
+    suspend fun <R> Ticket.getSoldForSubscription(
+        attribute: TicketAttribute,
+        action: suspend (Flow<Ticket>) -> R
+    ): R =
         getSoldForSubscription()
-            ?.filterByAttribute(attribute)
-            ?.let { action(it) }
+            .filterByAttribute(attribute)
+            .let { action(it) }
 
     @ValidationDslMarker
-    fun List<Ticket>.filterByAttribute(attribute: TicketAttribute) =
+    fun Flow<Ticket>.filterByAttribute(attribute: TicketAttribute) =
         filter { soldTicket -> soldTicket.type.attributes.any { it == attribute } }
 
     @ValidationDslMarker

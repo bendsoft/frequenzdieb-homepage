@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.web.reactive.function.server.router
+import org.springframework.web.reactive.function.server.coRouter
 
 const val locationRoute = "/api/event/location"
 
@@ -16,7 +16,7 @@ class LocationRoutes(
     private val locationRepository: LocationRepository
 ) {
     @Bean
-    fun locationRouter() = router {
+    fun locationRouter() = coRouter {
         locationRoute.nest {
             accept(MediaType.APPLICATION_JSON).nest {
                 createDefaultRoutes(locationRepository)

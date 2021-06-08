@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.web.reactive.function.server.router
+import org.springframework.web.reactive.function.server.coRouter
 
 const val subscriptionRoute = "/api/subscription"
 
@@ -25,7 +25,7 @@ class SubscriptionRoutes(
         RouterOperation(path = "/api/{id}/resend-confirmation"),
         RouterOperation(path = "/")
     )
-    fun subscriptionRouter() = router {
+    fun subscriptionRouter() = coRouter {
         subscriptionRoute.nest {
             accept(APPLICATION_JSON).nest {
                 GET("/{id}/confirm", subscriptionHandler::confirmWithSignature)

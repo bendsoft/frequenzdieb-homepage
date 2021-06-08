@@ -16,6 +16,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldBeEqualIgnoringCase
 import io.kotest.matchers.string.shouldContainIgnoringCase
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 import org.junit.jupiter.api.BeforeAll
@@ -28,7 +29,6 @@ import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.http.MediaType
 import org.springframework.web.server.ResponseStatusException
-import java.util.*
 
 @WebFluxTest
 @ComponentScan(basePackages = ["ch.frequenzdieb"])
@@ -71,19 +71,19 @@ internal class TicketTest {
 
         val fakeTicketType = ticketTypeHelper.createTicketType(
             name = "testType",
-            event = concert,
             attributes = listOf(fakeTicketAttribute),
             validationRules = mutableListOf("""
                 onOrder { (ticket, type) ->
                     ticket.countSold { sold ->
                         sold isMoreOrEqual type.getAttribute("Turnhalle Stehplätze").get<Int>("Stehplätze").toLong()
-                    } raiseValidationError ErrorCode.NO_MORE_TICKETS_AVAILABLE.toString()
+                    } raiseValidationError "NO_MORE_TICKETS_AVAILABLE"
                 }
             """)
         ).insert()
 
         val fakeTickets = ticketHelper.createFakeTickets(3) {
             createFakeTicket(
+                event = concert,
                 type = fakeTicketType
             )
         }.insert()
@@ -109,12 +109,12 @@ internal class TicketTest {
 
         val fakeTicketType = ticketTypeHelper.createTicketType(
             name = "testType",
-            event = concert,
             attributes = listOf(fakeTicketAttribute)
         ).insert()
 
         val fakeTickets = ticketHelper.createFakeTickets(3) {
             createFakeTicket(
+                event = concert,
                 type = fakeTicketType
             )
         }.insert()
@@ -143,12 +143,12 @@ internal class TicketTest {
 
         val fakeTicketType = ticketTypeHelper.createTicketType(
             name = "testType",
-            event = concert,
             attributes = listOf(fakeTicketAttribute)
         ).insert()
 
         val fakeTickets = ticketHelper.createFakeTickets(3) {
             createFakeTicket(
+                event = concert,
                 type = fakeTicketType
             )
         }.insert()
@@ -166,7 +166,7 @@ internal class TicketTest {
         }
 
         exception.reason shouldContainIgnoringCase "VALIDATION_ERROR"
-        exception.reason shouldContainIgnoringCase "NO_MORE_TICKETS_AVAILABLE"
+        exception.reason shouldContainIgnoringCase ErrorCode.NO_MORE_TICKETS_AVAILABLE.toString()
     }
 
     @Test
@@ -180,12 +180,12 @@ internal class TicketTest {
 
         val fakeTicketType = ticketTypeHelper.createTicketType(
             name = "testType",
-            event = concert,
             attributes = listOf(fakeTicketAttribute)
         ).insert()
 
         val fakeTickets = ticketHelper.createFakeTickets(3) {
             createFakeTicket(
+                event = concert,
                 type = fakeTicketType
             )
         }.insert()
@@ -205,7 +205,7 @@ internal class TicketTest {
         }
 
         exception.reason shouldContainIgnoringCase "VALIDATION_ERROR"
-        exception.reason shouldContainIgnoringCase "TICKET_NOT_PAID"
+        exception.reason shouldContainIgnoringCase ErrorCode.TICKET_NOT_PAID.toString()
     }
 
     @Test
@@ -214,14 +214,13 @@ internal class TicketTest {
 
         val ticketType = ticketTypeHelper.createTicketType(
             name = "testType",
-            event = concert,
             validationRules = mutableListOf("""
                 onInvalidation { (ticket, type) ->
                     ticket.getLastPayment { payment ->
                         with(type.getAttribute("price")) {
                             payment.amount isMoreOrEqual get("amount") || payment.currency isNotEqual get("currency")
                         }
-                    } raiseValidationError ErrorCode.TICKET_NOT_PAID.toString()
+                    } raiseValidationError "TICKET_NOT_PAID"
                 }
             """),
             attributes = listOf(
@@ -233,7 +232,10 @@ internal class TicketTest {
         ).insert()
 
         val fakeTickets = ticketHelper.createFakeTickets(3) {
-            createFakeTicket(type = ticketType)
+            createFakeTicket(
+                event = concert,
+                type = ticketType
+            )
         }.insert()
 
         val fakeTicket = ticketHelper.createNewFakeTicketFrom(fakeTickets)
@@ -250,49 +252,51 @@ internal class TicketTest {
     fun `should throw a validation-error if ordered too much tickets per subscriber`(): Unit = runBlocking {
         val concert = concertHelper.createConcert().insert()
 
-        val ticketType = ticketTypeHelper.createTicketType(
-            name = "Frequenzdieb 2052",
-            event = concert,
-            attributes = listOf(
-                ticketAttributeHelper.createFakeAttribute(
-                    name ="Standing Room",
-                    data = mutableMapOf(
-                        "maxStandingTicketsPerPerson" to 10,
-                        "standingRoom" to 20
-                    )
-                ).insert(),
-                ticketAttributeHelper.createFakeAttribute(
-                    name ="Seat",
-                    data = mutableMapOf(
-                        "maxSeatTicketsPerPerson" to 3,
-                        "seats" to 100
-                    )
-                ).insert()
+        val standingRoomTicketAttribute = ticketAttributeHelper.createFakeAttribute(
+            name ="Standing Room",
+            data = mutableMapOf(
+                "maxStandingTicketsPerPerson" to 10,
+                "standingRoom" to 20
             )
         ).insert()
 
-        val fakeTickets = ticketHelper.createFakeTickets(3) {
-            createFakeTicket(type = ticketType)
+        val seatTicketAttribute = ticketAttributeHelper.createFakeAttribute(
+            name ="Seat",
+            data = mutableMapOf(
+                "maxSeatTicketsPerPerson" to 3,
+                "seats" to 100
+            )
+        ).insert()
+
+        val fakeTicketType = ticketTypeHelper.createTicketType(
+            name = "Frequenzdieb 2052",
+            attributes = listOf(standingRoomTicketAttribute, seatTicketAttribute)
+        ).insert()
+
+        val fakeTicket = ticketHelper.createFakeTicket(
+            event = concert,
+            type = fakeTicketType
+        )
+
+        ticketHelper.createFakeTickets(3) {
+            createNewFakeTicketFrom(fakeTicket)
         }.insert()
 
-        val fakeTicket = ticketHelper.createNewFakeTicketFrom(fakeTickets)
+        val newFakeTicket = ticketHelper.createNewFakeTicketFrom(fakeTicket)
 
         val exception = shouldThrow<ResponseStatusException> {
-            fakeTicket.validate(
-                ticketRepository, ticketTypeRepository, paymentService
-            ) {
+            newFakeTicket.validate(ticketRepository, ticketTypeRepository, paymentService) {
                 onOrder { (ticket, type) ->
-
-                    ticket.getSoldForSubscription()?.apply {
+                    ticket.getSoldForSubscription().apply {
                         type.getAttribute("Seat").let { seatAttribute ->
-                            filterByAttribute(seatAttribute).size isMoreOrEqual seatAttribute.get("maxSeatTicketsPerPerson")
-                        } raiseValidationError "TOO_MUCH_TICKETS_ORDERED"
+                            filterByAttribute(seatAttribute).count() isMoreOrEqual seatAttribute.get("maxSeatTicketsPerPerson")
+                        } raiseValidationError ErrorCode.TOO_MUCH_TICKETS_ORDERED.toString()
                     }
 
                     type.getAttribute("Standing Room").let { standingRoomAttribute ->
                         ticket.getSoldForSubscription(standingRoomAttribute) { soldStandingRoomTickets ->
-                            soldStandingRoomTickets.size isMoreOrEqual standingRoomAttribute.get("maxStandingTicketsPerPerson")
-                        } raiseValidationError "TOO_MUCH_TICKETS_ORDERED"
+                            soldStandingRoomTickets.count() isMoreOrEqual standingRoomAttribute.get("maxStandingTicketsPerPerson")
+                        } raiseValidationError ErrorCode.TOO_MUCH_TICKETS_ORDERED.toString()
                     }
 
                 }
@@ -300,12 +304,12 @@ internal class TicketTest {
         }
 
         exception.reason shouldContainIgnoringCase "VALIDATION_ERROR"
-        exception.reason shouldContainIgnoringCase "TOO_MUCH_TICKETS_ORDERED"
+        exception.reason shouldContainIgnoringCase ErrorCode.TOO_MUCH_TICKETS_ORDERED.toString()
     }
 
     @Test
     fun `when creating a ticket should create a valid ticket`(): Unit = runBlocking {
-        val fakeTicket = ticketHelper.createFakeTicket()
+        val fakeTicket = ticketHelper.createNewFakeTicketFrom(ticketHelper.createFakeTicket())
 
         restClient.getAuthenticatedAsUser()
             .post().uri(ticketRoute)

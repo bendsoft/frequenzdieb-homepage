@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.web.reactive.function.server.router
+import org.springframework.web.reactive.function.server.coRouter
 
 @Configuration
 class EventRoutes(
@@ -25,7 +25,7 @@ class EventRoutes(
     private val baseRoute = "/api/event"
 
     @Bean
-    fun eventRouter() = router {
+    fun eventRouter() = coRouter {
         baseRoute.nest {
             accept(MediaType.APPLICATION_JSON).nest {
                 createDefaultRoutes(eventRepository)

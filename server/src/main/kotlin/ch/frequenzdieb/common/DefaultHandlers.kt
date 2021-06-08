@@ -2,18 +2,18 @@ package ch.frequenzdieb.common
 
 import ch.frequenzdieb.common.Validators.Companion.validateAsyncWith
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
-import ch.frequenzdieb.common.Validators.Companion.validateWith
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.http.HttpStatus
-import org.springframework.web.reactive.function.server.RouterFunctionDsl
-import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.*
 import org.springframework.web.reactive.function.server.ServerResponse.*
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import java.net.URI
 
 object DefaultHandlers {
-    inline fun <reified T : ImmutableEntity> RouterFunctionDsl.createDefaultRoutes(
+    inline fun <reified T : ImmutableEntity> CoRouterFunctionDsl.createDefaultRoutes(
         repository: ReactiveMongoRepository<T, String>
     ) = run {
         GET("/") { repository.getAll() }
@@ -23,47 +23,52 @@ object DefaultHandlers {
         DELETE("/{id}") { repository.delete(it) }
     }
 
-    inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.getById(request: ServerRequest) =
+    suspend fun <T : ImmutableEntity> ReactiveMongoRepository<T, String>.getById(request: ServerRequest): ServerResponse =
         findById(request.pathVariable("id"))
-            .returnOne()
+            .awaitSingleOrNull()
+            .asServerResponse()
 
-    inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.getAll() =
-        findAll().returnList()
+    suspend fun <T : ImmutableEntity> ReactiveMongoRepository<T, String>.getAll(): ServerResponse =
+        findAll()
+            .asFlow()
+            .toList()
+            .asServerResponse()
 
-    inline fun <reified T: ImmutableEntity> Mono<T>.returnOne() =
-        flatMap { ok().bodyValue(it) }
-            .switchIfEmpty(notFound().build())
+    suspend fun <T> T?.asServerResponse(emptyBody: Boolean = false): ServerResponse =
+        if (this !== null)
+            if (emptyBody) ok().buildAndAwait()
+            else ok().bodyValueAndAwait(this)
+        else notFound().buildAndAwait()
 
-    inline fun <reified T: ImmutableEntity> Flux<T>.returnList() =
-        collectList()
-            .flatMap { ok().bodyValue(it) }
-            .switchIfEmpty(notFound().build())
-
-    inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.create(
+    suspend inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.create(
         request: ServerRequest
-    ) = request.bodyToMono(T::class.java).validateEntity()
-        .flatMap { create(request.path(), it) }
+    ) = request.awaitBody(T::class)
+        .validateEntity()
+        .let { create(request.path(), it) }
 
-    inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.create(
+    suspend fun <T : ImmutableEntity> ReactiveMongoRepository<T, String>.create(
         requestPath: String,
         entity: T
-    ) = insert(entity)
-        .flatMap {
+    ): ServerResponse = insert(entity)
+        .awaitSingle()
+        .let {
             created(URI.create("${requestPath}/${it.id}"))
-                .bodyValue(it)
+                .bodyValueAndAwait(it)
         }
 
-    inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.update(
+    suspend inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.update(
         request: ServerRequest
-    ) = request.bodyToMono(T::class.java).validateEntity()
-        .validateWith { !it.id.isNullOrEmpty() }
-        .validateAsyncWith(
-            httpStatus = HttpStatus.NOT_FOUND
-        ) { existsById(request.pathVariable("id")) }
-        .flatMap { save(it) }
-        .flatMap { ok().bodyValue(it) }
+    ): ServerResponse = request.awaitBody(T::class)
+        .validateEntity()
+        .validateAsyncWith(httpStatus = HttpStatus.NOT_FOUND) {
+            existsById(request.pathVariable("id")).awaitSingle()
+        }
+        .let { save(it) }
+        .let { ok().bodyValueAndAwait(it) }
 
-    inline fun <reified T : ImmutableEntity> ReactiveMongoRepository<T, String>.delete(
+    suspend fun <T : ImmutableEntity> ReactiveMongoRepository<T, String>.delete(
         request: ServerRequest
-    ) = noContent().build(deleteById(request.pathVariable("id")))
+    ): ServerResponse = deleteById(request.pathVariable("id"))
+        .awaitSingle()
+        .let {  noContent().buildAndAwait() }
 }

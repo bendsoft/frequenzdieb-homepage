@@ -1,5 +1,7 @@
 package ch.frequenzdieb.common
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -21,6 +23,9 @@ class BaseHelper {
             mongoReactiveTemplate.insertAll(this)
                 .collectList()
                 .awaitFirst()
+
+        @HelperDsl
+        suspend fun <T : ImmutableEntity> Flow<T>.insert(): List<T> = toList().insert()
 
         private val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
         @HelperDsl

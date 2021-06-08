@@ -7,7 +7,6 @@ import java.time.Instant
 import java.util.*
 
 abstract class ImmutableEntity(
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Id
     var id: String = UUID.randomUUID().toString(),
 

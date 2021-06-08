@@ -25,8 +25,8 @@ open class Event(
     @NotEmpty
     val ticketTypes: List<TicketType>,
 
-    override val validationRules: List<String> = emptyList(),
+    override var validationRules: List<String> = listOf(),
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    val location: Location,
+    val location: Location
 ) : MutableEntity(), Validateable

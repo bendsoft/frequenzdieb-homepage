@@ -1,18 +1,21 @@
 package ch.frequenzdieb.ticket
 
+import ch.frequenzdieb.common.DefaultHandlers.asServerResponse
 import ch.frequenzdieb.common.DefaultHandlers.create
 import ch.frequenzdieb.common.DefaultHandlers.delete
 import ch.frequenzdieb.common.DefaultHandlers.getAll
 import ch.frequenzdieb.common.DefaultHandlers.getById
-import ch.frequenzdieb.common.DefaultHandlers.returnList
 import ch.frequenzdieb.common.DefaultHandlers.update
 import ch.frequenzdieb.security.auth.Role
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.web.reactive.function.server.router
+import org.springframework.web.reactive.function.server.coRouter
+import org.springframework.web.reactive.function.server.queryParamOrNull
 
 const val ticketRoute = "/api/ticket"
 
@@ -24,7 +27,7 @@ class TicketingRoutes(
 	private val ticketTypeRepository: TicketTypeRepository
 ) {
 	@Bean
-	fun ticketingRouter() = router {
+	fun ticketingRouter() = coRouter {
 		ticketRoute.nest {
 			accept(APPLICATION_JSON).nest {
 				GET("/{id}", ticketHandler::getById)
@@ -43,10 +46,16 @@ class TicketingRoutes(
 					"attribute".nest {
 						GET("/{id}") { ticketAttributeRepository.getById(it) }
 						POST("/") { ticketAttributeRepository.create(it) }
-						GET("/") { request ->
-							request.queryParam("key")
-								.map { ticketAttributeRepository.getAllByName(it).returnList() }
-								.orElse(ticketAttributeRepository.getAll())
+						GET("/") {
+							it.queryParamOrNull("name")
+								.let { attributeName ->
+									if (attributeName !== null)
+										ticketAttributeRepository.getAllByName(attributeName)
+											.asFlow()
+											.toList()
+											.asServerResponse()
+									else ticketAttributeRepository.getAll()
+								}
 						}
 						PUT("/{id}/archive") { ticketAttributeRepository.update(it) }
 					}

@@ -1,6 +1,7 @@
 package ch.frequenzdieb.event.location
 
 import ch.frequenzdieb.common.MutableEntity
+import ch.frequenzdieb.ticket.validation.Validateable
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
 import javax.validation.constraints.Size
@@ -11,5 +12,5 @@ data class Location (
     @Size(min = 2, max = 100, message = "INVALID_INPUT_SIZE")
     val name: String,
 
-    val validationRules: List<String> = emptyList()
-) : MutableEntity()
+    override val validationRules: List<String> = listOf()
+) : MutableEntity(), Validateable

@@ -6,6 +6,8 @@ import ch.frequenzdieb.event.Event
 import ch.frequenzdieb.event.concert.ConcertHelper
 import ch.frequenzdieb.subscription.Subscription
 import ch.frequenzdieb.subscription.SubscriptionHelper
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo
 import org.springframework.stereotype.Component
@@ -16,7 +18,6 @@ import java.util.*
 internal class TicketHelper {
     @Autowired lateinit var subscriptionHelper: SubscriptionHelper
     @Autowired lateinit var ticketTypeHelper: TicketTypeHelper
-    @Autowired lateinit var ticketAttributeHelper: TicketAttributeHelper
     @Autowired lateinit var concertHelper: ConcertHelper
 
     suspend fun createFakeTicket(
@@ -24,27 +25,32 @@ internal class TicketHelper {
         event: Event? = null,
         type: TicketType? = null
     ): Ticket {
-        val fakeTicketType = type ?: ticketTypeHelper.createTicketType()
+        val fakeTicketType = type ?: ticketTypeHelper.createTicketType().insert()
+        val fakeSubscription = subscription ?: subscriptionHelper.createSubscriptionForHans(createRandomString(5)).insert()
+        val fakeEvent = event ?: concertHelper.createConcert().insert()
 
         return Ticket(
-            subscription = subscriptionHelper.createSubscriptionForHans(createRandomString(5)).insert(),
+            subscription = fakeSubscription,
             type = fakeTicketType,
-            event = event ?: concertHelper.createConcert().insert(),
+            event = fakeEvent,
         )
     }
 
     suspend fun createFakeTickets(
         amount: Int,
         ticketProducer: suspend TicketHelper.() -> Ticket = { createFakeTicket() }
-    ): List<Ticket> =
-        (1..amount).map {
-            ticketProducer()
+    ): Flow<Ticket> = flow {
+        repeat(amount) {
+            emit(ticketProducer())
         }
+    }
 
-    fun createNewFakeTicketFrom(fakeTickets: List<Ticket>) = fakeTickets
-        .first()
+    fun createNewFakeTicketFrom(fakeTicket: Ticket) = fakeTicket
         .copy()
         .apply {
             id = UUID.randomUUID().toString()
         }
+
+    fun createNewFakeTicketFrom(fakeTickets: List<Ticket>) = fakeTickets
+        .first().let { createNewFakeTicketFrom(it) }
 }

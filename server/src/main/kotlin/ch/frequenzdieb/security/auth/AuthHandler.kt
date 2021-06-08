@@ -1,14 +1,17 @@
 package ch.frequenzdieb.security.auth
 
+import ch.frequenzdieb.common.DefaultHandlers.asServerResponse
 import ch.frequenzdieb.common.ErrorCode
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
 import ch.frequenzdieb.common.Validators.Companion.validateWith
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse.ok
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.awaitBody
 
 @Configuration
 class AuthHandler {
@@ -21,16 +24,16 @@ class AuthHandler {
     @Autowired
     lateinit var jwtTokenService: JwtTokenService
 
-    fun login(req: ServerRequest) =
-        req.bodyToMono(AuthenticationRequest::class.java)
+    suspend fun login(req: ServerRequest): ServerResponse =
+        req.awaitBody(AuthenticationRequest::class)
             .validateEntity()
-            .flatMap { authRequest ->
+            .let { authRequest ->
                 accountRepository.findOneByUsername(authRequest.username)
+                    .awaitSingle()
                     .validateWith(
                         errorCode = ErrorCode.NOT_AUTHORIZED,
                         httpStatus = HttpStatus.UNAUTHORIZED
                     ) { passwordEncoder.matches(authRequest.password, it.password) }
-                    .map { AuthenticationResult(jwtTokenService.generateToken(it)) }
-                    .flatMap { ok().bodyValue(it) }
+                    .let { AuthenticationResult(jwtTokenService.generateToken(it)).asServerResponse() }
             }
 }

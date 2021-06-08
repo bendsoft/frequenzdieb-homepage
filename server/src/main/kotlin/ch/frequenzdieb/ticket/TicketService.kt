@@ -5,6 +5,7 @@ import ch.frequenzdieb.event.EventRepository
 import ch.frequenzdieb.event.concert.Concert
 import ch.frequenzdieb.subscription.SubscriptionRepository
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.html.*
 import kotlinx.html.dom.create
 import net.glxn.qrgen.core.image.ImageType
@@ -14,8 +15,6 @@ import org.springframework.core.io.ResourceLoader
 import org.springframework.stereotype.Service
 import org.w3c.dom.Document
 import org.w3c.dom.Element
-import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.zip
 import java.io.ByteArrayOutputStream
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -36,25 +35,22 @@ class TicketService(
 				.toByteArray()
 		)
 
-	fun createPDF(ticket: Ticket): Mono<ByteArrayResource> {
+	suspend fun createPDF(ticket: Ticket): ByteArrayResource {
 		return templateParser.parseHTMLTemplate(
 			resourceLoader.getResource("classpath:ticket_template.html").inputStream
 		).run {
 			listOf(
 				addSubscriptionTags(ticket),
-				addEventTags(ticket)
+				addEventTags(ticket),
+				addTypeTags(ticket)
 			)
-			.zip {
-				it.plus(addTypeTags(ticket))
-					.fold(mapOf(
-						"TICKET_QR_CODE" to
-							create.img {
-								src = "data:image/png;base64,${createQRCode(ticket)}"
-							}
-					)) { acc, curr -> acc.plus(curr) }
-			}
-			.map { templateParser.replaceMarkups(this, it) }
-			.map { htmlTemplate ->
+			.fold(mapOf(
+				"TICKET_QR_CODE" to create.img {
+					src = "data:image/png;base64,${createQRCode(ticket)}"
+				}
+			)) { acc, curr -> acc.plus(curr) }
+			.let { templateParser.replaceMarkups(this, it) }
+			.let { htmlTemplate ->
 				ByteArrayResource(ByteArrayOutputStream().also {
 					PdfRendererBuilder().apply {
 						useFastMode()
@@ -67,9 +63,10 @@ class TicketService(
 		}
 	}
 
-	private fun Document.addEventTags(ticket: Ticket): Mono<Map<String, Element>> =
+	private suspend fun Document.addEventTags(ticket: Ticket): Map<String, Element> =
 		eventRepository.findById(ticket.event.id)
-			.map { event ->
+			.awaitSingle()
+			.let { event ->
 				mapOf(
 					"TICKET_TITLE" to create.h1 { +event.name },
 					"TICKET_EVENT_INFO" to create.span {
@@ -112,9 +109,10 @@ class TicketService(
 				.toMap()
 		}
 
-	private fun Document.addSubscriptionTags(ticket: Ticket): Mono<Map<String, Element>> =
+	private suspend fun Document.addSubscriptionTags(ticket: Ticket): Map<String, Element> =
 		subscriptionRepository.findById(ticket.subscription.id)
-			.map {
+			.awaitSingle()
+			.let {
 				mapOf("TICKET_OWNER_INFO" to create.p {
 					+"Dieses Ticket wurde erstellt für ${it.surname} ${it.name}"
 				})

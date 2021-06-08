@@ -1,11 +1,12 @@
 package ch.frequenzdieb.common
 
 import ch.frequenzdieb.security.SignatureFactory
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.validation.BeanPropertyBindingResult
 import org.springframework.validation.Validator
-import reactor.core.publisher.Mono
 import java.util.*
 import javax.mail.internet.AddressException
 import javax.mail.internet.InternetAddress
@@ -15,33 +16,36 @@ class Validators (
     webFluxValidator: Validator,
     signatureFactory: SignatureFactory
 ) {
+
     init {
         Companion.webFluxValidator = webFluxValidator
         Companion.signatureFactory = signatureFactory
     }
 
     companion object {
+        private val logger: Logger = LoggerFactory.getLogger(Validators::class.java)
+
         lateinit var webFluxValidator: Validator
         lateinit var signatureFactory: SignatureFactory
 
-        inline fun <reified T> Mono<T>.validateEntity(): Mono<T> =
-            doOnNext { entity ->
-                BeanPropertyBindingResult(entity, T::class.java.name).let { errors ->
-                    webFluxValidator.validate(entity!!, errors)
+        inline fun <reified T> T.validateEntity(): T =
+            apply {
+                BeanPropertyBindingResult(this, T::class.java.name).apply {
+                    webFluxValidator.validate(this@validateEntity!!, this)
 
-                    if (errors.hasErrors()) {
-                        ValidationFailure (
-                            value = entity,
+                    if (this.hasErrors()) {
+                        ValidationFailure(
+                            value = this,
                             code = ErrorCode.ENTITY_INVALID,
                             details = mapOf(
-                                "reason" to errors.allErrors
+                                "reason" to this.allErrors
                             )
                         ).throwAsServerResponse()
                     }
                 }
             }
 
-        fun <T : ImmutableEntity> Mono<T>.checkSignature(
+        fun <T : ImmutableEntity> T.checkSignature(
             signature: String,
             vararg additionalValuesInSignature: String
         ) =
@@ -50,40 +54,38 @@ class Validators (
                     && signatureFactory.createSignature(it.id, *additionalValuesInSignature) != signature
             }
 
-        fun <T> Mono<T>.validateAsyncWith(
+        suspend fun <T> T.validateAsyncWith(
             errorCode: ErrorCode = ErrorCode.VALIDATION_ERROR,
             httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
             vararg errorDetails: Pair<String, Any>,
-            asyncPredicate: (param: T) -> Mono<Boolean>
-        ): Mono<T> =
-            zipToPairWhen { asyncPredicate(it) }
-            .flatMap { (entity, checkResult) ->
-                entity.executeValidation(
-                    errorCode = errorCode,
-                    httpStatus = httpStatus,
-                    errorDetails = errorDetails,
-                    predicate = { checkResult }
-                )
+            asyncPredicate: suspend (T) -> Boolean
+        ): T = apply {
+            asyncPredicate(this@validateAsyncWith)
+                .let { checkResult ->
+                    executeValidation(
+                        errorCode = errorCode,
+                        httpStatus = httpStatus,
+                        errorDetails = errorDetails,
+                        predicate = { checkResult }
+                    )
+                }
+        }
 
-                Mono.justOrEmpty(entity)
-            }
-
-        fun <T> Mono<T>.validateWith(
+        fun <T> T.validateWith(
             errorCode: ErrorCode = ErrorCode.VALIDATION_ERROR,
             validationError: ValidationFailure? = null,
             httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
             vararg errorDetails: Pair<String, Any>,
             predicate: (param: T) -> Boolean
-        ): Mono<T> =
-            doOnNext {
-                it.executeValidation(
-                    errorCode = errorCode,
-                    validationError = validationError,
-                    httpStatus = httpStatus,
-                    errorDetails = errorDetails,
-                    predicate = predicate
-                )
-            }.log()
+        ): T = apply {
+            executeValidation(
+                errorCode = errorCode,
+                validationError = validationError,
+                httpStatus = httpStatus,
+                errorDetails = errorDetails,
+                predicate = predicate
+            )
+        }
 
         fun <T> T.executeValidation(
             errorCode: ErrorCode = ErrorCode.VALIDATION_ERROR,
@@ -91,7 +93,7 @@ class Validators (
             errorDetails: Array<out Pair<String, Any>> = emptyArray(),
             validationError: ValidationFailure? = null,
             predicate: (param: T) -> Boolean
-        ) {
+        ): T {
             if (!predicate(this)) {
                 Optional.ofNullable(validationError)
                     .orElse(ValidationFailure(
@@ -100,14 +102,17 @@ class Validators (
                             .takeIf { it.isNotEmpty() }
                             ?.let { mapOf(*it) }
                     ))
+                    .apply { logger.warn("Validation failed!")  }
                     .throwAsServerResponse(httpStatus)
             }
+
+            return this
         }
 
-        fun Mono<String>.validateEMail(): Mono<String> =
-            doOnNext {
+        fun String.validateEMail(): String =
+            apply {
                 try {
-                    InternetAddress(it).apply {
+                    InternetAddress(this).apply {
                         validate()
                     }
                 } catch (addressException: AddressException) {
