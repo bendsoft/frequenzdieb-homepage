@@ -16,7 +16,9 @@ internal class TicketTypeHelper {
         attributes: List<TicketAttribute> = listOf(),
         validationRules: MutableList<String> = mutableListOf()
     ): TicketType {
-        val fakeAttributes = attributes.ifEmpty { ticketAttributeHelper.createFakeAttribute(2).insert() }
+        val fakeAttributes = attributes.ifEmpty {
+            ticketAttributeHelper.createFakeAttribute(2).insert()
+        }
 
         return TicketType(
             name = name,

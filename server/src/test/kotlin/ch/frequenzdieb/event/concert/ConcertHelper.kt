@@ -30,6 +30,6 @@ internal class ConcertHelper {
         date = date,
         location = location ?: locationHelper.createLocation().insert(),
         terms = terms,
-        ticketTypes = ticketTypes ?: listOf(ticketTypeHelper.createTicketType())
+        ticketTypes = ticketTypes ?: listOf(ticketTypeHelper.createTicketType().insert())
     )
 }

@@ -34,14 +34,16 @@ internal class SecurityHelper {
     )
 
     inner class AuthenticatedRestClient {
-        fun getAuthenticatedAsAdmin() =
+        fun authenticatedAsAdmin() =
             mutateRestClient("fakeAdmin")
 
-        fun getAuthenticatedAsUser()=
+        fun authenticatedAsUser()=
             mutateRestClient("fakeUser")
 
-        fun getAuthenticatedAsHuman() =
+        fun authenticatedAsHuman() =
             mutateRestClient("fakeHuman")
+
+        fun unauthenticated() = restClient
 
         private fun mutateRestClient(username: String) =
             object : JacksonAnnotationIntrospector() {
@@ -51,7 +53,7 @@ internal class SecurityHelper {
                         access == JsonProperty.Access.READ_ONLY ||
                         access == JsonProperty.Access.WRITE_ONLY
                     ) {
-                        return JsonProperty.Access.AUTO
+                        return JsonProperty.Access.READ_WRITE
                     }
                     return access
                 }
@@ -68,7 +70,7 @@ internal class SecurityHelper {
             }
     }
 
-    suspend fun initAccountsForRestClient(): AuthenticatedRestClient {
+    suspend fun createAuthenticatedRestClient(): AuthenticatedRestClient {
         createAccount(
             username = "fakeUser",
             password = "password",
@@ -108,5 +110,5 @@ internal class SecurityHelper {
                 responseBody?.token!!
             }
 
-    fun getRestClientUnauthenticated() = restClient
+    fun unauthenticated() = restClient
 }

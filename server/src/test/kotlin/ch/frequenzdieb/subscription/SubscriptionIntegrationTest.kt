@@ -20,7 +20,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
     private lateinit var restClient: SecurityHelper.AuthenticatedRestClient
 
     fun createMaxImal(): WebTestClient.ResponseSpec {
-        return securityHelper.getRestClientUnauthenticated()
+        return securityHelper.unauthenticated()
             .post().uri("/api/subscription")
             .bodyValue(Subscription(
                 surname = "Imal",
@@ -36,14 +36,14 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
     fun setup() = runBlockingTest {
         // get subscription by email of hans muster
         val subscriberName = createRandomString(5)
-        resetCollection(Subscription::class.java)
+        resetCollection(Subscription::class)
         subscriptionHelper.createSubscriptionForHans(subscriberName)
-        restClient = securityHelper.initAccountsForRestClient()
+        restClient = securityHelper.createAuthenticatedRestClient()
     }
 
     @Test
     fun `should not allow unauthenticated requests`() {
-        securityHelper.getRestClientUnauthenticated()
+        securityHelper.unauthenticated()
             .get().uri("/api/subscription?email=hans.muster@example.com")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
@@ -52,7 +52,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `should have Hans as surname`() {
-        restClient.getAuthenticatedAsAdmin()
+        restClient.authenticatedAsAdmin()
             .get().uri("/api/subscription?email=hans.muster@example.com")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
@@ -64,7 +64,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `should return 404 if not found`() {
-        restClient.getAuthenticatedAsAdmin()
+        restClient.authenticatedAsAdmin()
             .get().uri("/api/subscription?email=han.solo@example.com")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
@@ -73,7 +73,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `should be a bad-request if no email given`() {
-        restClient.getAuthenticatedAsAdmin()
+        restClient.authenticatedAsAdmin()
             .get().uri("/api/subscription")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
@@ -85,13 +85,13 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `should delete a request by email given`() {
-        securityHelper.getRestClientUnauthenticated()
+        securityHelper.unauthenticated()
             .delete().uri("/api/subscription?email=hans.muster@example.com")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isNoContent
             .apply {
-                restClient.getAuthenticatedAsAdmin()
+                restClient.authenticatedAsAdmin()
                     .get().uri("/api/subscription?email=hans.muster@example.com")
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
@@ -104,7 +104,7 @@ internal class SubscriptionIntegrationTest : BaseIntegrationTest() {
         createMaxImal()
             .expectStatus().isCreated
             .apply {
-                restClient.getAuthenticatedAsAdmin()
+                restClient.authenticatedAsAdmin()
                     .get().uri("/api/subscription?email=max.imal@example.com")
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()

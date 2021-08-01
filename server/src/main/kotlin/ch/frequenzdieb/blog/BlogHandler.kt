@@ -19,7 +19,7 @@ class BlogHandler(
             .flatMap {
                 repository.save(it)
                     .flatMap { blogEntry ->
-                        created(URI.create("/blogEntry/${blogEntry.id}"))
+                        created(URI.create("/api/blogEntry/${blogEntry.id}"))
                             .bodyValue(blogEntry)
                     }
             }

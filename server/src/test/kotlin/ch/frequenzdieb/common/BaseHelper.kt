@@ -4,14 +4,24 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import kotlin.reflect.KClass
 
-class BaseHelper {
+@WebFluxTest
+class BaseHelper(
+    @Autowired private val mongoReactiveTemplate: ReactiveMongoTemplate
+) {
+    init {
+        Dsl.mongoReactiveTemplate = mongoReactiveTemplate
+    }
+
     companion object Dsl {
+        lateinit var mongoReactiveTemplate: ReactiveMongoTemplate
+
         @DslMarker
         annotation class HelperDsl
-
-        lateinit var mongoReactiveTemplate: ReactiveMongoTemplate
 
         @HelperDsl
         suspend fun <T : ImmutableEntity> T.insert(): T =
@@ -35,9 +45,9 @@ class BaseHelper {
             .joinToString("")
 
         @HelperDsl
-        suspend fun resetCollection(entityClass: Class<*>) =
+        suspend fun resetCollection(entityClass: KClass<*>) =
             mongoReactiveTemplate
-                .dropCollection(entityClass)
+                .dropCollection(entityClass.java)
                 .awaitFirstOrNull()
     }
 }

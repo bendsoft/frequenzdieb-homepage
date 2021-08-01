@@ -1,51 +1,53 @@
 package ch.frequenzdieb.event.concert
 
 import ch.frequenzdieb.common.BaseHelper.Dsl.createRandomString
+import ch.frequenzdieb.common.BaseHelper.Dsl.insert
 import ch.frequenzdieb.common.BaseHelper.Dsl.resetCollection
 import ch.frequenzdieb.common.BaseIntegrationTest
-import ch.frequenzdieb.event.location.LocationHelper
+import ch.frequenzdieb.event.eventRoute
+import ch.frequenzdieb.event.location.Location
 import ch.frequenzdieb.security.SecurityHelper
 import ch.frequenzdieb.ticket.TicketTypeHelper
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import java.time.LocalDateTime
 
-@ExperimentalCoroutinesApi
-internal class ConcertIntegrationTest : BaseIntegrationTest() {
-    @Autowired lateinit var concertHelper: ConcertHelper
-    @Autowired lateinit var locationHelper: LocationHelper
-    @Autowired lateinit var securityHelper: SecurityHelper
-    @Autowired lateinit var ticketTypeHelper: TicketTypeHelper
-
-    private val randomConcertName = createRandomString(10)
-    private val randomLocation = locationHelper.createLocation()
-    private val randomLiveActs = listOf(createRandomString(10))
-    private val randomTerms = createRandomString(10)
-
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+internal class ConcertIntegrationTest(
+    @Autowired private val concertHelper: ConcertHelper,
+    @Autowired private val securityHelper: SecurityHelper,
+    @Autowired private val ticketTypeHelper: TicketTypeHelper
+) : BaseIntegrationTest() {
     private lateinit var restClient: SecurityHelper.AuthenticatedRestClient
     private lateinit var concert: Concert
 
+    private val randomConcertName = createRandomString(10)
+    private val randomLocation = Location(createRandomString(10))
+    private val randomLiveActs = listOf(createRandomString(10))
+    private val randomTerms = createRandomString(10)
+
     @BeforeAll
-    fun setup() = runBlockingTest {
-        restClient = securityHelper.initAccountsForRestClient()
+    fun setup() = runBlocking {
+        restClient = securityHelper.createAuthenticatedRestClient()
 
         //existing concert
-        resetCollection(Concert::class.java)
+        resetCollection(Concert::class)
         concert = concertHelper.createConcert(
             concertName = randomConcertName
         )
     }
 
     @Test
-    fun `should have $randomConcertName as name`() {
-        restClient.getAuthenticatedAsAdmin()
-            .get().uri("/api/concert/${concert.id}")
+    fun `should have randomConcertName as name`(): Unit = runBlocking {
+        concert.insert()
+
+        restClient.unauthenticated()
+            .get().uri("$eventRoute/concert/${concert.id}")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk
@@ -55,9 +57,23 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
+    fun `when getting all should have randomConcertName as name`(): Unit = runBlocking {
+        concert.insert()
+
+        restClient.unauthenticated()
+            .get().uri("$eventRoute/concert")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk
+            .expectBodyList(Concert::class.java)
+            .returnResult()
+            .apply { responseBody?.first()?.name shouldBe randomConcertName }
+    }
+
+    @Test
     fun `should return 404 if not found`() {
-        restClient.getAuthenticatedAsAdmin()
-            .get().uri("/api/concert/doesnotexist")
+        restClient.authenticatedAsAdmin()
+            .get().uri("$eventRoute/concert/doesnotexist")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isNotFound
@@ -65,26 +81,28 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
 
     // deleting a concert
     @Test
-    fun `should not allow unauthenticated deletion`() {
-        restClient.getAuthenticatedAsAdmin()
-            .delete().uri("/api/concert/${concert.id}")
+    fun `should not allow unauthenticated deletion`(): Unit = runBlocking {
+        concert.insert()
+
+        restClient.unauthenticated()
+            .delete().uri("$eventRoute/concert/${concert.id}")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isUnauthorized
     }
 
     @Test
-    fun `should delete a concert`() {
-        val authenticatedRestClient = restClient.getAuthenticatedAsAdmin()
+    fun `should delete a concert`(): Unit = runBlocking {
+        concert.insert()
 
-        authenticatedRestClient
-            .delete().uri("/api/concert/${concert.id}")
+        restClient.authenticatedAsAdmin()
+            .delete().uri("$eventRoute/concert/${concert.id}")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isNoContent
             .apply {
-                authenticatedRestClient
-                    .get().uri("/api/concert/${concert.id}")
+                restClient.authenticatedAsAdmin()
+                    .get().uri("$eventRoute/concert/${concert.id}")
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .expectStatus().isNotFound
@@ -94,16 +112,18 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
     //creating a new concert
     @Test
     fun `should not allow unauthenticated creation`(): Unit = runBlocking {
-        securityHelper.getRestClientUnauthenticated()
-            .post().uri("/api/concert")
-            .bodyValue(Concert(
-                name = randomConcertName,
-                location = randomLocation,
-                date = LocalDateTime.of(2099, 5, 2, 0, 0),
-                liveActs = randomLiveActs,
-                terms = randomTerms,
-                ticketTypes = listOf(ticketTypeHelper.createTicketType())
-            ))
+        val fakeConcert = Concert(
+            name = randomConcertName,
+            location = randomLocation,
+            date = LocalDateTime.now().plusYears(1),
+            liveActs = randomLiveActs,
+            terms = randomTerms,
+            ticketTypes = listOf(ticketTypeHelper.createTicketType())
+        )
+
+        restClient.unauthenticated()
+            .post().uri("$eventRoute/concert")
+            .bodyValue(fakeConcert)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isUnauthorized
@@ -111,26 +131,26 @@ internal class ConcertIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `should contain the concert`(): Unit = runBlocking {
-        val authenticatedRestClient = restClient.getAuthenticatedAsAdmin()
+        val fakeConcert = Concert(
+            name = randomConcertName,
+            location = randomLocation,
+            date = LocalDateTime.now().plusYears(1),
+            liveActs = randomLiveActs,
+            terms = randomTerms,
+            ticketTypes = listOf(ticketTypeHelper.createTicketType())
+        )
 
-        authenticatedRestClient
-            .post().uri("/api/concert")
-            .bodyValue(Concert(
-                name = randomConcertName,
-                location = randomLocation,
-                date = LocalDateTime.of(2099, 5, 2, 0, 0),
-                liveActs = randomLiveActs,
-                terms = randomTerms,
-                ticketTypes = listOf(ticketTypeHelper.createTicketType())
-            ))
+        restClient.authenticatedAsAdmin()
+            .post().uri("$eventRoute/concert")
+            .bodyValue(fakeConcert)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isCreated
             .expectBody(Concert::class.java)
             .returnResult()
             .apply {
-                authenticatedRestClient
-                    .get().uri("/api/concert/${responseBody?.id}")
+                restClient.authenticatedAsAdmin()
+                    .get().uri("$eventRoute/concert/${responseBody?.id}")
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .expectStatus().isOk

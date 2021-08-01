@@ -69,6 +69,6 @@ object DefaultHandlers {
     suspend fun <T : ImmutableEntity> ReactiveMongoRepository<T, String>.delete(
         request: ServerRequest
     ): ServerResponse = deleteById(request.pathVariable("id"))
-        .awaitSingle()
-        .let {  noContent().buildAndAwait() }
+        .awaitSingleOrNull()
+        .let { noContent().buildAndAwait() }
 }

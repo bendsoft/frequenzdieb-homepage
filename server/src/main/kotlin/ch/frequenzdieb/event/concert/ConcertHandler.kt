@@ -3,6 +3,7 @@ package ch.frequenzdieb.event.concert
 import ch.frequenzdieb.common.DefaultHandlers.asServerResponse
 import ch.frequenzdieb.common.Validators.Companion.validateEntity
 import ch.frequenzdieb.event.EventRepository
+import ch.frequenzdieb.event.eventRoute
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -28,15 +29,18 @@ class ConcertHandler(
             .toList()
             .asServerResponse()
 
-    suspend fun create(req: ServerRequest): ServerResponse =
-        req.awaitBody(Concert::class)
+    suspend fun create(req: ServerRequest): ServerResponse {
+        val concert = req.awaitBody(Concert::class)
+
+        return concert
             .validateEntity()
             .let {
                 eventRepository.save(it)
                     .awaitSingle()
                     .let { concert ->
-                        created(URI.create("/event/concert/${concert.id}"))
+                        created(URI.create("$eventRoute/concert/${concert.id}"))
                             .bodyValueAndAwait(concert)
                     }
             }
+    }
 }

@@ -34,30 +34,30 @@ import org.springframework.web.server.ResponseStatusException
 @ComponentScan(basePackages = ["ch.frequenzdieb"])
 @Import(value = [SecurityConfig::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class TicketTest {
+internal class TicketTest(
+    @Autowired private val ticketService: TicketService,
+    @Autowired private val ticketHelper: TicketHelper,
+    @Autowired private val ticketTypeHelper: TicketTypeHelper,
+    @Autowired private val ticketAttributeHelper: TicketAttributeHelper,
+    @Autowired private val concertHelper: ConcertHelper,
+    @Autowired private val securityHelper: SecurityHelper,
+    @Autowired private val paymentHelper: PaymentHelper,
+    @Autowired private val mongoReactiveTemplate: ReactiveMongoTemplate,
+    @Autowired private val ticketRepository: TicketRepository,
+    @Autowired private val ticketTypeRepository: TicketTypeRepository,
+    @Autowired private val paymentService: PaymentService<*>
+) {
     init {
         // This is only needed when running in IntelliJ and makes me sick!
         setIdeaIoUseFallback()
     }
-
-    @Autowired lateinit var ticketService: TicketService
-    @Autowired lateinit var ticketHelper: TicketHelper
-    @Autowired lateinit var ticketTypeHelper: TicketTypeHelper
-    @Autowired lateinit var ticketAttributeHelper: TicketAttributeHelper
-    @Autowired lateinit var concertHelper: ConcertHelper
-    @Autowired lateinit var securityHelper: SecurityHelper
-    @Autowired lateinit var paymentHelper: PaymentHelper
-    @Autowired lateinit var mongoReactiveTemplate: ReactiveMongoTemplate
-    @Autowired lateinit var ticketRepository: TicketRepository
-    @Autowired lateinit var ticketTypeRepository: TicketTypeRepository
-    @Autowired lateinit var paymentService: PaymentService<*>
 
     private lateinit var restClient: SecurityHelper.AuthenticatedRestClient
 
     @BeforeAll
     fun setup() = runBlocking {
         BaseHelper.mongoReactiveTemplate = mongoReactiveTemplate
-        restClient = securityHelper.initAccountsForRestClient()
+        restClient = securityHelper.createAuthenticatedRestClient()
     }
 
     @Test
@@ -311,7 +311,7 @@ internal class TicketTest {
     fun `when creating a ticket should create a valid ticket`(): Unit = runBlocking {
         val fakeTicket = ticketHelper.createNewFakeTicketFrom(ticketHelper.createFakeTicket())
 
-        restClient.getAuthenticatedAsUser()
+        restClient.authenticatedAsUser()
             .post().uri(ticketRoute)
             .bodyValue(fakeTicket)
             .accept(MediaType.APPLICATION_JSON)
@@ -326,7 +326,7 @@ internal class TicketTest {
                 responseBody?.qrCode!!
             }
             .let { createdTicketQRCode ->
-                restClient.getAuthenticatedAsAdmin()
+                restClient.authenticatedAsAdmin()
                     .get().uri {
                         it
                             .path(ticketRoute)
@@ -358,7 +358,7 @@ internal class TicketTest {
             currency = "CHF"
         )
 
-        restClient.getAuthenticatedAsAdmin()
+        restClient.authenticatedAsAdmin()
             .put().uri("$ticketRoute/invalidate")
             .bodyValue(
                 TicketQrCode(

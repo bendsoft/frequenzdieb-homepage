@@ -49,7 +49,7 @@ class SubscriptionHandler(
                             subject = emailVerificationTitle,
                             message = createSubscriptionConfirmationMessage(it.id)
                         )
-                        created(URI.create("/subscription/${it.id}"))
+                        created(URI.create("api/subscription/${it.id}"))
                             .bodyValueAndAwait(it)
                     }
             }

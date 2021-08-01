@@ -30,23 +30,23 @@ class TicketingRoutes(
 	fun ticketingRouter() = coRouter {
 		ticketRoute.nest {
 			accept(APPLICATION_JSON).nest {
-				GET("/{id}", ticketHandler::getById)
-				GET("/", ticketHandler::findAllBySubscriptionIdAndEventId)
-				POST("/", ticketHandler::create)
-				POST("/{id}/pay", ticketHandler::createPaymentForTicket)
-				PUT("/invalidate", ticketHandler::invalidate)
-				GET("/{id}/download", ticketHandler::downloadTicket)
-				GET("/{id}/send", ticketHandler::sendTicket)
+				GET("{id}", ticketHandler::getById)
+				GET("", ticketHandler::findAllBySubscriptionIdAndEventId)
+				POST("", ticketHandler::create)
+				POST("{id}/pay", ticketHandler::createPaymentForTicket)
+				PUT("invalidate", ticketHandler::invalidate)
+				GET("{id}/download", ticketHandler::downloadTicket)
+				GET("{id}/send", ticketHandler::sendTicket)
 				"type".nest {
-					GET("/") { ticketTypeRepository.getAll() }
-					GET("/{id}") { ticketTypeRepository.getById(it) }
-					POST("/", ticketTypeHandler::create)
-					PUT("/{id}") { ticketTypeRepository.update(it) }
-					DELETE("/{id}") { ticketTypeRepository.delete(it) }
+					GET("") { ticketTypeRepository.getAll() }
+					GET("{id}") { ticketTypeRepository.getById(it) }
+					POST("", ticketTypeHandler::create)
+					PUT("{id}") { ticketTypeRepository.update(it) }
+					DELETE("{id}") { ticketTypeRepository.delete(it) }
 					"attribute".nest {
-						GET("/{id}") { ticketAttributeRepository.getById(it) }
-						POST("/") { ticketAttributeRepository.create(it) }
-						GET("/") {
+						GET("{id}") { ticketAttributeRepository.getById(it) }
+						POST("") { ticketAttributeRepository.create(it) }
+						GET("") {
 							it.queryParamOrNull("name")
 								.let { attributeName ->
 									if (attributeName !== null)
@@ -57,7 +57,7 @@ class TicketingRoutes(
 									else ticketAttributeRepository.getAll()
 								}
 						}
-						PUT("/{id}/archive") { ticketAttributeRepository.update(it) }
+						PUT("{id}/archive") { ticketAttributeRepository.update(it) }
 					}
 				}
 			}
