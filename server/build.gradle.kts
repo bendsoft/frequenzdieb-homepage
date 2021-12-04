@@ -2,13 +2,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val kotlinVersion = "1.5.0"
-val kotestVersion = "4.6.0"
+val kotestVersion = "4.6.3"
 
 plugins {
 	java
 	idea
 	id("com.palantir.docker") version "0.25.0"
-	id("org.springframework.boot") version "2.5.0"
+	id("org.springframework.boot") version "2.6.1"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
 	id("org.unbroken-dome.xjc") version "2.0.0"
 	id("org.openapi.generator") version "5.1.1"
@@ -19,7 +19,7 @@ plugins {
 
 group = "ch.frequenzdieb"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_16
 
 idea {
 	module {
@@ -43,14 +43,14 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
-	compileOnly("org.springdoc:springdoc-openapi-webflux-ui:1.5.9")
-	compileOnly("org.springdoc:springdoc-openapi-kotlin:1.5.9")
+	compileOnly("org.springdoc:springdoc-openapi-webflux-ui:1.5.12")
+	compileOnly("org.springdoc:springdoc-openapi-kotlin:1.5.12")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("javax.xml.bind:jaxb-api:2.3.0")
+	implementation("javax.xml.bind:jaxb-api:2.3.1")
 	implementation("commons-codec:commons-codec:1.15")
-	implementation("com.sun.xml.bind:jaxb-core:3.0.0")
-	implementation("com.sun.xml.bind:jaxb-impl:3.0.0")
+	implementation("com.sun.xml.bind:jaxb-core:3.0.1")
+	implementation("com.sun.xml.bind:jaxb-impl:3.0.1")
 	implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -59,8 +59,8 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
 	implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion")
 	implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlinVersion")
-	implementation("com.openhtmltopdf:openhtmltopdf-core:1.0.1")
-	implementation("com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.1")
+	implementation("com.openhtmltopdf:openhtmltopdf-core:1.0.10")
+	implementation("com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10")
 	implementation("com.github.kenglxn.QRGen:javase:2.6.0")
 	implementation("io.jsonwebtoken:jjwt:0.9.1")
 	kapt("org.springframework.boot:spring-boot-configuration-processor")
@@ -71,7 +71,7 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
 	testImplementation("io.kotest:kotest-property:$kotestVersion")
-	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
 }
 
 tasks {
@@ -113,7 +113,7 @@ tasks {
 	withType<KotlinCompile> {
 		kotlinOptions {
 			freeCompilerArgs = listOf("-Xjsr305=strict")
-			jvmTarget = "11"
+			jvmTarget = "16"
 		}
 	}
 }

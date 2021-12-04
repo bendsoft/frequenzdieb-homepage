@@ -42,10 +42,10 @@
       "sourceRoot": "projects/bouncer/src",
       "prefix": "bncr",
       "i18n": {
-        "sourceLocale": "en-US",
         "locales": {
           "de-CH": {
-            "translation": "projects/bouncer/src/locale/messages.de-ch.xlf"
+            "translation": "projects/bouncer/src/locale/messages.de-ch.xlf",
+            "baseHref": ""
           }
         }
       },
@@ -58,7 +58,6 @@
             "main": "projects/bouncer/src/main.ts",
             "polyfills": "projects/bouncer/src/polyfills.ts",
             "tsConfig": "projects/bouncer/tsconfig.app.json",
-            "aot": true,
             "assets": [
               "projects/bouncer/src/assets"
             ],
@@ -68,7 +67,13 @@
             ],
             "scripts": [],
             "i18nMissingTranslation": "warning",
-            "allowedCommonJsDependencies": ["@zxing/library"]
+            "allowedCommonJsDependencies": ["@zxing/library"],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -102,14 +107,11 @@
             },
             "de-CH": {
               "localize": ["de-CH"],
-              "aot": true,
-              "outputPath": "dist/bouncer/de-CH/",
-              "i18nFile": "projects/bouncer/src/locale/messages.de-ch.xlf",
-              "i18nFormat": "xlf",
-              "i18nLocale": "de-CH",
+              "outputPath": "dist/bouncer",
               "i18nMissingTranslation": "warning"
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -165,7 +167,9 @@
           "options": {
             "outputPath": "dist/frequenzdieb-bouncer/server",
             "main": "src/main.server.ts",
-            "tsConfig": "tsconfig.server.json"
+            "tsConfig": "tsconfig.server.json",
+            "sourceMap": true,
+            "optimization": false
           },
           "configurations": {
             "production": {
@@ -179,7 +183,8 @@
               "sourceMap": false,
               "optimization": true
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "app-shell": {
           "builder": "@angular-devkit/build-angular:app-shell",
@@ -216,7 +221,6 @@
             "main": "projects/ui/src/main.ts",
             "polyfills": "projects/ui/src/polyfills.ts",
             "tsConfig": "projects/ui/tsconfig.app.json",
-            "aot": true,
             "assets": [
               "projects/ui/src/favicon.ico",
               "projects/ui/src/assets"
@@ -224,7 +228,13 @@
             "styles": [
               "projects/ui/src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -254,7 +264,8 @@
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",

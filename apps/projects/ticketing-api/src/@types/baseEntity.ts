@@ -10,8 +10,10 @@
  * Do not edit the class manually.
  */
 
-export interface BaseEntity {
-  readonly id?: string
-  readonly createdDate?: number
-  readonly lastModifiedDate?: number
+
+export interface BaseEntity { 
+    readonly id?: string;
+    readonly createdDate?: number;
+    readonly lastModifiedDate?: number;
 }
+

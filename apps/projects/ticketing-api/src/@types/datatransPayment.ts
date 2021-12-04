@@ -10,10 +10,12 @@
  * Do not edit the class manually.
  */
 
-export interface DatatransPayment {
-  readonly merchantId?: string
-  amount: string
-  currency: string
-  reference: string
-  readonly signature?: string
+
+export interface DatatransPayment { 
+    readonly merchantId?: string;
+    amount: string;
+    currency: string;
+    reference: string;
+    readonly signature?: string;
 }
+

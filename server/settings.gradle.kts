@@ -1,1 +1,1 @@
-rootProject.name = "frequenzdieb.server"
+rootProject.name = "frequenzdieb"

@@ -10,7 +10,9 @@
  * Do not edit the class manually.
  */
 
-export interface ValidationErrorDetails {
-  key?: string
-  value?: object
+
+export interface ValidationErrorDetails { 
+    key?: string;
+    value?: object;
 }
+

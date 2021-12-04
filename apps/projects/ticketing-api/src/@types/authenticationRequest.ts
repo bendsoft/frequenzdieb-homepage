@@ -10,7 +10,9 @@
  * Do not edit the class manually.
  */
 
-export interface AuthenticationRequest {
-  username: string
-  password: string
+
+export interface AuthenticationRequest { 
+    username: string;
+    password: string;
 }
+
