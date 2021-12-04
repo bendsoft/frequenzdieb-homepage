@@ -1,20 +1,20 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
-val kotlinVersion = "1.5.0"
+val kotlinVersion = "1.6.0"
 val kotestVersion = "4.6.3"
 
 plugins {
 	java
 	idea
-	id("com.palantir.docker") version "0.25.0"
+	id("com.palantir.docker") version "0.31.0"
 	id("org.springframework.boot") version "2.6.1"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
 	id("org.unbroken-dome.xjc") version "2.0.0"
 	id("org.openapi.generator") version "5.1.1"
-	kotlin("jvm") version "1.5.0"
-	kotlin("plugin.spring") version "1.5.0"
-	kotlin("kapt") version "1.5.0"
+	kotlin("jvm") version "1.6.0"
+	kotlin("plugin.spring") version "1.6.0"
+	kotlin("kapt") version "1.6.0"
 }
 
 group = "ch.frequenzdieb"

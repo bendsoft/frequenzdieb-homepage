@@ -20,8 +20,6 @@ class RecaptchaService (
                     .build()
             }
             .accept(MediaType.APPLICATION_FORM_URLENCODED)
-            .exchange()
-            .flatMap {
-                it.bodyToMono(RecaptchaVerificationResult::class.java)
-            }
+            .retrieve()
+            .bodyToMono(RecaptchaVerificationResult::class.java)
 }

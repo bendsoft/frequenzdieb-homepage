@@ -27,7 +27,7 @@ class SignatureFactory(
             init(SecretKeySpec(DatatypeConverter.parseHexBinary(secret), algorithm))
         }
 
-    private fun ByteArray.toHex(): String = DatatypeConverter.printHexBinary(this).toLowerCase()
+    private fun ByteArray.toHex(): String = DatatypeConverter.printHexBinary(this).lowercase()
 
     private fun Mac.createSignature(valuesToSign: Array<out String>): String =
         doFinal(valuesToSign.joinToString(separator = "").toByteArray()).toHex()
