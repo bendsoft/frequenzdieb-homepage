@@ -5,10 +5,12 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import kotlin.reflect.KClass
 
+@DataMongoTest
 @WebFluxTest
 class BaseHelper(
     @Autowired private val mongoReactiveTemplate: ReactiveMongoTemplate

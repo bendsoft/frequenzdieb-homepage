@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM openjdk:17-jre-slim
 RUN addgroup --system dieb
 RUN adduser --system --ingroup dieb frequenz
 USER frequenz:dieb
