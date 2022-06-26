@@ -1,25 +1,25 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
-val kotlinVersion = "1.6.10"
-val kotestVersion = "5.0.3"
+val kotlinVersion = "1.7.0"
+val kotestVersion = "5.3.2"
 
 plugins {
 	java
 	idea
-	id("com.palantir.docker") version "0.31.0"
-	id("org.springframework.boot") version "2.6.1"
+	id("com.palantir.docker") version "0.34.0"
+	id("org.springframework.boot") version "2.7.1"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
 	id("org.unbroken-dome.xjc") version "2.0.0"
-	id("org.openapi.generator") version "5.3.1"
-	kotlin("jvm") version "1.6.10"
-	kotlin("plugin.spring") version "1.6.10"
-	kotlin("kapt") version "1.6.10"
+	id("org.openapi.generator") version "6.0.0"
+	kotlin("jvm") version "1.7.0"
+	kotlin("plugin.spring") version "1.7.0"
+	kotlin("kapt") version "1.7.0"
 }
 
 group = "ch.frequenzdieb.server"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 idea {
 	module {
@@ -66,7 +66,7 @@ dependencies {
 	kapt("org.springframework.boot:spring-boot-configuration-processor")
 	runtimeOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.2.4")
+	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.6")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
