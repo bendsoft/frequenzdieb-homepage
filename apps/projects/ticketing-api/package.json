@@ -6,7 +6,7 @@
     "url": "ssh://git@github.com/bendsoft/frequenzdieb-homepage.git"
   },
   "peerDependencies": {
-    "@angular/common": "~10.0.4",
+    "@angular/common": "~20.3.28",
     "@angular/core": "~10.0.4",
     "@angular/material": "~10.1.0",
     "@angular/forms": "~10.0.4",
@@ -15,7 +15,7 @@
     "ng-recaptcha": "~5.0.0"
   },
   "devDependencies": {
-    "@angular/common": "~10.0.4",
+    "@angular/common": "~20.3.28",
     "@angular/core": "~10.0.4",
     "@angular/material": "~10.1.0",
     "@angular/forms": "~10.0.4",
